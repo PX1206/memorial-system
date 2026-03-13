@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.memorial.system.mapper.LocalFileMapper">
+    <select id="getFileList" resultType="com.memorial.system.vo.FileVo">
+        select f.`code`, f.`name`, f.type, f.domain, f.path, f.suffix,
+               concat(#{localFilePath,jdbcType=VARCHAR}, f.code) as url,
+               f.source, f.size, f.create_time, u.nickname as create_by
+        from file f
+        left join `user` u on f.create_by = u.id
+        <where>
+            <if test="param.type != null">
+                and f.type = #{param.type,jdbcType=INTEGER}
+            </if>
+            <if test="param.name != null and param.name != ''">
+                AND f.name LIKE CONCAT('%',#{param.name,jdbcType=VARCHAR},'%')
+            </if>
+            <if test="param.source != null">
+                and f.source = #{param.source,jdbcType=INTEGER}
+            </if>
+            <if test="param.userId != null">
+                AND f.create_by = #{param.userId,jdbcType=INTEGER}
+            </if>
+            and f.del_flag = 0
+        </where>
+        order by f.create_time desc
+    </select>
+
+</mapper>

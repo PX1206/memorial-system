@@ -1,0 +1,531 @@
+[2026-03-13 17:29:47,578] [7f8fc85aca6a43828aeed062b7eeae9d] [INFO] [background-preinit] Version[21] - HV000001: Hibernate Validator 6.2.5.Final
+[2026-03-13 17:29:47,599] [44aac5192d2e41baa4b2f0cabd745f07] [INFO] [main] MemorialApplication[55] - Starting MemorialApplication using Java 1.8.0_202 on PX-1206 with PID 17104 (E:\java_projects\memorial-system\memorial-service\target\classes started by Sakura in E:\java_projects\memorial-system)
+[2026-03-13 17:29:47,600] [d41c3b12baf248ef9d5bd68b424e265a] [INFO] [main] MemorialApplication[637] - The following 1 profile is active: "dev"
+[2026-03-13 17:29:48,218] [d485f73877ad4e3a86ff224882c98a80] [INFO] [main] RepositoryConfigurationDelegate[262] - Multiple Spring Data modules found, entering strict repository configuration mode
+[2026-03-13 17:29:48,219] [e0d377f13b5c47658362f944e84099b1] [INFO] [main] RepositoryConfigurationDelegate[132] - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+[2026-03-13 17:29:48,238] [c20f0eef94eb4b99bc5c7c3972399596] [INFO] [main] RepositoryConfigurationDelegate[201] - Finished Spring Data repository scanning in 8 ms. Found 0 Redis repository interfaces.
+[2026-03-13 17:29:48,749] [62c8e773903e4a7890546866b3a8e634] [INFO] [main] TomcatWebServer[108] - Tomcat initialized with port(s): 2168 (http)
+[2026-03-13 17:29:48,755] [f876f7b5983b44dbabb6da04553a4f9e] [INFO] [main] Http11NioProtocol[173] - Initializing ProtocolHandler ["http-nio-2168"]
+[2026-03-13 17:29:48,756] [ca5f277e7bbf4a7e9faff7f5fe0c2fb1] [INFO] [main] StandardService[173] - Starting service [Tomcat]
+[2026-03-13 17:29:48,756] [885e5c0ed0a34018b2b3d553f97c4ab5] [INFO] [main] StandardEngine[173] - Starting Servlet engine: [Apache Tomcat/9.0.69]
+[2026-03-13 17:29:48,918] [62e3841d8f974ca1ab77ae025666cc19] [INFO] [main] [/][173] - Initializing Spring embedded WebApplicationContext
+[2026-03-13 17:29:48,918] [7738dbdc3e3d41c5ac7ce4264174b84d] [INFO] [main] ServletWebServerApplicationContext[292] - Root WebApplicationContext: initialization completed in 1282 ms
+[2026-03-13 17:29:50,399] [a449e2d8f0dd44adb3958ad361454c32] [INFO] [main] DruidDataSourceAutoConfigure[56] - Init DruidDataSource
+[2026-03-13 17:29:50,604] [84ede5f150344ef0a447b4dba1079e0b] [INFO] [main] DruidDataSource[998] - {dataSource-1} inited
+[2026-03-13 17:29:51,117] [80cb6633ea824a7589c93641c277ee89] [INFO] [main] AutowiredAnnotationBeanPostProcessor[501] - Autowired annotation should only be used on methods with parameters: public com.memorial.system.vo.PictureCodeVO com.memorial.system.service.impl.CaptchaServiceImpl.getPictureCode() throws java.lang.Exception
+[2026-03-13 17:29:51,299] [5a15ffc0eb4649fc8366610c30d1acaa] [INFO] [main] CaptchaServiceImpl[36] - aca2fe22-f076-4379-8e10-1a4e6671ffcb+++++++++++++q3qqu
+[2026-03-13 17:29:52,321] [b05530e2bb3943b896d7993bdad9cdaf] [INFO] [main] WebMvcPropertySourcedRequestMappingHandlerMapping[69] - Mapped URL path [/v2/api-docs] onto method [springfox.documentation.swagger2.web.Swagger2ControllerWebMvc#getDocumentation(String, HttpServletRequest)]
+[2026-03-13 17:29:53,205] [fdf33e92d9c14b2aa1c354b4b0c00486] [INFO] [main] DefaultRocketMQListenerContainer[285] - running container: DefaultRocketMQListenerContainer{consumerGroup='save_operation_log_consumer_group', nameServer='192.168.31.119:9876', topic='save_operation_log_topic', consumeMode=CONCURRENTLY, selectorType=TAG, selectorExpression='*', messageModel=CLUSTERING}
+[2026-03-13 17:29:53,206] [4b5e8d743d4f4e52936091a08ba11f64] [INFO] [main] ListenerContainerConfiguration[127] - Register the listener to container, listenerBeanName:saveOperationLogMQListener, containerBeanName:org.apache.rocketmq.spring.support.DefaultRocketMQListenerContainer_1
+[2026-03-13 17:29:53,229] [bc66801b60b84f79b8cae0df433fcfaa] [INFO] [main] Http11NioProtocol[173] - Starting ProtocolHandler ["http-nio-2168"]
+[2026-03-13 17:29:53,241] [9f5cd698ca4f48229a6dbd84a334e8fb] [INFO] [main] TomcatWebServer[220] - Tomcat started on port(s): 2168 (http) with context path ''
+[2026-03-13 17:29:53,242] [33b6486f7f594508b122fbddc7aa6aa7] [INFO] [main] DocumentationPluginsBootstrapper[93] - Documentation plugins bootstrapped
+[2026-03-13 17:29:53,244] [cb652e5a1ef047a1800b85d68d83b9d3] [INFO] [main] DocumentationPluginsBootstrapper[79] - Found 1 custom documentation plugin(s)
+[2026-03-13 17:29:53,261] [cb2f93380a224f69b3f9300a36c18eb7] [INFO] [main] ApiListingReferenceScanner[44] - Scanning for api listing references
+[2026-03-13 17:29:53,394] [bad3275d66b649fc9f0f45ede76b12d6] [INFO] [main] CachingOperationNameGenerator[41] - Generating unique operation named: getPageListUsingPOST_1
+[2026-03-13 17:29:53,398] [c05d04476c6b4030bca90274da9afa48] [INFO] [main] CachingOperationNameGenerator[41] - Generating unique operation named: addUsingPOST_1
+[2026-03-13 17:29:53,399] [c3bfb282ef174c9cbb43a0b08c3a8739] [INFO] [main] CachingOperationNameGenerator[41] - Generating unique operation named: deleteUsingPOST_1
+[2026-03-13 17:29:53,401] [519f8cbd685741b8a189311d3d2b232e] [INFO] [main] CachingOperationNameGenerator[41] - Generating unique operation named: updateUsingPOST_1
+[2026-03-13 17:29:53,452] [66dd0e2a0ee34968b8fd416c393dd75f] [INFO] [main] CachingOperationNameGenerator[41] - Generating unique operation named: getPageListUsingPOST_2
+[2026-03-13 17:29:53,458] [7fff3a6f8a8f4e7e9194e709a47f8388] [INFO] [main] CachingOperationNameGenerator[41] - Generating unique operation named: getPageListUsingPOST_3
+[2026-03-13 17:29:53,460] [23135c96f67a492f8372ef7e464f922f] [INFO] [main] CachingOperationNameGenerator[41] - Generating unique operation named: getDetailUsingGET_1
+[2026-03-13 17:29:53,463] [623fb63e696c48ef97c04e93baa7cee5] [INFO] [main] CachingOperationNameGenerator[41] - Generating unique operation named: addUsingPOST_2
+[2026-03-13 17:29:53,465] [f20466bc92c44b65a506132f57f197c7] [INFO] [main] CachingOperationNameGenerator[41] - Generating unique operation named: deleteUsingPOST_2
+[2026-03-13 17:29:53,466] [74e166baef464e7e854d8f476f45469b] [INFO] [main] CachingOperationNameGenerator[41] - Generating unique operation named: updateUsingPOST_2
+[2026-03-13 17:29:53,473] [bc283535afcc45fb89a4bc3d49f6c7c7] [INFO] [main] CachingOperationNameGenerator[41] - Generating unique operation named: getPageListUsingPOST_4
+[2026-03-13 17:29:53,476] [d5eebe8c8ee34e1894b379f64e5bd8c9] [INFO] [main] CachingOperationNameGenerator[41] - Generating unique operation named: deleteUsingPOST_3
+[2026-03-13 17:29:53,502] [75b13063707d44f8b2fcb69b82b8c87b] [INFO] [main] CachingOperationNameGenerator[41] - Generating unique operation named: getUserUsingGET_1
+[2026-03-13 17:29:53,516] [62285835d0a44c3ca946f416a11cae8c] [INFO] [main] CachingOperationNameGenerator[41] - Generating unique operation named: updateUsingPOST_3
+[2026-03-13 17:29:53,535] [a922b0dd680543ca88e38e937102e9fd] [INFO] [main] MemorialApplication[61] - Started MemorialApplication in 6.229 seconds (JVM running for 6.941)
+[2026-03-13 17:30:41,840] [e78a400fbfac49899da3519599840ca5] [INFO] [http-nio-2168-exec-1] [/][173] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+[2026-03-13 17:30:41,840] [7ebb1fa05fcb41d18dd8c9037f4f4258] [INFO] [http-nio-2168-exec-1] DispatcherServlet[525] - Initializing Servlet 'dispatcherServlet'
+[2026-03-13 17:30:41,842] [716c812913a646549ec372f197d8a884] [INFO] [http-nio-2168-exec-1] DispatcherServlet[547] - Completed initialization in 2 ms
+[2026-03-13 17:30:41,874] [74d50210bc58420da1062597ccf6fbba] [INFO] [http-nio-2168-exec-2] LogInterceptor[35] - 请求接口：/tomb/getPageList
+[2026-03-13 17:30:41,875] [bfe434583481499385321c261aff1735] [INFO] [http-nio-2168-exec-2] LoginInterceptor[36] - /tomb/getPageList
+[2026-03-13 17:30:41,875] [bfe434583481499385321c261aff1735] [INFO] [http-nio-2168-exec-2] LoginInterceptor[44] - fef83449-dd43-4498-bbf9-fc05790d6ec3
+[2026-03-13 17:30:42,008] [bfe434583481499385321c261aff1735] [DEBUG] [http-nio-2168-exec-2] getTombList[143] - ==>  Preparing: SELECT COUNT(1) FROM tomb t LEFT JOIN family f ON t.family_id = f.id AND f.del_flag = 0 WHERE t.del_flag = 0 
+[2026-03-13 17:30:42,023] [bfe434583481499385321c261aff1735] [DEBUG] [http-nio-2168-exec-2] getTombList[143] - ==> Parameters: 
+[2026-03-13 17:30:42,039] [bfe434583481499385321c261aff1735] [INFO] [http-nio-2168-exec-2] RestExceptionHandler[44] - 异常接口:/tomb/getPageList
+[2026-03-13 17:30:42,041] [bfe434583481499385321c261aff1735] [ERROR] [http-nio-2168-exec-2] RestExceptionHandler[45] - 系统异常:
+org.mybatis.spring.MyBatisSystemException: nested exception is org.apache.ibatis.exceptions.PersistenceException: 
+### Error querying database.  Cause: com.baomidou.mybatisplus.core.exceptions.MybatisPlusException: Error: Method queryTotal execution error of sql : 
+ SELECT COUNT(1) FROM tomb t LEFT JOIN family f ON t.family_id = f.id AND f.del_flag = 0 WHERE t.del_flag = 0 
+
+### The error may exist in file [E:\java_projects\memorial-system\memorial-service\target\classes\mapper\TombMapper.xml]
+### The error may involve defaultParameterMap
+### The error occurred while setting parameters
+### Cause: com.baomidou.mybatisplus.core.exceptions.MybatisPlusException: Error: Method queryTotal execution error of sql : 
+ SELECT COUNT(1) FROM tomb t LEFT JOIN family f ON t.family_id = f.id AND f.del_flag = 0 WHERE t.del_flag = 0 
+
+	at org.mybatis.spring.MyBatisExceptionTranslator.translateExceptionIfPossible(MyBatisExceptionTranslator.java:92)
+	at org.mybatis.spring.SqlSessionTemplate$SqlSessionInterceptor.invoke(SqlSessionTemplate.java:440)
+	at com.sun.proxy.$Proxy117.selectList(Unknown Source)
+	at org.mybatis.spring.SqlSessionTemplate.selectList(SqlSessionTemplate.java:223)
+	at com.baomidou.mybatisplus.core.override.MybatisMapperMethod.executeForIPage(MybatisMapperMethod.java:134)
+	at com.baomidou.mybatisplus.core.override.MybatisMapperMethod.execute(MybatisMapperMethod.java:96)
+	at com.baomidou.mybatisplus.core.override.MybatisMapperProxy.invoke(MybatisMapperProxy.java:96)
+	at com.sun.proxy.$Proxy120.getTombList(Unknown Source)
+	at com.memorial.system.service.impl.TombServiceImpl.getTombPageList(TombServiceImpl.java:35)
+	at com.memorial.system.service.impl.TombServiceImpl$$FastClassBySpringCGLIB$$1f364b4a.invoke(<generated>)
+	at org.springframework.cglib.proxy.MethodProxy.invoke(MethodProxy.java:218)
+	at org.springframework.aop.framework.CglibAopProxy.invokeMethod(CglibAopProxy.java:386)
+	at org.springframework.aop.framework.CglibAopProxy.access$000(CglibAopProxy.java:85)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:704)
+	at com.memorial.system.service.impl.TombServiceImpl$$EnhancerBySpringCGLIB$$35f4be38.getTombPageList(<generated>)
+	at com.memorial.system.controller.TombController.getPageList(TombController.java:33)
+	at com.memorial.system.controller.TombController$$FastClassBySpringCGLIB$$b6622d64.invoke(<generated>)
+	at org.springframework.cglib.proxy.MethodProxy.invoke(MethodProxy.java:218)
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.invokeJoinpoint(CglibAopProxy.java:793)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:163)
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:763)
+	at org.springframework.aop.interceptor.ExposeInvocationInterceptor.invoke(ExposeInvocationInterceptor.java:97)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:186)
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:763)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:708)
+	at com.memorial.system.controller.TombController$$EnhancerBySpringCGLIB$$62853336.getPageList(<generated>)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:205)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:150)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:117)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:895)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:808)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1071)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:964)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1006)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:909)
+	at javax.servlet.http.HttpServlet.service(HttpServlet.java:696)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:883)
+	at javax.servlet.http.HttpServlet.service(HttpServlet.java:779)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:227)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:162)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:53)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:189)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:162)
+	at com.github.xiaoymin.knife4j.spring.filter.SecurityBasicAuthFilter.doFilter(SecurityBasicAuthFilter.java:87)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:189)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:162)
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:117)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:189)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:162)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:117)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:189)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:162)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:177)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:97)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:541)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:135)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:92)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:78)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:360)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:399)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:65)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:891)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1784)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:49)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1191)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:61)
+	at java.lang.Thread.run(Thread.java:748)
+Caused by: org.apache.ibatis.exceptions.PersistenceException: 
+### Error querying database.  Cause: com.baomidou.mybatisplus.core.exceptions.MybatisPlusException: Error: Method queryTotal execution error of sql : 
+ SELECT COUNT(1) FROM tomb t LEFT JOIN family f ON t.family_id = f.id AND f.del_flag = 0 WHERE t.del_flag = 0 
+
+### The error may exist in file [E:\java_projects\memorial-system\memorial-service\target\classes\mapper\TombMapper.xml]
+### The error may involve defaultParameterMap
+### The error occurred while setting parameters
+### Cause: com.baomidou.mybatisplus.core.exceptions.MybatisPlusException: Error: Method queryTotal execution error of sql : 
+ SELECT COUNT(1) FROM tomb t LEFT JOIN family f ON t.family_id = f.id AND f.del_flag = 0 WHERE t.del_flag = 0 
+
+	at org.apache.ibatis.exceptions.ExceptionFactory.wrapException(ExceptionFactory.java:30)
+	at org.apache.ibatis.session.defaults.DefaultSqlSession.selectList(DefaultSqlSession.java:149)
+	at org.apache.ibatis.session.defaults.DefaultSqlSession.selectList(DefaultSqlSession.java:140)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.mybatis.spring.SqlSessionTemplate$SqlSessionInterceptor.invoke(SqlSessionTemplate.java:426)
+	... 73 common frames omitted
+Caused by: com.baomidou.mybatisplus.core.exceptions.MybatisPlusException: Error: Method queryTotal execution error of sql : 
+ SELECT COUNT(1) FROM tomb t LEFT JOIN family f ON t.family_id = f.id AND f.del_flag = 0 WHERE t.del_flag = 0 
+
+	at com.baomidou.mybatisplus.core.toolkit.ExceptionUtils.mpe(ExceptionUtils.java:39)
+	at com.baomidou.mybatisplus.extension.plugins.PaginationInterceptor.queryTotal(PaginationInterceptor.java:270)
+	at com.baomidou.mybatisplus.extension.plugins.PaginationInterceptor.intercept(PaginationInterceptor.java:218)
+	at org.apache.ibatis.plugin.Plugin.invoke(Plugin.java:61)
+	at com.sun.proxy.$Proxy175.prepare(Unknown Source)
+	at com.baomidou.mybatisplus.core.executor.MybatisSimpleExecutor.prepareStatement(MybatisSimpleExecutor.java:92)
+	at com.baomidou.mybatisplus.core.executor.MybatisSimpleExecutor.doQuery(MybatisSimpleExecutor.java:66)
+	at org.apache.ibatis.executor.BaseExecutor.queryFromDatabase(BaseExecutor.java:324)
+	at org.apache.ibatis.executor.BaseExecutor.query(BaseExecutor.java:156)
+	at com.baomidou.mybatisplus.core.executor.MybatisCachingExecutor.query(MybatisCachingExecutor.java:163)
+	at com.baomidou.mybatisplus.core.executor.MybatisCachingExecutor.query(MybatisCachingExecutor.java:90)
+	at org.apache.ibatis.session.defaults.DefaultSqlSession.selectList(DefaultSqlSession.java:147)
+	... 79 common frames omitted
+Caused by: java.sql.SQLSyntaxErrorException: Table 'memorial_db.tomb' doesn't exist
+	at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:120)
+	at com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:122)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeInternal(ClientPreparedStatement.java:916)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeQuery(ClientPreparedStatement.java:972)
+	at com.alibaba.druid.pool.DruidPooledPreparedStatement.executeQuery(DruidPooledPreparedStatement.java:227)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.apache.ibatis.logging.jdbc.PreparedStatementLogger.invoke(PreparedStatementLogger.java:56)
+	at com.sun.proxy.$Proxy177.executeQuery(Unknown Source)
+	at com.baomidou.mybatisplus.extension.plugins.PaginationInterceptor.queryTotal(PaginationInterceptor.java:259)
+	... 89 common frames omitted
+[2026-03-13 17:30:45,303] [ff0decba2b8f482ab4ea63b6fffc0d8e] [INFO] [http-nio-2168-exec-5] LogInterceptor[35] - 请求接口：/tomb/getPageList
+[2026-03-13 17:30:45,303] [6c039c0ad23f4c2497972f1080049495] [INFO] [http-nio-2168-exec-5] LoginInterceptor[36] - /tomb/getPageList
+[2026-03-13 17:30:45,304] [6c039c0ad23f4c2497972f1080049495] [INFO] [http-nio-2168-exec-5] LoginInterceptor[44] - fef83449-dd43-4498-bbf9-fc05790d6ec3
+[2026-03-13 17:30:45,322] [6c039c0ad23f4c2497972f1080049495] [DEBUG] [http-nio-2168-exec-5] getTombList[143] - ==>  Preparing: SELECT COUNT(1) FROM tomb t LEFT JOIN family f ON t.family_id = f.id AND f.del_flag = 0 WHERE t.del_flag = 0 
+[2026-03-13 17:30:45,323] [6c039c0ad23f4c2497972f1080049495] [DEBUG] [http-nio-2168-exec-5] getTombList[143] - ==> Parameters: 
+[2026-03-13 17:30:45,324] [6c039c0ad23f4c2497972f1080049495] [INFO] [http-nio-2168-exec-5] RestExceptionHandler[44] - 异常接口:/tomb/getPageList
+[2026-03-13 17:30:45,325] [6c039c0ad23f4c2497972f1080049495] [ERROR] [http-nio-2168-exec-5] RestExceptionHandler[45] - 系统异常:
+org.mybatis.spring.MyBatisSystemException: nested exception is org.apache.ibatis.exceptions.PersistenceException: 
+### Error querying database.  Cause: com.baomidou.mybatisplus.core.exceptions.MybatisPlusException: Error: Method queryTotal execution error of sql : 
+ SELECT COUNT(1) FROM tomb t LEFT JOIN family f ON t.family_id = f.id AND f.del_flag = 0 WHERE t.del_flag = 0 
+
+### The error may exist in file [E:\java_projects\memorial-system\memorial-service\target\classes\mapper\TombMapper.xml]
+### The error may involve defaultParameterMap
+### The error occurred while setting parameters
+### Cause: com.baomidou.mybatisplus.core.exceptions.MybatisPlusException: Error: Method queryTotal execution error of sql : 
+ SELECT COUNT(1) FROM tomb t LEFT JOIN family f ON t.family_id = f.id AND f.del_flag = 0 WHERE t.del_flag = 0 
+
+	at org.mybatis.spring.MyBatisExceptionTranslator.translateExceptionIfPossible(MyBatisExceptionTranslator.java:92)
+	at org.mybatis.spring.SqlSessionTemplate$SqlSessionInterceptor.invoke(SqlSessionTemplate.java:440)
+	at com.sun.proxy.$Proxy117.selectList(Unknown Source)
+	at org.mybatis.spring.SqlSessionTemplate.selectList(SqlSessionTemplate.java:223)
+	at com.baomidou.mybatisplus.core.override.MybatisMapperMethod.executeForIPage(MybatisMapperMethod.java:134)
+	at com.baomidou.mybatisplus.core.override.MybatisMapperMethod.execute(MybatisMapperMethod.java:96)
+	at com.baomidou.mybatisplus.core.override.MybatisMapperProxy.invoke(MybatisMapperProxy.java:96)
+	at com.sun.proxy.$Proxy120.getTombList(Unknown Source)
+	at com.memorial.system.service.impl.TombServiceImpl.getTombPageList(TombServiceImpl.java:35)
+	at com.memorial.system.service.impl.TombServiceImpl$$FastClassBySpringCGLIB$$1f364b4a.invoke(<generated>)
+	at org.springframework.cglib.proxy.MethodProxy.invoke(MethodProxy.java:218)
+	at org.springframework.aop.framework.CglibAopProxy.invokeMethod(CglibAopProxy.java:386)
+	at org.springframework.aop.framework.CglibAopProxy.access$000(CglibAopProxy.java:85)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:704)
+	at com.memorial.system.service.impl.TombServiceImpl$$EnhancerBySpringCGLIB$$35f4be38.getTombPageList(<generated>)
+	at com.memorial.system.controller.TombController.getPageList(TombController.java:33)
+	at com.memorial.system.controller.TombController$$FastClassBySpringCGLIB$$b6622d64.invoke(<generated>)
+	at org.springframework.cglib.proxy.MethodProxy.invoke(MethodProxy.java:218)
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.invokeJoinpoint(CglibAopProxy.java:793)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:163)
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:763)
+	at org.springframework.aop.interceptor.ExposeInvocationInterceptor.invoke(ExposeInvocationInterceptor.java:97)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:186)
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:763)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:708)
+	at com.memorial.system.controller.TombController$$EnhancerBySpringCGLIB$$62853336.getPageList(<generated>)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:205)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:150)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:117)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:895)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:808)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1071)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:964)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1006)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:909)
+	at javax.servlet.http.HttpServlet.service(HttpServlet.java:696)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:883)
+	at javax.servlet.http.HttpServlet.service(HttpServlet.java:779)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:227)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:162)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:53)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:189)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:162)
+	at com.github.xiaoymin.knife4j.spring.filter.SecurityBasicAuthFilter.doFilter(SecurityBasicAuthFilter.java:87)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:189)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:162)
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:117)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:189)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:162)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:117)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:189)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:162)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:177)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:97)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:541)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:135)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:92)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:78)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:360)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:399)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:65)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:891)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1784)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:49)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1191)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:61)
+	at java.lang.Thread.run(Thread.java:748)
+Caused by: org.apache.ibatis.exceptions.PersistenceException: 
+### Error querying database.  Cause: com.baomidou.mybatisplus.core.exceptions.MybatisPlusException: Error: Method queryTotal execution error of sql : 
+ SELECT COUNT(1) FROM tomb t LEFT JOIN family f ON t.family_id = f.id AND f.del_flag = 0 WHERE t.del_flag = 0 
+
+### The error may exist in file [E:\java_projects\memorial-system\memorial-service\target\classes\mapper\TombMapper.xml]
+### The error may involve defaultParameterMap
+### The error occurred while setting parameters
+### Cause: com.baomidou.mybatisplus.core.exceptions.MybatisPlusException: Error: Method queryTotal execution error of sql : 
+ SELECT COUNT(1) FROM tomb t LEFT JOIN family f ON t.family_id = f.id AND f.del_flag = 0 WHERE t.del_flag = 0 
+
+	at org.apache.ibatis.exceptions.ExceptionFactory.wrapException(ExceptionFactory.java:30)
+	at org.apache.ibatis.session.defaults.DefaultSqlSession.selectList(DefaultSqlSession.java:149)
+	at org.apache.ibatis.session.defaults.DefaultSqlSession.selectList(DefaultSqlSession.java:140)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.mybatis.spring.SqlSessionTemplate$SqlSessionInterceptor.invoke(SqlSessionTemplate.java:426)
+	... 73 common frames omitted
+Caused by: com.baomidou.mybatisplus.core.exceptions.MybatisPlusException: Error: Method queryTotal execution error of sql : 
+ SELECT COUNT(1) FROM tomb t LEFT JOIN family f ON t.family_id = f.id AND f.del_flag = 0 WHERE t.del_flag = 0 
+
+	at com.baomidou.mybatisplus.core.toolkit.ExceptionUtils.mpe(ExceptionUtils.java:39)
+	at com.baomidou.mybatisplus.extension.plugins.PaginationInterceptor.queryTotal(PaginationInterceptor.java:270)
+	at com.baomidou.mybatisplus.extension.plugins.PaginationInterceptor.intercept(PaginationInterceptor.java:218)
+	at org.apache.ibatis.plugin.Plugin.invoke(Plugin.java:61)
+	at com.sun.proxy.$Proxy175.prepare(Unknown Source)
+	at com.baomidou.mybatisplus.core.executor.MybatisSimpleExecutor.prepareStatement(MybatisSimpleExecutor.java:92)
+	at com.baomidou.mybatisplus.core.executor.MybatisSimpleExecutor.doQuery(MybatisSimpleExecutor.java:66)
+	at org.apache.ibatis.executor.BaseExecutor.queryFromDatabase(BaseExecutor.java:324)
+	at org.apache.ibatis.executor.BaseExecutor.query(BaseExecutor.java:156)
+	at com.baomidou.mybatisplus.core.executor.MybatisCachingExecutor.query(MybatisCachingExecutor.java:163)
+	at com.baomidou.mybatisplus.core.executor.MybatisCachingExecutor.query(MybatisCachingExecutor.java:90)
+	at org.apache.ibatis.session.defaults.DefaultSqlSession.selectList(DefaultSqlSession.java:147)
+	... 79 common frames omitted
+Caused by: java.sql.SQLSyntaxErrorException: Table 'memorial_db.tomb' doesn't exist
+	at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:120)
+	at com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:122)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeInternal(ClientPreparedStatement.java:916)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeQuery(ClientPreparedStatement.java:972)
+	at com.alibaba.druid.pool.DruidPooledPreparedStatement.executeQuery(DruidPooledPreparedStatement.java:227)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.apache.ibatis.logging.jdbc.PreparedStatementLogger.invoke(PreparedStatementLogger.java:56)
+	at com.sun.proxy.$Proxy177.executeQuery(Unknown Source)
+	at com.baomidou.mybatisplus.extension.plugins.PaginationInterceptor.queryTotal(PaginationInterceptor.java:259)
+	... 89 common frames omitted
+[2026-03-13 17:46:12,568] [62533e7b022f440bbaa36e297ad3101f] [INFO] [http-nio-2168-exec-3] LogInterceptor[35] - 请求接口：/tomb/getPageList
+[2026-03-13 17:46:12,569] [14b855aa723646d0bb0ad88a854716aa] [INFO] [http-nio-2168-exec-3] LoginInterceptor[36] - /tomb/getPageList
+[2026-03-13 17:46:12,569] [14b855aa723646d0bb0ad88a854716aa] [INFO] [http-nio-2168-exec-3] LoginInterceptor[44] - fef83449-dd43-4498-bbf9-fc05790d6ec3
+[2026-03-13 17:46:12,588] [14b855aa723646d0bb0ad88a854716aa] [WARN] [http-nio-2168-exec-3] DruidAbstractDataSource[1494] - discard long time none received connection. , jdbcUrl : jdbc:mysql://192.168.31.119:3306/memorial_db?useUnicode=true&characterEncoding=utf-8&useSSL=false, version : 1.2.8, lastPacketReceivedIdleMillis : 927253
+[2026-03-13 17:46:12,589] [14b855aa723646d0bb0ad88a854716aa] [WARN] [http-nio-2168-exec-3] DruidAbstractDataSource[1494] - discard long time none received connection. , jdbcUrl : jdbc:mysql://192.168.31.119:3306/memorial_db?useUnicode=true&characterEncoding=utf-8&useSSL=false, version : 1.2.8, lastPacketReceivedIdleMillis : 981995
+[2026-03-13 17:46:12,589] [14b855aa723646d0bb0ad88a854716aa] [WARN] [http-nio-2168-exec-3] DruidAbstractDataSource[1494] - discard long time none received connection. , jdbcUrl : jdbc:mysql://192.168.31.119:3306/memorial_db?useUnicode=true&characterEncoding=utf-8&useSSL=false, version : 1.2.8, lastPacketReceivedIdleMillis : 981999
+[2026-03-13 17:46:12,590] [14b855aa723646d0bb0ad88a854716aa] [WARN] [http-nio-2168-exec-3] DruidAbstractDataSource[1494] - discard long time none received connection. , jdbcUrl : jdbc:mysql://192.168.31.119:3306/memorial_db?useUnicode=true&characterEncoding=utf-8&useSSL=false, version : 1.2.8, lastPacketReceivedIdleMillis : 982004
+[2026-03-13 17:46:12,591] [14b855aa723646d0bb0ad88a854716aa] [WARN] [http-nio-2168-exec-3] DruidAbstractDataSource[1494] - discard long time none received connection. , jdbcUrl : jdbc:mysql://192.168.31.119:3306/memorial_db?useUnicode=true&characterEncoding=utf-8&useSSL=false, version : 1.2.8, lastPacketReceivedIdleMillis : 982011
+[2026-03-13 17:46:12,597] [14b855aa723646d0bb0ad88a854716aa] [DEBUG] [http-nio-2168-exec-3] getTombList[143] - ==>  Preparing: SELECT COUNT(1) FROM tomb t LEFT JOIN family f ON t.family_id = f.id AND f.del_flag = 0 WHERE t.del_flag = 0 
+[2026-03-13 17:46:12,598] [14b855aa723646d0bb0ad88a854716aa] [DEBUG] [http-nio-2168-exec-3] getTombList[143] - ==> Parameters: 
+[2026-03-13 17:46:21,505] [720abbb0041c469cafb4e8978ae1ad06] [INFO] [http-nio-2168-exec-7] LogInterceptor[35] - 请求接口：/user/logOut
+[2026-03-13 17:46:21,506] [abdd9446b0884fb9b9778728f099afac] [INFO] [http-nio-2168-exec-7] LoginInterceptor[36] - /user/logOut
+[2026-03-13 17:46:21,506] [abdd9446b0884fb9b9778728f099afac] [INFO] [http-nio-2168-exec-7] LoginInterceptor[44] - fef83449-dd43-4498-bbf9-fc05790d6ec3
+[2026-03-13 17:46:21,532] [abdd9446b0884fb9b9778728f099afac] [INFO] [http-nio-2168-exec-7] BaseLogAop[392] - 
+{"path":"/user/logOut","ip":"192.168.31.73","requestMethod":"POST","requestBody":false,"time":"2026-03-13 17:46:21","token":"fef83449-dd43-4498-bbf9-fc05790d6ec3"}
+[2026-03-13 17:46:21,538] [abdd9446b0884fb9b9778728f099afac] [INFO] [http-nio-2168-exec-7] BaseLogAop[403] - responseResult:
+{"code":200,"success":true,"message":"操作成功","data":null,"time":"2026-03-13 17:46:21"}
+[2026-03-13 17:46:21,547] [abdd9446b0884fb9b9778728f099afac] [ERROR] [http-nio-2168-exec-7] BaseLogAop[614] - 获取登录信息异常++++++++++++++++++++
+[2026-03-13 17:46:21,548] [abdd9446b0884fb9b9778728f099afac] [INFO] [http-nio-2168-exec-7] BaseLogAop[635] - 日志信息：{"requestId":"abdd9446b0884fb9b9778728f099afac","name":"退出登录（当前用户）","ip":"192.168.31.73","path":"/user/logOut","module":"memorial","className":"com.memorial.system.controller.UserController","methodName":"logOut","requestMethod":"POST","requestBody":false,"token":"1edadbc987a202907100d453218c9abe","type":14,"success":true,"code":200,"message":"操作成功","browserName":"Chrome","browserVersion":"145.0.0.0","engineName":"Webkit","engineVersion":"537.36","osName":"Windows 10 or Windows Server 2016","platformName":"Windows","mobile":false,"deviceModel":"Win64; x64","remark":""}
+[2026-03-13 17:46:21,771] [d3c004daaefa4a13836ba4092a91a60c] [INFO] [NettyClientPublicExecutor_4] BaseLogAop[640] - 推送系统操作日志消息成功
+[2026-03-13 17:46:21,787] [8b8fab200fe8412096aba4d2cf4a23a9] [INFO] [ConsumeMessageThread_1] SaveOperationLogMQListener[27] - MQ收到保存系统操作日志消息：{"browserName":"Chrome","browserVersion":"145.0.0.0","className":"com.memorial.system.controller.UserController","code":200,"deviceModel":"Win64; x64","engineName":"Webkit","engineVersion":"537.36","ip":"192.168.31.73","message":"操作成功","methodName":"logOut","mobile":false,"module":"memorial","name":"退出登录（当前用户）","osName":"Windows 10 or Windows Server 2016","path":"/user/logOut","platformName":"Windows","remark":"","requestBody":false,"requestId":"abdd9446b0884fb9b9778728f099afac","requestMethod":"POST","success":true,"token":"1edadbc987a202907100d453218c9abe","type":14}
+[2026-03-13 17:46:21,791] [6e61e0a97d1a4552906f1b017ca621f9] [DEBUG] [ConsumeMessageThread_1] insert[143] - ==>  Preparing: INSERT INTO sys_operation_log ( request_id, name, ip, path, module, class_name, method_name, request_method, request_body, token, type, success, code, message, browser_name, browser_version, engine_name, engine_version, os_name, platform_name, mobile, device_model, remark ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ) 
+[2026-03-13 17:46:21,793] [b81d53f6121941cfb00b39e051d0ff83] [DEBUG] [ConsumeMessageThread_1] insert[143] - ==> Parameters: abdd9446b0884fb9b9778728f099afac(String), 退出登录（当前用户）(String), 192.168.31.73(String), /user/logOut(String), memorial(String), com.memorial.system.controller.UserController(String), logOut(String), POST(String), false(Boolean), 1edadbc987a202907100d453218c9abe(String), 14(Integer), true(Boolean), 200(Integer), 操作成功(String), Chrome(String), 145.0.0.0(String), Webkit(String), 537.36(String), Windows 10 or Windows Server 2016(String), Windows(String), false(Boolean), Win64; x64(String), (String)
+[2026-03-13 17:46:21,798] [1690823282404eafa44a470abc4d5df4] [DEBUG] [ConsumeMessageThread_1] insert[143] - <==    Updates: 1
+[2026-03-13 17:46:36,415] [96436aae42ef489c801b22a6e371099e] [INFO] [http-nio-2168-exec-8] LogInterceptor[35] - 请求接口：/captcha/getPictureCode
+[2026-03-13 17:46:36,426] [ff08f2ed771c4a9082c6e1fb2066a44c] [INFO] [http-nio-2168-exec-8] CaptchaServiceImpl[36] - 01d9f4bd-a58c-4ad3-8fa0-4e4c34327194+++++++++++++xaufn
+[2026-03-13 17:46:38,388] [06085dfafedb49419e7e94df6173d79d] [INFO] [http-nio-2168-exec-6] LogInterceptor[35] - 请求接口：/captcha/getPictureCode
+[2026-03-13 17:46:38,396] [25e1acf9bbc8410ab415456ebe5a30bb] [INFO] [http-nio-2168-exec-6] CaptchaServiceImpl[36] - cbb88504-ee5b-4c6a-a6c3-474b3872673f+++++++++++++dfmsp
+[2026-03-13 17:47:29,553] [53e010a2472945b6b2a9736861db7342] [INFO] [http-nio-2168-exec-10] LogInterceptor[35] - 请求接口：/captcha/getPictureCode
+[2026-03-13 17:47:29,561] [39e510818a474f89addbc5b7de2cf0b1] [INFO] [http-nio-2168-exec-10] CaptchaServiceImpl[36] - ff9c045b-5886-47b0-a116-fbb048336bea+++++++++++++3cysz
+[2026-03-13 17:49:21,205] [1a523863f390447ab63711fe52e505e3] [INFO] [http-nio-2168-exec-5] LogInterceptor[35] - 请求接口：/user/login/sms
+[2026-03-13 17:49:21,233] [cbe45fa69be140b9816eb11c26d53c1b] [INFO] [http-nio-2168-exec-5] BaseLogAop[392] - 
+{"path":"/user/login/sms","ip":"192.168.31.73","requestMethod":"POST","contentType":"application/json","requestBody":true,"param":{"mobile":"13128830520","smsCode":"666666"},"time":"2026-03-13 17:49:21"}
+[2026-03-13 17:49:21,256] [cbe45fa69be140b9816eb11c26d53c1b] [WARN] [http-nio-2168-exec-5] DruidAbstractDataSource[1494] - discard long time none received connection. , jdbcUrl : jdbc:mysql://192.168.31.119:3306/memorial_db?useUnicode=true&characterEncoding=utf-8&useSSL=false, version : 1.2.8, lastPacketReceivedIdleMillis : 179459
+[2026-03-13 17:49:21,260] [cbe45fa69be140b9816eb11c26d53c1b] [DEBUG] [http-nio-2168-exec-5] selectOne[143] - ==>  Preparing: SELECT id,user_no,username,nickname,mobile,head_img,sex,birthday,address,salt,password,login_time,role,status,create_time,create_by,update_time,update_by,del_flag FROM user WHERE del_flag=0 AND (mobile = ? AND status <> ?) 
+[2026-03-13 17:49:21,261] [cbe45fa69be140b9816eb11c26d53c1b] [DEBUG] [http-nio-2168-exec-5] selectOne[143] - ==> Parameters: 13128830520(String), 0(Integer)
+[2026-03-13 17:49:21,267] [cbe45fa69be140b9816eb11c26d53c1b] [DEBUG] [http-nio-2168-exec-5] selectOne[143] - <==      Total: 1
+[2026-03-13 17:49:21,272] [cbe45fa69be140b9816eb11c26d53c1b] [DEBUG] [http-nio-2168-exec-5] updateById[143] - ==>  Preparing: UPDATE user SET user_no=?, username=?, nickname=?, mobile=?, salt=?, password=?, login_time=?, role=?, status=?, create_time=? WHERE id=? AND del_flag=0 
+[2026-03-13 17:49:21,273] [cbe45fa69be140b9816eb11c26d53c1b] [DEBUG] [http-nio-2168-exec-5] updateById[143] - ==> Parameters: 882026010100000001(String), admin(String), 管理员(String), 13128830520(String), e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855(String), 8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92(String), 2026-03-13 17:49:21.269(Timestamp), admin(String), 1(Integer), 2026-03-13 17:44:57.0(Timestamp), 1(Long)
+[2026-03-13 17:49:21,277] [cbe45fa69be140b9816eb11c26d53c1b] [DEBUG] [http-nio-2168-exec-5] updateById[143] - <==    Updates: 1
+[2026-03-13 17:49:21,294] [cbe45fa69be140b9816eb11c26d53c1b] [INFO] [http-nio-2168-exec-5] BaseLogAop[403] - responseResult:
+{"code":200,"success":true,"message":"操作成功","data":{"id":1,"userNo":"882026010100000001","username":"admin","nickname":"管理员","mobile":"13128830520","headImg":null,"birthday":null,"sex":null,"role":"admin","status":1,"token":"9043f580-1433-4be5-b3e2-b15b1a102671"},"time":"2026-03-13 17:49:21"}
+[2026-03-13 17:49:21,295] [cbe45fa69be140b9816eb11c26d53c1b] [ERROR] [http-nio-2168-exec-5] BaseLogAop[614] - 获取登录信息异常++++++++++++++++++++
+[2026-03-13 17:49:21,296] [cbe45fa69be140b9816eb11c26d53c1b] [INFO] [http-nio-2168-exec-5] BaseLogAop[635] - 日志信息：{"requestId":"cbe45fa69be140b9816eb11c26d53c1b","name":"用户登录（短信验证码）","ip":"192.168.31.73","path":"/user/login/sms","module":"memorial","className":"com.memorial.system.controller.UserController","methodName":"smsLogin","requestMethod":"POST","contentType":"application/json","requestBody":true,"param":"{\"mobile\":\"13128830520\",\"smsCode\":\"666666\"}","type":1,"success":true,"code":200,"message":"操作成功","browserName":"Chrome","browserVersion":"145.0.0.0","engineName":"Webkit","engineVersion":"537.36","osName":"Windows 10 or Windows Server 2016","platformName":"Windows","mobile":false,"deviceModel":"Win64; x64","remark":""}
+[2026-03-13 17:49:21,298] [38ff5a34f2414f7bbdd8f9dbf55880cd] [INFO] [NettyClientPublicExecutor_1] BaseLogAop[640] - 推送系统操作日志消息成功
+[2026-03-13 17:49:21,305] [6c8e5b264dbf4db483f835480b289fb4] [INFO] [ConsumeMessageThread_2] SaveOperationLogMQListener[27] - MQ收到保存系统操作日志消息：{"browserName":"Chrome","browserVersion":"145.0.0.0","className":"com.memorial.system.controller.UserController","code":200,"contentType":"application/json","deviceModel":"Win64; x64","engineName":"Webkit","engineVersion":"537.36","ip":"192.168.31.73","message":"操作成功","methodName":"smsLogin","mobile":false,"module":"memorial","name":"用户登录（短信验证码）","osName":"Windows 10 or Windows Server 2016","param":"{\"mobile\":\"13128830520\",\"smsCode\":\"666666\"}","path":"/user/login/sms","platformName":"Windows","remark":"","requestBody":true,"requestId":"cbe45fa69be140b9816eb11c26d53c1b","requestMethod":"POST","success":true,"type":1}
+[2026-03-13 17:49:21,307] [2e5fd38e625c49578c4935cbf858b161] [DEBUG] [ConsumeMessageThread_2] insert[143] - ==>  Preparing: INSERT INTO sys_operation_log ( request_id, name, ip, path, module, class_name, method_name, request_method, content_type, request_body, param, type, success, code, message, browser_name, browser_version, engine_name, engine_version, os_name, platform_name, mobile, device_model, remark ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ) 
+[2026-03-13 17:49:21,307] [9f5dc8ed8a444b4b9c4e22929004c7d2] [DEBUG] [ConsumeMessageThread_2] insert[143] - ==> Parameters: cbe45fa69be140b9816eb11c26d53c1b(String), 用户登录（短信验证码）(String), 192.168.31.73(String), /user/login/sms(String), memorial(String), com.memorial.system.controller.UserController(String), smsLogin(String), POST(String), application/json(String), true(Boolean), {"mobile":"13128830520","smsCode":"666666"}(String), 1(Integer), true(Boolean), 200(Integer), 操作成功(String), Chrome(String), 145.0.0.0(String), Webkit(String), 537.36(String), Windows 10 or Windows Server 2016(String), Windows(String), false(Boolean), Win64; x64(String), (String)
+[2026-03-13 17:49:21,337] [00ec98a446784af0926379d6c042b755] [DEBUG] [ConsumeMessageThread_2] insert[143] - <==    Updates: 1
+[2026-03-13 17:49:21,379] [2f93fdf8eed04cefa9d32e909753d184] [INFO] [http-nio-2168-exec-3] LogInterceptor[35] - 请求接口：/dashboard/stats
+[2026-03-13 17:49:21,379] [1d485baaea9a44d69df6978a937d76f1] [INFO] [http-nio-2168-exec-3] LoginInterceptor[36] - /dashboard/stats
+[2026-03-13 17:49:21,379] [1d485baaea9a44d69df6978a937d76f1] [INFO] [http-nio-2168-exec-3] LoginInterceptor[44] - 9043f580-1433-4be5-b3e2-b15b1a102671
+[2026-03-13 17:49:21,385] [1d485baaea9a44d69df6978a937d76f1] [DEBUG] [http-nio-2168-exec-3] selectCount[143] - ==>  Preparing: SELECT COUNT( 1 ) FROM tomb WHERE del_flag=0 AND (del_flag = ?) 
+[2026-03-13 17:49:21,386] [1d485baaea9a44d69df6978a937d76f1] [DEBUG] [http-nio-2168-exec-3] selectCount[143] - ==> Parameters: false(Boolean)
+[2026-03-13 17:49:21,387] [1d485baaea9a44d69df6978a937d76f1] [DEBUG] [http-nio-2168-exec-3] selectCount[143] - <==      Total: 1
+[2026-03-13 17:49:21,390] [1d485baaea9a44d69df6978a937d76f1] [DEBUG] [http-nio-2168-exec-3] selectCount[143] - ==>  Preparing: SELECT COUNT( 1 ) FROM user WHERE del_flag=0 AND (del_flag = ?) 
+[2026-03-13 17:49:21,390] [1d485baaea9a44d69df6978a937d76f1] [DEBUG] [http-nio-2168-exec-3] selectCount[143] - ==> Parameters: false(Boolean)
+[2026-03-13 17:49:21,395] [1d485baaea9a44d69df6978a937d76f1] [DEBUG] [http-nio-2168-exec-3] selectCount[143] - <==      Total: 1
+[2026-03-13 17:49:21,398] [1d485baaea9a44d69df6978a937d76f1] [DEBUG] [http-nio-2168-exec-3] selectCount[143] - ==>  Preparing: SELECT COUNT( 1 ) FROM family WHERE del_flag=0 AND (del_flag = ?) 
+[2026-03-13 17:49:21,398] [1d485baaea9a44d69df6978a937d76f1] [DEBUG] [http-nio-2168-exec-3] selectCount[143] - ==> Parameters: false(Boolean)
+[2026-03-13 17:49:21,399] [1d485baaea9a44d69df6978a937d76f1] [DEBUG] [http-nio-2168-exec-3] selectCount[143] - <==      Total: 1
+[2026-03-13 17:49:21,401] [1d485baaea9a44d69df6978a937d76f1] [DEBUG] [http-nio-2168-exec-3] selectCount[143] - ==>  Preparing: SELECT COUNT( 1 ) FROM tomb_message WHERE del_flag=0 AND (del_flag = ?) 
+[2026-03-13 17:49:21,402] [1d485baaea9a44d69df6978a937d76f1] [DEBUG] [http-nio-2168-exec-3] selectCount[143] - ==> Parameters: false(Boolean)
+[2026-03-13 17:49:21,403] [1d485baaea9a44d69df6978a937d76f1] [DEBUG] [http-nio-2168-exec-3] selectCount[143] - <==      Total: 1
+[2026-03-13 17:49:21,403] [1d485baaea9a44d69df6978a937d76f1] [DEBUG] [http-nio-2168-exec-3] getRecentCheckins[143] - ==>  Preparing: SELECT c.id, c.tomb_id, t.name AS tomb_name, c.visitor_name, c.type, c.ip, c.location, c.create_time FROM tomb_checkin c LEFT JOIN tomb t ON c.tomb_id = t.id AND t.del_flag = 0 WHERE c.del_flag = 0 ORDER BY c.create_time DESC LIMIT ? 
+[2026-03-13 17:49:21,404] [1d485baaea9a44d69df6978a937d76f1] [DEBUG] [http-nio-2168-exec-3] getRecentCheckins[143] - ==> Parameters: 5(Integer)
+[2026-03-13 17:49:21,405] [1d485baaea9a44d69df6978a937d76f1] [DEBUG] [http-nio-2168-exec-3] getRecentCheckins[143] - <==      Total: 0
+[2026-03-13 17:49:21,405] [1d485baaea9a44d69df6978a937d76f1] [DEBUG] [http-nio-2168-exec-3] getRecentMessages[143] - ==>  Preparing: SELECT m.id, m.tomb_id, t.name AS tomb_name, m.visitor_name, m.avatar, m.content, m.status, m.create_time FROM tomb_message m LEFT JOIN tomb t ON m.tomb_id = t.id AND t.del_flag = 0 WHERE m.del_flag = 0 AND m.status = 'approved' ORDER BY m.create_time DESC LIMIT ? 
+[2026-03-13 17:49:21,406] [1d485baaea9a44d69df6978a937d76f1] [DEBUG] [http-nio-2168-exec-3] getRecentMessages[143] - ==> Parameters: 5(Integer)
+[2026-03-13 17:49:21,407] [1d485baaea9a44d69df6978a937d76f1] [DEBUG] [http-nio-2168-exec-3] getRecentMessages[143] - <==      Total: 0
+[2026-03-13 17:49:25,258] [d7be7e671c8c4e8ca2cafcff8e53a1da] [INFO] [http-nio-2168-exec-7] LogInterceptor[35] - 请求接口：/user/getPageList
+[2026-03-13 17:49:25,258] [5ff578f8ee47402795cec60858a2193b] [INFO] [http-nio-2168-exec-7] LoginInterceptor[36] - /user/getPageList
+[2026-03-13 17:49:25,259] [5ff578f8ee47402795cec60858a2193b] [INFO] [http-nio-2168-exec-7] LoginInterceptor[44] - 9043f580-1433-4be5-b3e2-b15b1a102671
+[2026-03-13 17:49:25,267] [5ff578f8ee47402795cec60858a2193b] [DEBUG] [http-nio-2168-exec-7] getUserList[143] - ==>  Preparing: SELECT COUNT(1) FROM `user` u WHERE u.del_flag = 0 
+[2026-03-13 17:49:25,268] [5ff578f8ee47402795cec60858a2193b] [DEBUG] [http-nio-2168-exec-7] getUserList[143] - ==> Parameters: 
+[2026-03-13 17:49:25,278] [5ff578f8ee47402795cec60858a2193b] [DEBUG] [http-nio-2168-exec-7] getUserList[143] - ==>  Preparing: SELECT u.id, u.user_no, u.nickname, u.username, u.mobile, u.head_img, u.sex, u.login_time, u.`status`, u.create_time FROM `user` u WHERE u.del_flag = 0 ORDER BY u.id DESC LIMIT ?,? 
+[2026-03-13 17:49:25,279] [5ff578f8ee47402795cec60858a2193b] [DEBUG] [http-nio-2168-exec-7] getUserList[143] - ==> Parameters: 0(Long), 10(Long)
+[2026-03-13 17:49:25,281] [5ff578f8ee47402795cec60858a2193b] [DEBUG] [http-nio-2168-exec-7] getUserList[143] - <==      Total: 1
+[2026-03-13 17:49:34,960] [d955b0997f064349b3ee9dea9d525e9b] [INFO] [http-nio-2168-exec-6] LogInterceptor[35] - 请求接口：/family/getPageList
+[2026-03-13 17:49:34,961] [8d0e952f91a54b5da03e4841aee383a2] [INFO] [http-nio-2168-exec-6] LoginInterceptor[36] - /family/getPageList
+[2026-03-13 17:49:34,961] [8d0e952f91a54b5da03e4841aee383a2] [INFO] [http-nio-2168-exec-6] LoginInterceptor[44] - 9043f580-1433-4be5-b3e2-b15b1a102671
+[2026-03-13 17:49:34,975] [8d0e952f91a54b5da03e4841aee383a2] [DEBUG] [http-nio-2168-exec-6] getFamilyList[143] - ==>  Preparing: SELECT COUNT(1) FROM family f WHERE f.del_flag = 0 
+[2026-03-13 17:49:34,976] [8d0e952f91a54b5da03e4841aee383a2] [DEBUG] [http-nio-2168-exec-6] getFamilyList[143] - ==> Parameters: 
+[2026-03-13 17:50:05,846] [d11c4998ef2b420d8ec27d82e14415e9] [INFO] [http-nio-2168-exec-1] LogInterceptor[35] - 请求接口：/user/getPageList
+[2026-03-13 17:50:05,847] [9b6bc7f67637405f9103edff0a8837a9] [INFO] [http-nio-2168-exec-1] LoginInterceptor[36] - /user/getPageList
+[2026-03-13 17:50:05,847] [9b6bc7f67637405f9103edff0a8837a9] [INFO] [http-nio-2168-exec-1] LoginInterceptor[44] - 9043f580-1433-4be5-b3e2-b15b1a102671
+[2026-03-13 17:50:05,851] [9b6bc7f67637405f9103edff0a8837a9] [DEBUG] [http-nio-2168-exec-1] getUserList[143] - ==>  Preparing: SELECT COUNT(1) FROM `user` u WHERE u.del_flag = 0 
+[2026-03-13 17:50:05,852] [9b6bc7f67637405f9103edff0a8837a9] [DEBUG] [http-nio-2168-exec-1] getUserList[143] - ==> Parameters: 
+[2026-03-13 17:50:05,854] [9b6bc7f67637405f9103edff0a8837a9] [DEBUG] [http-nio-2168-exec-1] getUserList[143] - ==>  Preparing: SELECT u.id, u.user_no, u.nickname, u.username, u.mobile, u.head_img, u.sex, u.login_time, u.`status`, u.create_time FROM `user` u WHERE u.del_flag = 0 ORDER BY u.id DESC LIMIT ?,? 
+[2026-03-13 17:50:05,855] [9b6bc7f67637405f9103edff0a8837a9] [DEBUG] [http-nio-2168-exec-1] getUserList[143] - ==> Parameters: 0(Long), 10(Long)
+[2026-03-13 17:50:05,857] [9b6bc7f67637405f9103edff0a8837a9] [DEBUG] [http-nio-2168-exec-1] getUserList[143] - <==      Total: 1
+[2026-03-13 17:50:31,091] [d559e177ce4d4c1eb367d5eee4967ac0] [INFO] [http-nio-2168-exec-5] LogInterceptor[35] - 请求接口：/user/add
+[2026-03-13 17:50:31,091] [0d0dbc1cd9f84239999292a56f81b29e] [INFO] [http-nio-2168-exec-5] LoginInterceptor[36] - /user/add
+[2026-03-13 17:50:31,091] [0d0dbc1cd9f84239999292a56f81b29e] [INFO] [http-nio-2168-exec-5] LoginInterceptor[44] - 9043f580-1433-4be5-b3e2-b15b1a102671
+[2026-03-13 17:50:31,099] [0d0dbc1cd9f84239999292a56f81b29e] [INFO] [http-nio-2168-exec-5] BaseLogAop[392] - 
+{"path":"/user/add","ip":"192.168.31.73","requestMethod":"POST","contentType":"application/json","requestBody":true,"param":{"username":"z3","mobile":"13100000000","nickname":"张三","sex":1,"password":"fP6IrXYllkyNAfbhRH+Kbyo9DsVmLkssf4FTSY9SQUOXUHYhesHjSnndhJafPYBw5MGnT3Gxedkaf0o/uAHB/lCwclornDusSqjcmtRSPTNK06A/fd2Zur5ngdyYJL7X3QCOx1eJYVkM/CgZ8Nz5uPHMZKgenYqWJCvxpHWt/OE="},"time":"2026-03-13 17:50:31","token":"9043f580-1433-4be5-b3e2-b15b1a102671"}
+[2026-03-13 17:50:31,110] [0d0dbc1cd9f84239999292a56f81b29e] [DEBUG] [http-nio-2168-exec-5] selectCount[143] - ==>  Preparing: SELECT COUNT( 1 ) FROM user WHERE del_flag=0 AND (mobile = ? AND status <> ?) 
+[2026-03-13 17:50:31,110] [0d0dbc1cd9f84239999292a56f81b29e] [DEBUG] [http-nio-2168-exec-5] selectCount[143] - ==> Parameters: 13100000000(String), 0(Integer)
+[2026-03-13 17:50:31,113] [0d0dbc1cd9f84239999292a56f81b29e] [DEBUG] [http-nio-2168-exec-5] selectCount[143] - <==      Total: 1
+[2026-03-13 17:50:31,115] [0d0dbc1cd9f84239999292a56f81b29e] [DEBUG] [http-nio-2168-exec-5] selectCount[143] - ==>  Preparing: SELECT COUNT( 1 ) FROM user WHERE del_flag=0 AND (username = ? AND status <> ?) 
+[2026-03-13 17:50:31,116] [0d0dbc1cd9f84239999292a56f81b29e] [DEBUG] [http-nio-2168-exec-5] selectCount[143] - ==> Parameters: z3(String), 0(Integer)
+[2026-03-13 17:50:31,117] [0d0dbc1cd9f84239999292a56f81b29e] [DEBUG] [http-nio-2168-exec-5] selectCount[143] - <==      Total: 1
+[2026-03-13 17:50:31,303] [0d0dbc1cd9f84239999292a56f81b29e] [DEBUG] [http-nio-2168-exec-5] insert[143] - ==>  Preparing: INSERT INTO user ( user_no, username, nickname, mobile, sex, salt, password, status, create_by ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ? ) 
+[2026-03-13 17:50:31,304] [0d0dbc1cd9f84239999292a56f81b29e] [DEBUG] [http-nio-2168-exec-5] insert[143] - ==> Parameters: 8820260313990568(String), z3(String), 张三(String), 13100000000(String), 1(Integer), b7f783fcc86cb0179dd8c8e6c12c719bdc50be5878174cd076455815cf1e9ad3(String), 950d73e60261e02edff2f50d6c14cf1ee3aba96a3f052dd418aaff1456f5dd28(String), 1(Integer), 1(Long)
+[2026-03-13 17:50:31,306] [0d0dbc1cd9f84239999292a56f81b29e] [DEBUG] [http-nio-2168-exec-5] insert[143] - <==    Updates: 1
+[2026-03-13 17:50:31,309] [0d0dbc1cd9f84239999292a56f81b29e] [INFO] [http-nio-2168-exec-5] BaseLogAop[403] - responseResult:
+{"code":200,"success":true,"message":"操作成功","data":null,"time":"2026-03-13 17:50:31"}
+[2026-03-13 17:50:31,312] [0d0dbc1cd9f84239999292a56f81b29e] [INFO] [http-nio-2168-exec-5] BaseLogAop[635] - 日志信息：{"requestId":"0d0dbc1cd9f84239999292a56f81b29e","userId":1,"userName":"admin","name":"新增用户（管理端）","ip":"192.168.31.73","path":"/user/add","module":"memorial","className":"com.memorial.system.controller.UserController","methodName":"addUser","requestMethod":"POST","contentType":"application/json","requestBody":true,"param":"{\"username\":\"z3\",\"mobile\":\"13100000000\",\"nickname\":\"张三\",\"sex\":1,\"password\":\"fP6IrXYllkyNAfbhRH+Kbyo9DsVmLkssf4FTSY9SQUOXUHYhesHjSnndhJafPYBw5MGnT3Gxedkaf0o/uAHB/lCwclornDusSqjcmtRSPTNK06A/fd2Zur5ngdyYJL7X3QCOx1eJYVkM/CgZ8Nz5uPHMZKgenYqWJCvxpHWt/OE=\"}","token":"acc7020c2108269403c32da16699f1f2","type":2,"success":true,"code":200,"message":"操作成功","browserName":"Chrome","browserVersion":"145.0.0.0","engineName":"Webkit","engineVersion":"537.36","osName":"Windows 10 or Windows Server 2016","platformName":"Windows","mobile":false,"deviceModel":"Win64; x64","remark":""}
+[2026-03-13 17:50:31,314] [71742545cb1d4a71931ec9cf17b01ebc] [INFO] [NettyClientPublicExecutor_5] BaseLogAop[640] - 推送系统操作日志消息成功
+[2026-03-13 17:50:31,318] [1fad6e02e77a40d5bdcbf4d4da6b4cf6] [INFO] [ConsumeMessageThread_3] SaveOperationLogMQListener[27] - MQ收到保存系统操作日志消息：{"browserName":"Chrome","browserVersion":"145.0.0.0","className":"com.memorial.system.controller.UserController","code":200,"contentType":"application/json","deviceModel":"Win64; x64","engineName":"Webkit","engineVersion":"537.36","ip":"192.168.31.73","message":"操作成功","methodName":"addUser","mobile":false,"module":"memorial","name":"新增用户（管理端）","osName":"Windows 10 or Windows Server 2016","param":"{\"username\":\"z3\",\"mobile\":\"13100000000\",\"nickname\":\"张三\",\"sex\":1,\"password\":\"fP6IrXYllkyNAfbhRH+Kbyo9DsVmLkssf4FTSY9SQUOXUHYhesHjSnndhJafPYBw5MGnT3Gxedkaf0o/uAHB/lCwclornDusSqjcmtRSPTNK06A/fd2Zur5ngdyYJL7X3QCOx1eJYVkM/CgZ8Nz5uPHMZKgenYqWJCvxpHWt/OE=\"}","path":"/user/add","platformName":"Windows","remark":"","requestBody":true,"requestId":"0d0dbc1cd9f84239999292a56f81b29e","requestMethod":"POST","success":true,"token":"acc7020c2108269403c32da16699f1f2","type":2,"userId":"1","userName":"admin"}
+[2026-03-13 17:50:31,320] [97b0cd2a6d8d4ea5916d1c2a29e8a705] [DEBUG] [ConsumeMessageThread_3] insert[143] - ==>  Preparing: INSERT INTO sys_operation_log ( request_id, user_id, user_name, name, ip, path, module, class_name, method_name, request_method, content_type, request_body, param, token, type, success, code, message, browser_name, browser_version, engine_name, engine_version, os_name, platform_name, mobile, device_model, remark ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ) 
+[2026-03-13 17:50:31,321] [2c9fa603999c472abbd2766a3929fd2d] [DEBUG] [ConsumeMessageThread_3] insert[143] - ==> Parameters: 0d0dbc1cd9f84239999292a56f81b29e(String), 1(String), admin(String), 新增用户（管理端）(String), 192.168.31.73(String), /user/add(String), memorial(String), com.memorial.system.controller.UserController(String), addUser(String), POST(String), application/json(String), true(Boolean), {"username":"z3","mobile":"13100000000","nickname":"张三","sex":1,"password":"fP6IrXYllkyNAfbhRH+Kbyo9DsVmLkssf4FTSY9SQUOXUHYhesHjSnndhJafPYBw5MGnT3Gxedkaf0o/uAHB/lCwclornDusSqjcmtRSPTNK06A/fd2Zur5ngdyYJL7X3QCOx1eJYVkM/CgZ8Nz5uPHMZKgenYqWJCvxpHWt/OE="}(String), acc7020c2108269403c32da16699f1f2(String), 2(Integer), true(Boolean), 200(Integer), 操作成功(String), Chrome(String), 145.0.0.0(String), Webkit(String), 537.36(String), Windows 10 or Windows Server 2016(String), Windows(String), false(Boolean), Win64; x64(String), (String)
+[2026-03-13 17:50:31,323] [014de43ec1574bbc8cc6f02a6dab5dfc] [DEBUG] [ConsumeMessageThread_3] insert[143] - <==    Updates: 1
+[2026-03-13 17:50:31,324] [a1a1f67903d4403e902603afc6dc0037] [INFO] [http-nio-2168-exec-3] LogInterceptor[35] - 请求接口：/user/getPageList
+[2026-03-13 17:50:31,324] [f44d9d0271df47b29381d2deaeb7dfac] [INFO] [http-nio-2168-exec-3] LoginInterceptor[36] - /user/getPageList
+[2026-03-13 17:50:31,324] [f44d9d0271df47b29381d2deaeb7dfac] [INFO] [http-nio-2168-exec-3] LoginInterceptor[44] - 9043f580-1433-4be5-b3e2-b15b1a102671
+[2026-03-13 17:50:31,329] [f44d9d0271df47b29381d2deaeb7dfac] [DEBUG] [http-nio-2168-exec-3] getUserList[143] - ==>  Preparing: SELECT COUNT(1) FROM `user` u WHERE u.del_flag = 0 
+[2026-03-13 17:50:31,330] [f44d9d0271df47b29381d2deaeb7dfac] [DEBUG] [http-nio-2168-exec-3] getUserList[143] - ==> Parameters: 
+[2026-03-13 17:50:31,336] [f44d9d0271df47b29381d2deaeb7dfac] [DEBUG] [http-nio-2168-exec-3] getUserList[143] - ==>  Preparing: SELECT u.id, u.user_no, u.nickname, u.username, u.mobile, u.head_img, u.sex, u.login_time, u.`status`, u.create_time FROM `user` u WHERE u.del_flag = 0 ORDER BY u.id DESC LIMIT ?,? 
+[2026-03-13 17:50:31,337] [f44d9d0271df47b29381d2deaeb7dfac] [DEBUG] [http-nio-2168-exec-3] getUserList[143] - ==> Parameters: 0(Long), 10(Long)
+[2026-03-13 17:50:31,339] [f44d9d0271df47b29381d2deaeb7dfac] [DEBUG] [http-nio-2168-exec-3] getUserList[143] - <==      Total: 2
+[2026-03-13 17:56:42,167] [9d706c981ace403e8e5fa214c7b56827] [INFO] [http-nio-2168-exec-8] LogInterceptor[35] - 请求接口：/user/getPageList
+[2026-03-13 17:56:42,167] [21ba4a4bbb0e4d1b842ddc0038a27f5e] [INFO] [http-nio-2168-exec-8] LoginInterceptor[36] - /user/getPageList
+[2026-03-13 17:56:42,167] [21ba4a4bbb0e4d1b842ddc0038a27f5e] [INFO] [http-nio-2168-exec-8] LoginInterceptor[44] - 9043f580-1433-4be5-b3e2-b15b1a102671
+[2026-03-13 17:56:42,172] [21ba4a4bbb0e4d1b842ddc0038a27f5e] [WARN] [http-nio-2168-exec-8] DruidAbstractDataSource[1494] - discard long time none received connection. , jdbcUrl : jdbc:mysql://192.168.31.119:3306/memorial_db?useUnicode=true&characterEncoding=utf-8&useSSL=false, version : 1.2.8, lastPacketReceivedIdleMillis : 370833
+[2026-03-13 17:56:42,180] [21ba4a4bbb0e4d1b842ddc0038a27f5e] [DEBUG] [http-nio-2168-exec-8] getUserList[143] - ==>  Preparing: SELECT COUNT(1) FROM `user` u WHERE u.del_flag = 0 
+[2026-03-13 17:56:42,181] [21ba4a4bbb0e4d1b842ddc0038a27f5e] [DEBUG] [http-nio-2168-exec-8] getUserList[143] - ==> Parameters: 
+[2026-03-13 17:56:42,184] [21ba4a4bbb0e4d1b842ddc0038a27f5e] [DEBUG] [http-nio-2168-exec-8] getUserList[143] - ==>  Preparing: SELECT u.id, u.user_no, u.nickname, u.username, u.mobile, u.head_img, u.sex, u.login_time, u.`status`, u.create_time FROM `user` u WHERE u.del_flag = 0 ORDER BY u.id DESC LIMIT ?,? 
+[2026-03-13 17:56:42,184] [21ba4a4bbb0e4d1b842ddc0038a27f5e] [DEBUG] [http-nio-2168-exec-8] getUserList[143] - ==> Parameters: 0(Long), 10(Long)
+[2026-03-13 17:56:42,185] [21ba4a4bbb0e4d1b842ddc0038a27f5e] [DEBUG] [http-nio-2168-exec-8] getUserList[143] - <==      Total: 2
+[2026-03-13 17:56:43,556] [5989338dc87441a5b3a7a8949f9d24eb] [INFO] [http-nio-2168-exec-6] LogInterceptor[35] - 请求接口：/user/getPageList
+[2026-03-13 17:56:43,556] [488addf590cf408a984c2bf5e37f4550] [INFO] [http-nio-2168-exec-6] LoginInterceptor[36] - /user/getPageList
+[2026-03-13 17:56:43,556] [488addf590cf408a984c2bf5e37f4550] [INFO] [http-nio-2168-exec-6] LoginInterceptor[44] - 9043f580-1433-4be5-b3e2-b15b1a102671
+[2026-03-13 17:56:43,561] [488addf590cf408a984c2bf5e37f4550] [DEBUG] [http-nio-2168-exec-6] getUserList[143] - ==>  Preparing: SELECT COUNT(1) FROM `user` u WHERE u.del_flag = 0 
+[2026-03-13 17:56:43,562] [488addf590cf408a984c2bf5e37f4550] [DEBUG] [http-nio-2168-exec-6] getUserList[143] - ==> Parameters: 
+[2026-03-13 17:56:43,564] [488addf590cf408a984c2bf5e37f4550] [DEBUG] [http-nio-2168-exec-6] getUserList[143] - ==>  Preparing: SELECT u.id, u.user_no, u.nickname, u.username, u.mobile, u.head_img, u.sex, u.login_time, u.`status`, u.create_time FROM `user` u WHERE u.del_flag = 0 ORDER BY u.id DESC LIMIT ?,? 
+[2026-03-13 17:56:43,564] [488addf590cf408a984c2bf5e37f4550] [DEBUG] [http-nio-2168-exec-6] getUserList[143] - ==> Parameters: 0(Long), 10(Long)
+[2026-03-13 17:56:43,567] [488addf590cf408a984c2bf5e37f4550] [DEBUG] [http-nio-2168-exec-6] getUserList[143] - <==      Total: 2
+[2026-03-13 17:58:09,095] [b253ec142de6455b8f727b25ec14d686] [INFO] [http-nio-2168-exec-2] LogInterceptor[35] - 请求接口：/user/getPageList
+[2026-03-13 17:58:09,095] [8f41a6be6e0e4fc390dd186d55da07a6] [INFO] [http-nio-2168-exec-2] LoginInterceptor[36] - /user/getPageList
+[2026-03-13 17:58:09,095] [8f41a6be6e0e4fc390dd186d55da07a6] [INFO] [http-nio-2168-exec-2] LoginInterceptor[44] - 9043f580-1433-4be5-b3e2-b15b1a102671
+[2026-03-13 17:58:09,102] [8f41a6be6e0e4fc390dd186d55da07a6] [WARN] [http-nio-2168-exec-2] DruidAbstractDataSource[1494] - discard long time none received connection. , jdbcUrl : jdbc:mysql://192.168.31.119:3306/memorial_db?useUnicode=true&characterEncoding=utf-8&useSSL=false, version : 1.2.8, lastPacketReceivedIdleMillis : 85536
+[2026-03-13 17:58:09,109] [8f41a6be6e0e4fc390dd186d55da07a6] [DEBUG] [http-nio-2168-exec-2] getUserList[143] - ==>  Preparing: SELECT COUNT(1) FROM `user` u WHERE u.del_flag = 0 
+[2026-03-13 17:58:09,110] [8f41a6be6e0e4fc390dd186d55da07a6] [DEBUG] [http-nio-2168-exec-2] getUserList[143] - ==> Parameters: 
+[2026-03-13 17:58:09,112] [8f41a6be6e0e4fc390dd186d55da07a6] [DEBUG] [http-nio-2168-exec-2] getUserList[143] - ==>  Preparing: SELECT u.id, u.user_no, u.nickname, u.username, u.mobile, u.head_img, u.sex, u.login_time, u.`status`, u.create_time FROM `user` u WHERE u.del_flag = 0 ORDER BY u.id DESC LIMIT ?,? 
+[2026-03-13 17:58:09,112] [8f41a6be6e0e4fc390dd186d55da07a6] [DEBUG] [http-nio-2168-exec-2] getUserList[143] - ==> Parameters: 0(Long), 10(Long)
+[2026-03-13 17:58:09,113] [8f41a6be6e0e4fc390dd186d55da07a6] [DEBUG] [http-nio-2168-exec-2] getUserList[143] - <==      Total: 2
+[2026-03-13 17:58:10,530] [afaaf9a3d49c4ff7b5af1373828e68de] [INFO] [http-nio-2168-exec-5] LogInterceptor[35] - 请求接口：/user/getPageList
+[2026-03-13 17:58:10,530] [4c0ae62360454cfcb03cad90867de2a9] [INFO] [http-nio-2168-exec-5] LoginInterceptor[36] - /user/getPageList
+[2026-03-13 17:58:10,530] [4c0ae62360454cfcb03cad90867de2a9] [INFO] [http-nio-2168-exec-5] LoginInterceptor[44] - 9043f580-1433-4be5-b3e2-b15b1a102671
+[2026-03-13 17:58:10,535] [4c0ae62360454cfcb03cad90867de2a9] [DEBUG] [http-nio-2168-exec-5] getUserList[143] - ==>  Preparing: SELECT COUNT(1) FROM `user` u WHERE u.del_flag = 0 
+[2026-03-13 17:58:10,535] [4c0ae62360454cfcb03cad90867de2a9] [DEBUG] [http-nio-2168-exec-5] getUserList[143] - ==> Parameters: 
+[2026-03-13 17:58:10,538] [4c0ae62360454cfcb03cad90867de2a9] [DEBUG] [http-nio-2168-exec-5] getUserList[143] - ==>  Preparing: SELECT u.id, u.user_no, u.nickname, u.username, u.mobile, u.head_img, u.sex, u.login_time, u.`status`, u.create_time FROM `user` u WHERE u.del_flag = 0 ORDER BY u.id DESC LIMIT ?,? 
+[2026-03-13 17:58:10,538] [4c0ae62360454cfcb03cad90867de2a9] [DEBUG] [http-nio-2168-exec-5] getUserList[143] - ==> Parameters: 0(Long), 10(Long)
+[2026-03-13 17:58:10,541] [4c0ae62360454cfcb03cad90867de2a9] [DEBUG] [http-nio-2168-exec-5] getUserList[143] - <==      Total: 2
+[2026-03-13 18:02:04,245] [98802bc69efc485583f5d85eb6542fce] [INFO] [http-nio-2168-exec-9] LogInterceptor[35] - 请求接口：/dashboard/stats
+[2026-03-13 18:02:04,246] [acdc18e4d79d41be8e92bffdb63209ea] [INFO] [http-nio-2168-exec-9] LoginInterceptor[36] - /dashboard/stats
+[2026-03-13 18:02:04,246] [acdc18e4d79d41be8e92bffdb63209ea] [INFO] [http-nio-2168-exec-9] LoginInterceptor[44] - 9043f580-1433-4be5-b3e2-b15b1a102671
+[2026-03-13 18:02:04,251] [acdc18e4d79d41be8e92bffdb63209ea] [WARN] [http-nio-2168-exec-9] DruidAbstractDataSource[1494] - discard long time none received connection. , jdbcUrl : jdbc:mysql://192.168.31.119:3306/memorial_db?useUnicode=true&characterEncoding=utf-8&useSSL=false, version : 1.2.8, lastPacketReceivedIdleMillis : 233712
+[2026-03-13 18:02:04,257] [acdc18e4d79d41be8e92bffdb63209ea] [DEBUG] [http-nio-2168-exec-9] selectCount[143] - ==>  Preparing: SELECT COUNT( 1 ) FROM tomb WHERE del_flag=0 AND (del_flag = ?) 
+[2026-03-13 18:02:04,257] [acdc18e4d79d41be8e92bffdb63209ea] [DEBUG] [http-nio-2168-exec-9] selectCount[143] - ==> Parameters: false(Boolean)
+[2026-03-13 18:02:04,259] [acdc18e4d79d41be8e92bffdb63209ea] [DEBUG] [http-nio-2168-exec-9] selectCount[143] - <==      Total: 1
+[2026-03-13 18:02:04,260] [acdc18e4d79d41be8e92bffdb63209ea] [DEBUG] [http-nio-2168-exec-9] selectCount[143] - ==>  Preparing: SELECT COUNT( 1 ) FROM user WHERE del_flag=0 AND (del_flag = ?) 
+[2026-03-13 18:02:04,260] [acdc18e4d79d41be8e92bffdb63209ea] [DEBUG] [http-nio-2168-exec-9] selectCount[143] - ==> Parameters: false(Boolean)
+[2026-03-13 18:02:04,262] [acdc18e4d79d41be8e92bffdb63209ea] [DEBUG] [http-nio-2168-exec-9] selectCount[143] - <==      Total: 1
+[2026-03-13 18:02:04,263] [acdc18e4d79d41be8e92bffdb63209ea] [DEBUG] [http-nio-2168-exec-9] selectCount[143] - ==>  Preparing: SELECT COUNT( 1 ) FROM family WHERE del_flag=0 AND (del_flag = ?) 
+[2026-03-13 18:02:04,263] [acdc18e4d79d41be8e92bffdb63209ea] [DEBUG] [http-nio-2168-exec-9] selectCount[143] - ==> Parameters: false(Boolean)
+[2026-03-13 18:02:04,264] [acdc18e4d79d41be8e92bffdb63209ea] [DEBUG] [http-nio-2168-exec-9] selectCount[143] - <==      Total: 1
+[2026-03-13 18:02:04,265] [acdc18e4d79d41be8e92bffdb63209ea] [DEBUG] [http-nio-2168-exec-9] selectCount[143] - ==>  Preparing: SELECT COUNT( 1 ) FROM tomb_message WHERE del_flag=0 AND (del_flag = ?) 
+[2026-03-13 18:02:04,265] [acdc18e4d79d41be8e92bffdb63209ea] [DEBUG] [http-nio-2168-exec-9] selectCount[143] - ==> Parameters: false(Boolean)
+[2026-03-13 18:02:04,266] [acdc18e4d79d41be8e92bffdb63209ea] [DEBUG] [http-nio-2168-exec-9] selectCount[143] - <==      Total: 1
+[2026-03-13 18:02:04,267] [acdc18e4d79d41be8e92bffdb63209ea] [DEBUG] [http-nio-2168-exec-9] getRecentCheckins[143] - ==>  Preparing: SELECT c.id, c.tomb_id, t.name AS tomb_name, c.visitor_name, c.type, c.ip, c.location, c.create_time FROM tomb_checkin c LEFT JOIN tomb t ON c.tomb_id = t.id AND t.del_flag = 0 WHERE c.del_flag = 0 ORDER BY c.create_time DESC LIMIT ? 
+[2026-03-13 18:02:04,267] [acdc18e4d79d41be8e92bffdb63209ea] [DEBUG] [http-nio-2168-exec-9] getRecentCheckins[143] - ==> Parameters: 5(Integer)
+[2026-03-13 18:02:04,268] [acdc18e4d79d41be8e92bffdb63209ea] [DEBUG] [http-nio-2168-exec-9] getRecentCheckins[143] - <==      Total: 0
+[2026-03-13 18:02:04,268] [acdc18e4d79d41be8e92bffdb63209ea] [DEBUG] [http-nio-2168-exec-9] getRecentMessages[143] - ==>  Preparing: SELECT m.id, m.tomb_id, t.name AS tomb_name, m.visitor_name, m.avatar, m.content, m.status, m.create_time FROM tomb_message m LEFT JOIN tomb t ON m.tomb_id = t.id AND t.del_flag = 0 WHERE m.del_flag = 0 AND m.status = 'approved' ORDER BY m.create_time DESC LIMIT ? 
+[2026-03-13 18:02:04,269] [acdc18e4d79d41be8e92bffdb63209ea] [DEBUG] [http-nio-2168-exec-9] getRecentMessages[143] - ==> Parameters: 5(Integer)
+[2026-03-13 18:02:04,269] [acdc18e4d79d41be8e92bffdb63209ea] [DEBUG] [http-nio-2168-exec-9] getRecentMessages[143] - <==      Total: 0
+[2026-03-13 18:02:51,838] [71707719ac1e461bb9104586e77ac154] [INFO] [http-nio-2168-exec-8] LogInterceptor[35] - 请求接口：/dashboard/stats
+[2026-03-13 18:02:51,839] [81b02b18785f41cab18f694c168272c7] [INFO] [http-nio-2168-exec-8] LoginInterceptor[36] - /dashboard/stats
+[2026-03-13 18:02:51,839] [81b02b18785f41cab18f694c168272c7] [INFO] [http-nio-2168-exec-8] LoginInterceptor[44] - 9043f580-1433-4be5-b3e2-b15b1a102671
+[2026-03-13 18:02:51,858] [81b02b18785f41cab18f694c168272c7] [DEBUG] [http-nio-2168-exec-8] selectCount[143] - ==>  Preparing: SELECT COUNT( 1 ) FROM tomb WHERE del_flag=0 AND (del_flag = ?) 
+[2026-03-13 18:02:51,858] [81b02b18785f41cab18f694c168272c7] [DEBUG] [http-nio-2168-exec-8] selectCount[143] - ==> Parameters: false(Boolean)
+[2026-03-13 18:02:51,861] [81b02b18785f41cab18f694c168272c7] [DEBUG] [http-nio-2168-exec-8] selectCount[143] - <==      Total: 1
+[2026-03-13 18:02:51,864] [81b02b18785f41cab18f694c168272c7] [DEBUG] [http-nio-2168-exec-8] selectCount[143] - ==>  Preparing: SELECT COUNT( 1 ) FROM user WHERE del_flag=0 AND (del_flag = ?) 
+[2026-03-13 18:02:51,864] [81b02b18785f41cab18f694c168272c7] [DEBUG] [http-nio-2168-exec-8] selectCount[143] - ==> Parameters: false(Boolean)
+[2026-03-13 18:02:51,867] [81b02b18785f41cab18f694c168272c7] [DEBUG] [http-nio-2168-exec-8] selectCount[143] - <==      Total: 1
+[2026-03-13 18:02:51,869] [81b02b18785f41cab18f694c168272c7] [DEBUG] [http-nio-2168-exec-8] selectCount[143] - ==>  Preparing: SELECT COUNT( 1 ) FROM family WHERE del_flag=0 AND (del_flag = ?) 
+[2026-03-13 18:02:51,869] [81b02b18785f41cab18f694c168272c7] [DEBUG] [http-nio-2168-exec-8] selectCount[143] - ==> Parameters: false(Boolean)
+[2026-03-13 18:02:51,870] [81b02b18785f41cab18f694c168272c7] [DEBUG] [http-nio-2168-exec-8] selectCount[143] - <==      Total: 1
+[2026-03-13 18:02:51,872] [81b02b18785f41cab18f694c168272c7] [DEBUG] [http-nio-2168-exec-8] selectCount[143] - ==>  Preparing: SELECT COUNT( 1 ) FROM tomb_message WHERE del_flag=0 AND (del_flag = ?) 
+[2026-03-13 18:02:51,872] [81b02b18785f41cab18f694c168272c7] [DEBUG] [http-nio-2168-exec-8] selectCount[143] - ==> Parameters: false(Boolean)
+[2026-03-13 18:02:51,873] [81b02b18785f41cab18f694c168272c7] [DEBUG] [http-nio-2168-exec-8] selectCount[143] - <==      Total: 1
+[2026-03-13 18:02:51,875] [81b02b18785f41cab18f694c168272c7] [DEBUG] [http-nio-2168-exec-8] getRecentCheckins[143] - ==>  Preparing: SELECT c.id, c.tomb_id, t.name AS tomb_name, c.visitor_name, c.type, c.ip, c.location, c.create_time FROM tomb_checkin c LEFT JOIN tomb t ON c.tomb_id = t.id AND t.del_flag = 0 WHERE c.del_flag = 0 ORDER BY c.create_time DESC LIMIT ? 
+[2026-03-13 18:02:51,875] [81b02b18785f41cab18f694c168272c7] [DEBUG] [http-nio-2168-exec-8] getRecentCheckins[143] - ==> Parameters: 5(Integer)
+[2026-03-13 18:02:51,876] [81b02b18785f41cab18f694c168272c7] [DEBUG] [http-nio-2168-exec-8] getRecentCheckins[143] - <==      Total: 0
+[2026-03-13 18:02:51,877] [81b02b18785f41cab18f694c168272c7] [DEBUG] [http-nio-2168-exec-8] getRecentMessages[143] - ==>  Preparing: SELECT m.id, m.tomb_id, t.name AS tomb_name, m.visitor_name, m.avatar, m.content, m.status, m.create_time FROM tomb_message m LEFT JOIN tomb t ON m.tomb_id = t.id AND t.del_flag = 0 WHERE m.del_flag = 0 AND m.status = 'approved' ORDER BY m.create_time DESC LIMIT ? 
+[2026-03-13 18:02:51,877] [81b02b18785f41cab18f694c168272c7] [DEBUG] [http-nio-2168-exec-8] getRecentMessages[143] - ==> Parameters: 5(Integer)
+[2026-03-13 18:02:51,878] [81b02b18785f41cab18f694c168272c7] [DEBUG] [http-nio-2168-exec-8] getRecentMessages[143] - <==      Total: 0
+[2026-03-13 18:03:56,854] [52119ec0274346ff9790c284775f48c6] [INFO] [http-nio-2168-exec-1] LogInterceptor[35] - 请求接口：/sysOperationLog/getPageList
+[2026-03-13 18:03:56,855] [be9179e7167549429b715a48782ae7f3] [INFO] [http-nio-2168-exec-1] LoginInterceptor[36] - /sysOperationLog/getPageList
+[2026-03-13 18:03:56,855] [be9179e7167549429b715a48782ae7f3] [INFO] [http-nio-2168-exec-1] LoginInterceptor[44] - 9043f580-1433-4be5-b3e2-b15b1a102671
+[2026-03-13 18:03:56,867] [be9179e7167549429b715a48782ae7f3] [WARN] [http-nio-2168-exec-1] DruidAbstractDataSource[1494] - discard long time none received connection. , jdbcUrl : jdbc:mysql://192.168.31.119:3306/memorial_db?useUnicode=true&characterEncoding=utf-8&useSSL=false, version : 1.2.8, lastPacketReceivedIdleMillis : 64989
+[2026-03-13 18:03:56,872] [be9179e7167549429b715a48782ae7f3] [DEBUG] [http-nio-2168-exec-1] getSysOperationLogList[143] - ==>  Preparing: SELECT COUNT(1) FROM sys_operation_log 
+[2026-03-13 18:03:56,873] [be9179e7167549429b715a48782ae7f3] [DEBUG] [http-nio-2168-exec-1] getSysOperationLogList[143] - ==> Parameters: 
+[2026-03-13 18:03:56,876] [be9179e7167549429b715a48782ae7f3] [DEBUG] [http-nio-2168-exec-1] getSysOperationLogList[143] - ==>  Preparing: select id, request_id, user_id, user_name, name, ip, area, operator, path, module, class_name, method_name, request_method, content_type, request_body, param, token, type, success, code, message, exception_name, exception_message, browser_name, browser_version, engine_name, engine_version, os_name, platform_name, mobile, device_name, device_model, remark, create_time, update_time from sys_operation_log order by create_time desc LIMIT ?,? 
+[2026-03-13 18:03:56,876] [be9179e7167549429b715a48782ae7f3] [DEBUG] [http-nio-2168-exec-1] getSysOperationLogList[143] - ==> Parameters: 0(Long), 10(Long)
+[2026-03-13 18:03:56,881] [be9179e7167549429b715a48782ae7f3] [DEBUG] [http-nio-2168-exec-1] getSysOperationLogList[143] - <==      Total: 3

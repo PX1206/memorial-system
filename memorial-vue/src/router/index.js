@@ -1,0 +1,101 @@
+import { createRouter, createWebHistory } from 'vue-router'
+import Layout from '@/layout/Layout.vue'
+import Login from '@/views/Login.vue'
+import Memorial from '@/views/memorial/Memorial.vue'
+
+const routes = [
+  { path: '/login', component: Login },
+
+  {
+    path: '/',
+    component: Layout,
+    redirect: '/dashboard',
+    children: [
+      {
+        path: 'dashboard',
+        component: () => import('@/views/dashboard/Dashboard.vue'),
+        meta: { requiresAuth: true }
+      },
+
+      // 墓碑管理
+      {
+        path: 'tomb',
+        component: () => import('@/views/tomb/TombList.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
+        path: 'tomb/message',
+        component: () => import('@/views/tomb/TombMessage.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
+        path: 'tomb/checkin',
+        component: () => import('@/views/tomb/TombCheckin.vue'),
+        meta: { requiresAuth: true }
+      },
+
+      // 家族管理
+      {
+        path: 'family',
+        component: () => import('@/views/family/FamilyList.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
+        path: 'family/member',
+        component: () => import('@/views/family/FamilyMember.vue'),
+        meta: { requiresAuth: true }
+      },
+
+      // 用户管理
+      {
+        path: 'user',
+        component: () => import('@/views/user/UserList.vue'),
+        meta: { requiresAuth: true }
+      },
+
+      // 系统管理
+      {
+        path: 'system/role',
+        component: () => import('@/views/system/RoleList.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
+        path: 'system/log',
+        component: () => import('@/views/system/SystemLog.vue'),
+        meta: { requiresAuth: true }
+      },
+
+      {
+        path: 'profile',
+        component: () => import('@/views/user/Profile.vue'),
+        meta: { requiresAuth: true }
+      }
+    ]
+  },
+
+  { path: '/memorial/:id', component: Memorial },
+
+  { path: '/:pathMatch(.*)*', redirect: '/login' }
+]
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes
+})
+
+router.beforeEach((to, from, next) => {
+  const token = localStorage.getItem('token')
+
+  if (to.path === '/login') {
+    if (token) return next('/dashboard')
+    return next()
+  }
+
+  if (to.meta.requiresAuth && !token) {
+    return next('/login')
+  }
+
+  next()
+})
+
+export default router

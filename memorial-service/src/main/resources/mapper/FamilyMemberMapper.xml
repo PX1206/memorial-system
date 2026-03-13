@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.memorial.system.mapper.FamilyMemberMapper">
+
+    <select id="getMemberList" resultType="com.memorial.system.vo.FamilyMemberVO">
+        SELECT m.id, m.family_id, m.name, m.relation, m.phone, m.role,
+               m.avatar, m.create_time
+        FROM family_member m
+        <where>
+            <if test="param.familyId != null">
+                AND m.family_id = #{param.familyId}
+            </if>
+            <if test="param.keyword != null and param.keyword != ''">
+                AND m.name LIKE CONCAT('%', #{param.keyword, jdbcType=VARCHAR}, '%')
+            </if>
+            AND m.del_flag = 0
+        </where>
+        ORDER BY m.id ASC
+    </select>
+
+</mapper>

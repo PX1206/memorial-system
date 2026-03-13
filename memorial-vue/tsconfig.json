@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ES2017",                  // 支持 async/await
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "lib": ["DOM", "ES2017"],            // DOM API + Promise 等
+    "allowJs": true,                      // 允许 JS 文件
+    "jsx": "preserve",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,                       // 开启严格模式
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,                 // 忽略库文件类型检查
+    "noImplicitAny": false,
+    "sourceMap": true,
+    "baseUrl": ".",                       // 相对路径解析基准
+    "paths": {
+      "@/*": ["src/*"]                    // 支持 @ 别名
+    }
+  },
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.vue"],
+  "exclude": ["node_modules", "dist"]
+}

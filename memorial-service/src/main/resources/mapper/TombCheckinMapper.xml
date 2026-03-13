@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.memorial.system.mapper.TombCheckinMapper">
+
+    <select id="getCheckinList" resultType="com.memorial.system.vo.TombCheckinVO">
+        SELECT c.id, c.tomb_id, t.name AS tomb_name, c.visitor_name,
+               c.type, c.ip, c.location, c.create_time
+        FROM tomb_checkin c
+        LEFT JOIN tomb t ON c.tomb_id = t.id AND t.del_flag = 0
+        <where>
+            <if test="param.keyword != null and param.keyword != ''">
+                AND (c.visitor_name LIKE CONCAT('%', #{param.keyword, jdbcType=VARCHAR}, '%')
+                     OR t.name LIKE CONCAT('%', #{param.keyword, jdbcType=VARCHAR}, '%'))
+            </if>
+            <if test="param.type != null and param.type != ''">
+                AND c.type = #{param.type}
+            </if>
+            <if test="param.tombId != null">
+                AND c.tomb_id = #{param.tombId}
+            </if>
+            AND c.del_flag = 0
+        </where>
+        ORDER BY c.id DESC
+    </select>
+
+    <select id="getRecentCheckins" resultType="com.memorial.system.vo.TombCheckinVO">
+        SELECT c.id, c.tomb_id, t.name AS tomb_name, c.visitor_name,
+               c.type, c.ip, c.location, c.create_time
+        FROM tomb_checkin c
+        LEFT JOIN tomb t ON c.tomb_id = t.id AND t.del_flag = 0
+        WHERE c.del_flag = 0
+        ORDER BY c.create_time DESC
+        LIMIT #{limit}
+    </select>
+
+</mapper>

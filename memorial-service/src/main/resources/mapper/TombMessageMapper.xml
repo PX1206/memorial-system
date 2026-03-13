@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.memorial.system.mapper.TombMessageMapper">
+
+    <select id="getMessageList" resultType="com.memorial.system.vo.TombMessageVO">
+        SELECT m.id, m.tomb_id, t.name AS tomb_name, m.visitor_name, m.avatar,
+               m.content, m.status, m.reject_reason, m.create_time
+        FROM tomb_message m
+        LEFT JOIN tomb t ON m.tomb_id = t.id AND t.del_flag = 0
+        <where>
+            <if test="param.keyword != null and param.keyword != ''">
+                AND (m.content LIKE CONCAT('%', #{param.keyword, jdbcType=VARCHAR}, '%')
+                     OR t.name LIKE CONCAT('%', #{param.keyword, jdbcType=VARCHAR}, '%'))
+            </if>
+            <if test="param.status != null and param.status != ''">
+                AND m.status = #{param.status}
+            </if>
+            <if test="param.tombId != null">
+                AND m.tomb_id = #{param.tombId}
+            </if>
+            AND m.del_flag = 0
+        </where>
+        ORDER BY m.id DESC
+    </select>
+
+    <select id="getRecentMessages" resultType="com.memorial.system.vo.TombMessageVO">
+        SELECT m.id, m.tomb_id, t.name AS tomb_name, m.visitor_name, m.avatar,
+               m.content, m.status, m.create_time
+        FROM tomb_message m
+        LEFT JOIN tomb t ON m.tomb_id = t.id AND t.del_flag = 0
+        WHERE m.del_flag = 0 AND m.status = 'approved'
+        ORDER BY m.create_time DESC
+        LIMIT #{limit}
+    </select>
+
+</mapper>
