@@ -16,46 +16,23 @@
         :collapse-transition="false"
         class="layout-menu"
       >
-        <el-menu-item index="/dashboard">
-          <el-icon><DataAnalysis /></el-icon>
-          <template #title>首页概览</template>
-        </el-menu-item>
-
-        <el-sub-menu index="tomb-group">
-          <template #title>
-            <el-icon><Place /></el-icon>
-            <span>墓碑管理</span>
-          </template>
-          <el-menu-item index="/tomb">墓碑列表</el-menu-item>
-          <el-menu-item index="/tomb/message">留言管理</el-menu-item>
-          <el-menu-item index="/tomb/checkin">打卡记录</el-menu-item>
-        </el-sub-menu>
-
-        <el-sub-menu index="family-group">
-          <template #title>
-            <el-icon><Connection /></el-icon>
-            <span>家族管理</span>
-          </template>
-          <el-menu-item index="/family">家族列表</el-menu-item>
-          <el-menu-item index="/family/member">成员管理</el-menu-item>
-        </el-sub-menu>
-
-        <el-sub-menu index="user-group" v-if="isAdmin">
-          <template #title>
-            <el-icon><User /></el-icon>
-            <span>用户管理</span>
-          </template>
-          <el-menu-item index="/user">用户列表</el-menu-item>
-        </el-sub-menu>
-
-        <el-sub-menu index="system-group" v-if="isAdmin">
-          <template #title>
-            <el-icon><Setting /></el-icon>
-            <span>系统管理</span>
-          </template>
-          <el-menu-item index="/system/role">角色管理</el-menu-item>
-          <el-menu-item index="/system/log">操作日志</el-menu-item>
-        </el-sub-menu>
+        <template v-for="menu in userMenus" :key="menu.id">
+          <el-sub-menu v-if="menu.children && menu.children.length && hasVisibleChildren(menu)" :index="'menu-' + menu.id">
+            <template #title>
+              <el-icon><component :is="getIcon(menu.icon)" /></el-icon>
+              <span>{{ menu.title }}</span>
+            </template>
+            <template v-for="child in menu.children" :key="child.id">
+              <el-menu-item v-if="child.type !== 'btn' && !child.hidden" :index="child.path">
+                {{ child.title }}
+              </el-menu-item>
+            </template>
+          </el-sub-menu>
+          <el-menu-item v-else-if="!menu.hidden && menu.type !== 'btn'" :index="menu.path">
+            <el-icon><component :is="getIcon(menu.icon)" /></el-icon>
+            <template #title>{{ menu.title }}</template>
+          </el-menu-item>
+        </template>
       </el-menu>
     </el-aside>
 
@@ -105,41 +82,78 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import {
   Compass, DataAnalysis, Place, Connection, User, Setting,
-  Fold, Expand, ArrowDown, UserFilled, SwitchButton
+  Fold, Expand, ArrowDown, UserFilled, SwitchButton,
+  Document, Menu as MenuIcon, Grid, List, Monitor, Operation
 } from '@element-plus/icons-vue'
+import { usePermissionStore } from '@/stores/permission'
+import { getUserMenuTree, getUserPermissions } from '@/api/menu'
 
 const router = useRouter()
 const route = useRoute()
+const permissionStore = usePermissionStore()
 
 const isCollapse = ref(false)
 const defaultAvatar = 'https://i.pravatar.cc/150?img=3'
 const user = reactive({ username: '', avatar: '', role: '' })
+const userMenus = ref<any[]>([])
 
-const isAdmin = computed(() => user.role === 'admin')
+const iconMap: Record<string, any> = {
+  DataAnalysis, Place, Connection, User, Setting,
+  Document, Menu: MenuIcon, Grid, List, Monitor, Operation, Compass
+}
+
+function getIcon(name: string) {
+  if (!name) return Document
+  return iconMap[name] || Document
+}
+
+function hasVisibleChildren(menu: any) {
+  return menu.children?.some((c: any) => c.type !== 'btn' && !c.hidden)
+}
+
 const currentRoute = computed(() => route.path)
 
-const breadcrumbMap: Record<string, string> = {
-  '/dashboard': '首页概览',
-  '/tomb': '墓碑列表',
-  '/tomb/message': '留言管理',
-  '/tomb/checkin': '打卡记录',
-  '/family': '家族列表',
-  '/family/member': '成员管理',
-  '/user': '用户列表',
-  '/system/role': '角色管理',
-  '/system/log': '操作日志'
-}
-const breadcrumbName = computed(() => breadcrumbMap[route.path] || '')
-
-onMounted(() => {
-  const currentUser = localStorage.getItem('currentUser')
-  if (currentUser) {
-    const u = JSON.parse(currentUser)
-    user.username = u.username || u.mobile || '用户'
-    user.avatar = u.headImg || ''
-    user.role = u.role || 'admin'
+const breadcrumbMap = computed(() => {
+  const map: Record<string, string> = {}
+  function walk(menus: any[]) {
+    for (const m of menus) {
+      if (m.path) map[m.path] = m.title
+      if (m.children) walk(m.children)
+    }
   }
+  walk(userMenus.value)
+  return map
 })
+
+const breadcrumbName = computed(() => breadcrumbMap.value[route.path] || '')
+
+async function loadUserMenusAndPermissions() {
+  try {
+    const currentUser = localStorage.getItem('currentUser')
+    if (currentUser) {
+      const u = JSON.parse(currentUser)
+      user.username = u.username || u.mobile || '用户'
+      user.avatar = u.headImg || ''
+      user.role = u.role || ''
+
+      if (u.permissions) {
+        permissionStore.setPermissions(u.permissions)
+      }
+    }
+
+    const [menus, permissions] = await Promise.all([
+      getUserMenuTree(),
+      getUserPermissions()
+    ])
+    userMenus.value = menus || []
+    permissionStore.setPermissions(permissions || [])
+    permissionStore.setMenuTree(menus || [])
+  } catch {
+    userMenus.value = []
+  }
+}
+
+onMounted(() => loadUserMenusAndPermissions())
 
 const goProfile = () => router.push('/profile')
 
@@ -150,6 +164,7 @@ const logout = async () => {
   } catch { /* 即使接口失败也要退出 */ }
   localStorage.removeItem('token')
   localStorage.removeItem('currentUser')
+  permissionStore.clear()
   router.push('/login')
 }
 </script>

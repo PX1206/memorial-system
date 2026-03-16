@@ -7,11 +7,14 @@ import 'element-plus/dist/index.css'
 import './styles/index.css'
 
 import { createPinia } from 'pinia'
+import { setupPermissionDirective } from './directives/permission'
 
 const app = createApp(App)
 
+app.use(createPinia())
 app.use(router)
 app.use(ElementPlus)
-app.use(createPinia())
+
+setupPermissionDirective(app)
 
 app.mount('#app')

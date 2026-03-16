@@ -6,7 +6,7 @@
           <el-input v-model="query.keyword" placeholder="搜索用户名/手机号" clearable style="width: 220px" @clear="loadData" />
           <el-button type="primary" @click="loadData"><el-icon><Search /></el-icon>搜索</el-button>
         </div>
-        <el-button type="primary" @click="openDialog()"><el-icon><Plus /></el-icon>新增用户</el-button>
+        <el-button type="primary" @click="openDialog()" v-permission="'sys:user:add'"><el-icon><Plus /></el-icon>新增用户</el-button>
       </div>
 
       <el-table :data="tableData" border stripe v-loading="loading">
@@ -29,13 +29,14 @@
         </el-table-column>
         <el-table-column prop="loginTime" label="最后登录" width="170" />
         <el-table-column prop="createTime" label="注册时间" width="170" />
-        <el-table-column label="操作" width="240" fixed="right">
+        <el-table-column label="操作" width="300" fixed="right">
           <template #default="{ row }">
-            <el-button size="small" type="primary" link @click="openDialog(row)">编辑</el-button>
-            <el-button size="small" type="warning" link @click="resetPwd(row)">重置密码</el-button>
-            <el-button v-if="row.status === 1" size="small" type="info" link @click="handleDisable(row)">禁用</el-button>
-            <el-button v-if="row.status === 2 || row.status === 3 || row.status === 4" size="small" type="success" link @click="handleRestore(row)">恢复</el-button>
-            <el-button size="small" type="danger" link @click="handleDelete(row)">删除</el-button>
+            <el-button size="small" type="primary" link @click="openDialog(row)" v-permission="'sys:user:edit'">编辑</el-button>
+            <el-button size="small" type="warning" link @click="resetPwd(row)" v-permission="'sys:user:resetPwd'">重置密码</el-button>
+            <el-button size="small" type="success" link @click="openRoleDialog(row)" v-permission="'sys:user:role'">角色</el-button>
+            <el-button v-if="row.status === 1" size="small" type="info" link @click="handleDisable(row)" v-permission="'sys:user:disable'">禁用</el-button>
+            <el-button v-if="row.status === 2 || row.status === 3 || row.status === 4" size="small" type="success" link @click="handleRestore(row)" v-permission="'sys:user:restore'">恢复</el-button>
+            <el-button size="small" type="danger" link @click="handleDelete(row)" v-permission="'sys:user:delete'">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -75,6 +76,17 @@
         <el-button type="primary" :loading="saving" @click="saveUser">确定</el-button>
       </template>
     </el-dialog>
+
+    <el-dialog v-model="roleDialogVisible" title="分配角色" width="400px" destroy-on-close>
+      <div class="role-title">用户：{{ roleUser.username }}</div>
+      <el-checkbox-group v-model="selectedRoleIds">
+        <el-checkbox v-for="role in allRoles" :key="role.id" :value="role.id" :label="role.name" />
+      </el-checkbox-group>
+      <template #footer>
+        <el-button @click="roleDialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="roleLoading" @click="saveUserRole">保存</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -83,11 +95,17 @@ import { ref, reactive, onMounted } from 'vue'
 import { Search, Plus } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getUserPageList, addUser, updateUser, deleteUser, disableUser, restoreUser, resetPassword } from '@/api/user'
+import { getAllRoles, getUserRoleIds, saveUserRoles } from '@/api/role'
 import { encryptPassword } from '@/utils/rsa'
 
 const loading = ref(false)
 const saving = ref(false)
 const dialogVisible = ref(false)
+const roleDialogVisible = ref(false)
+const roleLoading = ref(false)
+const roleUser = ref({})
+const selectedRoleIds = ref([])
+const allRoles = ref([])
 const isEdit = ref(false)
 const formRef = ref()
 const total = ref(0)
@@ -174,10 +192,32 @@ function handleDelete(row) {
   ElMessageBox.confirm(`确定删除用户 "${row.username}" 吗？`, '提示', { type: 'warning' })
     .then(async () => { await deleteUser(row.id); ElMessage.success('删除成功'); loadData() })
 }
+
+async function openRoleDialog(row) {
+  roleUser.value = row
+  try {
+    const [roles, ids] = await Promise.all([getAllRoles(), getUserRoleIds(row.id)])
+    allRoles.value = roles || []
+    selectedRoleIds.value = ids || []
+  } catch { /* handled by interceptor */ }
+  roleDialogVisible.value = true
+}
+
+async function saveUserRole() {
+  roleLoading.value = true
+  try {
+    await saveUserRoles({ userId: roleUser.value.id, roleIds: selectedRoleIds.value })
+    ElMessage.success('角色保存成功')
+    roleDialogVisible.value = false
+  } catch { /* handled by interceptor */ } finally {
+    roleLoading.value = false
+  }
+}
 </script>
 
 <style scoped>
 .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
 .toolbar-left { display: flex; gap: 10px; }
 .pagination-wrap { display: flex; justify-content: flex-end; margin-top: 16px; }
+.role-title { font-size: 14px; font-weight: 600; margin-bottom: 12px; color: #303133; }
 </style>

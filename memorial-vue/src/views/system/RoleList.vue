@@ -3,12 +3,12 @@
     <el-card>
       <div class="toolbar">
         <div class="toolbar-left">
-          <el-input v-model="query.keyword" placeholder="搜索角色名称" clearable style="width: 220px" />
+          <el-input v-model="query.keyword" placeholder="搜索角色名称" clearable style="width: 220px" @keyup.enter="loadData" />
           <el-button type="primary" @click="loadData">
             <el-icon><Search /></el-icon>搜索
           </el-button>
         </div>
-        <el-button type="primary" @click="openDialog()">
+        <el-button type="primary" @click="openDialog()" v-permission="'sys:role:add'">
           <el-icon><Plus /></el-icon>新增角色
         </el-button>
       </div>
@@ -20,7 +20,7 @@
         <el-table-column prop="description" label="描述" show-overflow-tooltip />
         <el-table-column prop="userCount" label="用户数" width="80">
           <template #default="{ row }">
-            <el-tag>{{ row.userCount }}</el-tag>
+            <el-tag>{{ row.userCount || 0 }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="status" label="状态" width="80">
@@ -31,12 +31,24 @@
         <el-table-column prop="createTime" label="创建时间" width="170" />
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="{ row }">
-            <el-button size="small" type="primary" link @click="openDialog(row)">编辑</el-button>
-            <el-button size="small" type="success" link @click="setPermissions(row)">权限</el-button>
-            <el-button size="small" type="danger" link @click="deleteRole(row)" :disabled="row.code === 'admin'">删除</el-button>
+            <el-button size="small" type="primary" link @click="openDialog(row)" v-permission="'sys:role:edit'">编辑</el-button>
+            <el-button size="small" type="success" link @click="setPermissions(row)" v-permission="'sys:role:perm'">权限</el-button>
+            <el-button size="small" type="danger" link @click="handleDelete(row)" :disabled="row.code === 'admin'" v-permission="'sys:role:delete'">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
+
+      <div class="pagination-wrap">
+        <el-pagination
+          v-model:current-page="query.pageIndex"
+          v-model:page-size="query.pageSize"
+          :total="total"
+          :page-sizes="[10, 20, 50]"
+          layout="total, sizes, prev, pager, next, jumper"
+          @size-change="loadData"
+          @current-change="loadData"
+        />
+      </div>
     </el-card>
 
     <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑角色' : '新增角色'" width="500px" destroy-on-close>
@@ -45,7 +57,7 @@
           <el-input v-model="form.name" />
         </el-form-item>
         <el-form-item label="角色标识" prop="code">
-          <el-input v-model="form.code" :disabled="isEdit" placeholder="如: admin, user" />
+          <el-input v-model="form.code" :disabled="isEdit" placeholder="如: admin, editor" />
         </el-form-item>
         <el-form-item label="描述">
           <el-input v-model="form.description" type="textarea" :rows="3" />
@@ -53,7 +65,7 @@
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="saveRole">确定</el-button>
+        <el-button type="primary" @click="saveRole" :loading="saveLoading">确定</el-button>
       </template>
     </el-dialog>
 
@@ -61,15 +73,16 @@
       <div class="perm-title">角色：{{ currentRole.name }}</div>
       <el-tree
         ref="treeRef"
-        :data="menuTree"
+        :data="menuTreeData"
         show-checkbox
         node-key="id"
-        :default-checked-keys="currentRole.permissions || []"
-        :props="{ children: 'children', label: 'label' }"
+        :default-checked-keys="checkedMenuIds"
+        :props="{ children: 'children', label: 'title' }"
+        default-expand-all
       />
       <template #footer>
         <el-button @click="permVisible = false">取消</el-button>
-        <el-button type="primary" @click="savePerm">保存</el-button>
+        <el-button type="primary" @click="savePerm" :loading="permLoading">保存</el-button>
       </template>
     </el-dialog>
   </div>
@@ -79,45 +92,25 @@
 import { ref, reactive, onMounted } from 'vue'
 import { Search, Plus } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { getRolePageList, addRole, updateRole, deleteRole, toggleRoleStatus, saveRoleMenus, getRoleMenuIds } from '@/api/role'
+import { getMenuTree } from '@/api/menu'
 
 const loading = ref(false)
+const saveLoading = ref(false)
+const permLoading = ref(false)
 const dialogVisible = ref(false)
 const permVisible = ref(false)
 const isEdit = ref(false)
 const formRef = ref()
 const treeRef = ref()
+const total = ref(0)
 
-const query = reactive({ keyword: '' })
+const query = reactive({ keyword: '', pageIndex: 1, pageSize: 10 })
 const currentRole = ref({})
+const checkedMenuIds = ref([])
+const menuTreeData = ref([])
 
-const tableData = ref([
-  { id: 1, name: '超级管理员', code: 'admin', description: '系统最高权限，可管理所有功能', userCount: 2, status: 1, permissions: [1, 2, 3, 4, 5, 6, 7, 8], createTime: '2026-01-01 00:00:00' },
-  { id: 2, name: '普通用户', code: 'user', description: '普通注册用户，只能管理自己的数据', userCount: 354, status: 1, permissions: [1, 3, 5], createTime: '2026-01-01 00:00:00' }
-])
-
-const menuTree = [
-  { id: 1, label: '首页概览' },
-  {
-    id: 2, label: '墓碑管理', children: [
-      { id: 3, label: '墓碑列表' },
-      { id: 4, label: '留言管理' },
-      { id: 5, label: '打卡记录' }
-    ]
-  },
-  {
-    id: 6, label: '家族管理', children: [
-      { id: 7, label: '家族列表' },
-      { id: 8, label: '成员管理' }
-    ]
-  },
-  { id: 9, label: '用户管理' },
-  {
-    id: 10, label: '系统管理', children: [
-      { id: 11, label: '角色管理' },
-      { id: 12, label: '操作日志' }
-    ]
-  }
-]
+const tableData = ref([])
 
 const form = reactive({ id: null, name: '', code: '', description: '' })
 
@@ -126,9 +119,15 @@ const rules = {
   code: [{ required: true, message: '请输入角色标识', trigger: 'blur' }]
 }
 
-function loadData() {
+async function loadData() {
   loading.value = true
-  setTimeout(() => { loading.value = false }, 300)
+  try {
+    const res = await getRolePageList(query)
+    tableData.value = res.records || []
+    total.value = res.total || 0
+  } catch { /* handled by interceptor */ } finally {
+    loading.value = false
+  }
 }
 
 onMounted(() => loadData())
@@ -136,60 +135,89 @@ onMounted(() => loadData())
 function openDialog(row) {
   isEdit.value = !!row
   if (row) {
-    Object.assign(form, row)
+    Object.assign(form, { id: row.id, name: row.name, code: row.code, description: row.description })
   } else {
     Object.assign(form, { id: null, name: '', code: '', description: '' })
   }
   dialogVisible.value = true
 }
 
-function saveRole() {
-  formRef.value.validate((valid) => {
-    if (!valid) return
+async function saveRole() {
+  await formRef.value.validate()
+  saveLoading.value = true
+  try {
     if (isEdit.value) {
-      const idx = tableData.value.findIndex(r => r.id === form.id)
-      if (idx !== -1) tableData.value[idx] = { ...tableData.value[idx], ...form }
+      await updateRole(form)
       ElMessage.success('修改成功')
     } else {
-      tableData.value.push({
-        ...form,
-        id: Date.now(),
-        userCount: 0,
-        status: 1,
-        permissions: [],
-        createTime: new Date().toLocaleString()
-      })
+      await addRole(form)
       ElMessage.success('新增成功')
     }
     dialogVisible.value = false
-  })
+    loadData()
+  } catch { /* handled by interceptor */ } finally {
+    saveLoading.value = false
+  }
 }
 
-function toggleStatus(row) {
-  ElMessage.success(`角色 ${row.name} 已${row.status === 1 ? '启用' : '禁用'}`)
+async function toggleStatus(row) {
+  try {
+    await toggleRoleStatus(row.id)
+    ElMessage.success(`角色 ${row.name} 已${row.status === 1 ? '启用' : '禁用'}`)
+  } catch {
+    row.status = row.status === 1 ? 0 : 1
+  }
 }
 
-function setPermissions(row) {
+async function setPermissions(row) {
   currentRole.value = { ...row }
+  try {
+    const [tree, ids] = await Promise.all([
+      getMenuTree(),
+      getRoleMenuIds(row.id)
+    ])
+    menuTreeData.value = tree || []
+    checkedMenuIds.value = filterLeafIds(tree || [], ids || [])
+  } catch { /* handled by interceptor */ }
   permVisible.value = true
 }
 
-function savePerm() {
+function filterLeafIds(tree, ids) {
+  const leafIds = []
+  function walk(nodes) {
+    for (const node of nodes) {
+      if (node.children && node.children.length > 0) {
+        walk(node.children)
+      } else {
+        if (ids.includes(node.id)) leafIds.push(node.id)
+      }
+    }
+  }
+  walk(tree)
+  return leafIds
+}
+
+async function savePerm() {
   const checked = treeRef.value.getCheckedKeys()
   const halfChecked = treeRef.value.getHalfCheckedKeys()
   const allKeys = [...checked, ...halfChecked]
-  const idx = tableData.value.findIndex(r => r.id === currentRole.value.id)
-  if (idx !== -1) tableData.value[idx].permissions = allKeys
-  ElMessage.success('权限保存成功')
-  permVisible.value = false
+  permLoading.value = true
+  try {
+    await saveRoleMenus({ roleId: currentRole.value.id, menuIds: allKeys })
+    ElMessage.success('权限保存成功')
+    permVisible.value = false
+  } catch { /* handled by interceptor */ } finally {
+    permLoading.value = false
+  }
 }
 
-function deleteRole(row) {
-  ElMessageBox.confirm(`确定删除角色 "${row.name}" 吗？`, '提示', { type: 'warning' })
-    .then(() => {
-      tableData.value = tableData.value.filter(r => r.id !== row.id)
-      ElMessage.success('删除成功')
-    })
+async function handleDelete(row) {
+  await ElMessageBox.confirm(`确定删除角色 "${row.name}" 吗？`, '提示', { type: 'warning' })
+  try {
+    await deleteRole(row.id)
+    ElMessage.success('删除成功')
+    loadData()
+  } catch { /* handled by interceptor */ }
 }
 </script>
 
@@ -211,5 +239,11 @@ function deleteRole(row) {
   font-weight: 600;
   margin-bottom: 12px;
   color: #303133;
+}
+
+.pagination-wrap {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
 }
 </style>

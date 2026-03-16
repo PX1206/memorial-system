@@ -52,4 +52,7 @@ public class LoginUserInfoVO implements Serializable {
     @ApiModelProperty("登录认证token, 请求时请在Header配置成：Authorization")
     private String token;
 
+    @ApiModelProperty("权限code列表")
+    private List<String> permissions;
+
 }

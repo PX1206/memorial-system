@@ -11,6 +11,7 @@ import com.memorial.common.vo.LoginUserInfoVO;
 import com.memorial.system.entity.User;
 import com.memorial.system.mapper.*;
 import com.memorial.system.param.*;
+import com.memorial.system.service.MenuService;
 import com.memorial.system.service.UserService;
 import com.memorial.common.base.BaseServiceImpl;
 import com.memorial.common.pagination.Paging;
@@ -51,6 +52,8 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapper, User> implement
     private CommonUtil commonUtil;
     @Autowired
     private RedisUtil redisUtil;
+    @Autowired
+    private MenuService menuService;
 
     @Override
     @Transactional
@@ -225,6 +228,15 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapper, User> implement
         // 封装登录信息返回
         LoginUserInfoVO loginUserInfoVO = new LoginUserInfoVO();
         BeanUtils.copyProperties(user, loginUserInfoVO);
+
+        // 查询用户权限列表
+        try {
+            List<String> permissions = menuService.getUserPermissions(user.getId());
+            loginUserInfoVO.setPermissions(permissions);
+        } catch (Exception e) {
+            log.error("查询用户权限失败", e);
+            loginUserInfoVO.setPermissions(new java.util.ArrayList<>());
+        }
 
         // 登录成功保存token信息
         if (StringUtil.isBlank(token)) {

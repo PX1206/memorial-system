@@ -60,6 +60,11 @@ const routes = [
         meta: { requiresAuth: true }
       },
       {
+        path: 'system/menu',
+        component: () => import('@/views/system/MenuList.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
         path: 'system/log',
         component: () => import('@/views/system/SystemLog.vue'),
         meta: { requiresAuth: true }
