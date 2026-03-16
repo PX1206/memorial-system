@@ -17,6 +17,7 @@ public class FamilyMemberVO implements Serializable {
 
     private Long id;
     private Long familyId;
+    private String familyName;
     private String name;
     private String relation;
     private String phone;

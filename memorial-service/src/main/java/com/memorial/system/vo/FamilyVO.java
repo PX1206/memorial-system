@@ -8,6 +8,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 @Data
 @Accessors(chain = true)
@@ -16,6 +17,8 @@ public class FamilyVO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private Long id;
+    private Long pid;
+    private String parentName;
     private String name;
     private String description;
     private String phone;
@@ -27,4 +30,6 @@ public class FamilyVO implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
+
+    private List<FamilyVO> children;
 }

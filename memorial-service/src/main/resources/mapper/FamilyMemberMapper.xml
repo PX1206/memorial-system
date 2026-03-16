@@ -4,8 +4,10 @@
 
     <select id="getMemberList" resultType="com.memorial.system.vo.FamilyMemberVO">
         SELECT m.id, m.family_id, m.name, m.relation, m.phone, m.role,
-               m.avatar, m.create_time
+               m.avatar, m.create_time,
+               f.name AS family_name
         FROM family_member m
+        LEFT JOIN family f ON f.id = m.family_id AND f.del_flag = 0
         <where>
             <if test="param.familyId != null">
                 AND m.family_id = #{param.familyId}

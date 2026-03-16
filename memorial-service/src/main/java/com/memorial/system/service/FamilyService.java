@@ -7,6 +7,8 @@ import com.memorial.system.param.FamilyPageParam;
 import com.memorial.system.param.FamilyParam;
 import com.memorial.system.vo.FamilyVO;
 
+import java.util.List;
+
 public interface FamilyService extends BaseService<Family> {
 
     Paging<FamilyVO> getFamilyPageList(FamilyPageParam param) throws Exception;
@@ -16,4 +18,6 @@ public interface FamilyService extends BaseService<Family> {
     boolean updateFamily(FamilyParam param) throws Exception;
 
     boolean deleteFamily(Long id) throws Exception;
+
+    List<FamilyVO> getFamilyTree() throws Exception;
 }

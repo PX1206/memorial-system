@@ -35,3 +35,15 @@ export function restoreUser(id) {
 export function resetPassword(data) {
   return request.post('/user/resetPassword', data)
 }
+
+export function updateCurrentUser(data) {
+  return request.post('/user/update', data)
+}
+
+export function uploadFile(file) {
+  const formData = new FormData()
+  formData.append('file', file)
+  return request.post('/file/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  })
+}

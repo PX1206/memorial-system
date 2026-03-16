@@ -12,6 +12,7 @@ import com.memorial.system.service.FamilyService;
 import com.memorial.system.vo.FamilyVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -56,5 +57,12 @@ public class FamilyController extends BaseController {
     public ApiResult<Boolean> delete(@PathVariable("id") Long id) throws Exception {
         boolean flag = familyService.deleteFamily(id);
         return ApiResult.result(flag);
+    }
+
+    @GetMapping("/getTree")
+    @ApiOperation(value = "获取家族树", response = FamilyVO.class)
+    public ApiResult<List<FamilyVO>> getTree() throws Exception {
+        List<FamilyVO> tree = familyService.getFamilyTree();
+        return ApiResult.ok(tree);
     }
 }

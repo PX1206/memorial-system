@@ -78,7 +78,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import {
   Compass, DataAnalysis, Place, Connection, User, Setting,
@@ -96,6 +96,18 @@ const isCollapse = ref(false)
 const defaultAvatar = 'https://i.pravatar.cc/150?img=3'
 const user = reactive({ username: '', avatar: '', role: '' })
 const userMenus = ref<any[]>([])
+
+function refreshUserDisplay() {
+  const currentUser = localStorage.getItem('currentUser')
+  if (currentUser) {
+    const u = JSON.parse(currentUser)
+    user.username = u.nickname || u.username || u.mobile || '用户'
+    user.avatar = u.headImg || ''
+  }
+}
+
+window.addEventListener('user-info-updated', refreshUserDisplay)
+onUnmounted(() => window.removeEventListener('user-info-updated', refreshUserDisplay))
 
 const iconMap: Record<string, any> = {
   DataAnalysis, Place, Connection, User, Setting,
@@ -132,7 +144,7 @@ async function loadUserMenusAndPermissions() {
     const currentUser = localStorage.getItem('currentUser')
     if (currentUser) {
       const u = JSON.parse(currentUser)
-      user.username = u.username || u.mobile || '用户'
+      user.username = u.nickname || u.username || u.mobile || '用户'
       user.avatar = u.headImg || ''
       user.role = u.role || ''
 

@@ -18,7 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -38,6 +39,7 @@ public class FamilyServiceImpl extends BaseServiceImpl<FamilyMapper, Family> imp
     @Transactional(rollbackFor = Exception.class)
     public boolean addFamily(FamilyParam param) throws Exception {
         Family family = new Family();
+        family.setPid(param.getPid() != null ? param.getPid() : 0L);
         family.setName(param.getName());
         family.setDescription(param.getDescription());
         family.setPhone(param.getPhone());
@@ -63,6 +65,7 @@ public class FamilyServiceImpl extends BaseServiceImpl<FamilyMapper, Family> imp
         if (family == null) {
             throw new BusinessException(500, "家族信息不存在");
         }
+        family.setPid(param.getPid() != null ? param.getPid() : 0L);
         family.setName(param.getName());
         family.setDescription(param.getDescription());
         family.setPhone(param.getPhone());
@@ -77,5 +80,18 @@ public class FamilyServiceImpl extends BaseServiceImpl<FamilyMapper, Family> imp
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteFamily(Long id) throws Exception {
         return super.removeById(id);
+    }
+
+    @Override
+    public List<FamilyVO> getFamilyTree() throws Exception {
+        List<FamilyVO> all = familyMapper.getAllFamilyList();
+        return buildTree(all, 0L);
+    }
+
+    private List<FamilyVO> buildTree(List<FamilyVO> list, Long parentId) {
+        return list.stream()
+                .filter(f -> Objects.equals(f.getPid(), parentId))
+                .peek(f -> f.setChildren(buildTree(list, f.getId())))
+                .collect(Collectors.toList());
     }
 }

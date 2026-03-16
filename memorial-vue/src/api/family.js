@@ -31,3 +31,7 @@ export function updateFamilyMember(data) {
 export function removeFamilyMember(id) {
   return request.post(`/family/member/delete/${id}`)
 }
+
+export function getFamilyTree() {
+  return request.get('/family/getTree')
+}

@@ -21,6 +21,9 @@ public class Family extends BaseEntity {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
+    @ApiModelProperty("上级家族ID，0表示顶级")
+    private Long pid;
+
     @ApiModelProperty("家族名称")
     private String name;
 

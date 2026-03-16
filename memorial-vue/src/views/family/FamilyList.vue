@@ -12,6 +12,12 @@
       <el-table :data="tableData" border stripe v-loading="loading">
         <el-table-column prop="id" label="ID" width="70" />
         <el-table-column prop="name" label="家族名称" />
+        <el-table-column prop="parentName" label="上级家族" width="140">
+          <template #default="{ row }">
+            <el-tag v-if="row.parentName" type="warning">{{ row.parentName }}</el-tag>
+            <span v-else class="text-muted">顶级</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="founderName" label="创建人" />
         <el-table-column prop="memberCount" label="成员数" width="100">
           <template #default="{ row }"><el-tag>{{ row.memberCount }} 人</el-tag></template>
@@ -45,6 +51,17 @@
 
     <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑家族' : '新增家族'" width="500px" destroy-on-close>
       <el-form :model="form" :rules="rules" ref="formRef" label-width="90px">
+        <el-form-item label="上级家族">
+          <el-tree-select
+            v-model="form.pid"
+            :data="familyTreeOptions"
+            :props="{ value: 'id', label: 'name', children: 'children' }"
+            check-strictly
+            placeholder="选择上级家族（不选为顶级）"
+            clearable
+            style="width: 100%"
+          />
+        </el-form-item>
         <el-form-item label="家族名称" prop="name"><el-input v-model="form.name" /></el-form-item>
         <el-form-item label="家族简介"><el-input v-model="form.description" type="textarea" :rows="3" /></el-form-item>
         <el-form-item label="联系电话"><el-input v-model="form.phone" /></el-form-item>
@@ -63,7 +80,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Search, Plus } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getFamilyPageList, addFamily, updateFamily, deleteFamily } from '@/api/family'
+import { getFamilyPageList, addFamily, updateFamily, deleteFamily, getFamilyTree } from '@/api/family'
 
 const router = useRouter()
 const loading = ref(false)
@@ -72,11 +89,12 @@ const dialogVisible = ref(false)
 const isEdit = ref(false)
 const formRef = ref()
 const total = ref(0)
+const familyTreeOptions = ref([])
 
 const query = reactive({ keyword: '', pageIndex: 1, pageSize: 10 })
 const tableData = ref([])
 
-const form = reactive({ id: null, name: '', description: '', phone: '', address: '' })
+const form = reactive({ id: null, pid: 0, name: '', description: '', phone: '', address: '' })
 const rules = { name: [{ required: true, message: '请输入家族名称', trigger: 'blur' }] }
 
 async function loadData() {
@@ -91,12 +109,20 @@ async function loadData() {
   finally { loading.value = false }
 }
 
-onMounted(() => loadData())
+async function loadFamilyTree() {
+  try {
+    const tree = await getFamilyTree()
+    familyTreeOptions.value = [{ id: 0, name: '顶级（无上级）', children: tree || [] }]
+  } catch { familyTreeOptions.value = [] }
+}
+
+onMounted(() => { loadData(); loadFamilyTree() })
 
 function openDialog(row) {
   isEdit.value = !!row
-  if (row) Object.assign(form, row)
-  else Object.assign(form, { id: null, name: '', description: '', phone: '', address: '' })
+  if (row) Object.assign(form, { id: row.id, pid: row.pid || 0, name: row.name, description: row.description, phone: row.phone, address: row.address })
+  else Object.assign(form, { id: null, pid: 0, name: '', description: '', phone: '', address: '' })
+  loadFamilyTree()
   dialogVisible.value = true
 }
 
@@ -114,6 +140,7 @@ function saveFamily() {
       }
       dialogVisible.value = false
       loadData()
+      loadFamilyTree()
     } catch { /* */ }
     finally { saving.value = false }
   })
@@ -129,6 +156,7 @@ function handleDelete(row) {
       await deleteFamily(row.id)
       ElMessage.success('删除成功')
       loadData()
+      loadFamilyTree()
     })
 }
 </script>
@@ -137,4 +165,5 @@ function handleDelete(row) {
 .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
 .toolbar-left { display: flex; gap: 10px; }
 .pagination-wrap { display: flex; justify-content: flex-end; margin-top: 16px; }
+.text-muted { color: #c0c4cc; font-size: 13px; }
 </style>

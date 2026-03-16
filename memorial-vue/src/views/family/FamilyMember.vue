@@ -12,6 +12,11 @@
       <el-table :data="tableData" border stripe v-loading="loading">
         <el-table-column prop="id" label="ID" width="70" />
         <el-table-column prop="name" label="姓名" />
+        <el-table-column prop="familyName" label="所属家族" width="140">
+          <template #default="{ row }">
+            <el-tag type="warning">{{ row.familyName || familyName }}</el-tag>
+          </template>
+        </el-table-column>
         <el-table-column prop="relation" label="关系" width="100">
           <template #default="{ row }"><el-tag>{{ row.relation }}</el-tag></template>
         </el-table-column>
@@ -45,6 +50,16 @@
 
     <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑成员' : '添加成员'" width="500px" destroy-on-close>
       <el-form :model="form" :rules="rules" ref="formRef" label-width="90px">
+        <el-form-item label="所属家族" prop="familyId">
+          <el-tree-select
+            v-model="form.familyId"
+            :data="familyTreeOptions"
+            :props="{ value: 'id', label: 'name', children: 'children' }"
+            check-strictly
+            placeholder="选择所属家族"
+            style="width: 100%"
+          />
+        </el-form-item>
         <el-form-item label="姓名" prop="name"><el-input v-model="form.name" /></el-form-item>
         <el-form-item label="关系" prop="relation">
           <el-select v-model="form.relation" style="width: 100%">
@@ -73,7 +88,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { Plus, ArrowLeft } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getMemberPageList, addFamilyMember, updateFamilyMember, removeFamilyMember } from '@/api/family'
+import { getMemberPageList, addFamilyMember, updateFamilyMember, removeFamilyMember, getFamilyTree } from '@/api/family'
 
 const router = useRouter()
 const route = useRoute()
@@ -83,6 +98,7 @@ const dialogVisible = ref(false)
 const isEdit = ref(false)
 const formRef = ref()
 const total = ref(0)
+const familyTreeOptions = ref([])
 
 const familyId = ref(Number(route.query.familyId) || null)
 const familyName = ref(route.query.familyName || '')
@@ -94,7 +110,8 @@ const tableData = ref([])
 const form = reactive({ id: null, familyId: familyId.value, name: '', relation: '', phone: '', role: '成员' })
 const rules = {
   name: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
-  relation: [{ required: true, message: '请选择关系', trigger: 'change' }]
+  relation: [{ required: true, message: '请选择关系', trigger: 'change' }],
+  familyId: [{ required: true, message: '请选择所属家族', trigger: 'change' }]
 }
 
 async function loadData() {
@@ -110,13 +127,20 @@ async function loadData() {
   finally { loading.value = false }
 }
 
-onMounted(() => loadData())
+async function loadFamilyTree() {
+  try {
+    const tree = await getFamilyTree()
+    familyTreeOptions.value = tree || []
+  } catch { familyTreeOptions.value = [] }
+}
+
+onMounted(() => { loadData(); loadFamilyTree() })
 
 function goBack() { router.push('/family') }
 
 function openDialog(row) {
   isEdit.value = !!row
-  if (row) Object.assign(form, row)
+  if (row) Object.assign(form, { id: row.id, familyId: row.familyId, name: row.name, relation: row.relation, phone: row.phone, role: row.role })
   else Object.assign(form, { id: null, familyId: familyId.value, name: '', relation: '', phone: '', role: '成员' })
   dialogVisible.value = true
 }

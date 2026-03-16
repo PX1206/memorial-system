@@ -76,7 +76,15 @@
           </el-col>
           <el-col :span="12">
             <el-form-item label="所属家族">
-              <el-input v-model="form.familyId" placeholder="家族ID（可选）" />
+              <el-tree-select
+                v-model="form.familyId"
+                :data="familyTreeOptions"
+                :props="{ value: 'id', label: 'name', children: 'children' }"
+                check-strictly
+                clearable
+                placeholder="选择所属家族"
+                style="width: 100%"
+              />
             </el-form-item>
           </el-col>
         </el-row>
@@ -98,8 +106,20 @@
         <el-form-item label="生平事迹">
           <el-input v-model="form.story" type="textarea" :rows="4" placeholder="墓主人生平事迹" />
         </el-form-item>
-        <el-form-item label="照片URL">
-          <el-input v-model="form.photo" placeholder="照片URL" />
+        <el-form-item label="照片">
+          <div class="photo-upload">
+            <div v-if="form.photo" class="photo-preview">
+              <el-image :src="form.photo" fit="cover" class="photo-img" />
+              <div class="photo-actions">
+                <el-icon @click="form.photo = ''"><Close /></el-icon>
+              </div>
+            </div>
+            <div v-else class="photo-placeholder" @click="triggerUpload">
+              <el-icon :size="28" color="#c0c4cc"><Plus /></el-icon>
+              <span>上传照片</span>
+            </div>
+            <input ref="fileInput" type="file" accept="image/*" style="display:none" @change="handleUpload" />
+          </div>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -130,10 +150,12 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { Search, Plus, Picture } from '@element-plus/icons-vue'
+import { Search, Plus, Picture, Close } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import QRCode from 'qrcode'
 import { getTombPageList, addTomb, updateTomb, deleteTomb } from '@/api/tomb'
+import { getFamilyTree } from '@/api/family'
+import { uploadFile } from '@/api/user'
 
 const loading = ref(false)
 const saving = ref(false)
@@ -141,8 +163,10 @@ const dialogVisible = ref(false)
 const detailVisible = ref(false)
 const isEdit = ref(false)
 const formRef = ref()
+const fileInput = ref()
 const total = ref(0)
 const detailData = ref({})
+const familyTreeOptions = ref([])
 
 const query = reactive({ keyword: '', pageIndex: 1, pageSize: 10 })
 const tableData = ref([])
@@ -170,7 +194,38 @@ async function loadData() {
   finally { loading.value = false }
 }
 
-onMounted(() => loadData())
+async function loadFamilyTree() {
+  try {
+    const tree = await getFamilyTree()
+    familyTreeOptions.value = tree || []
+  } catch { familyTreeOptions.value = [] }
+}
+
+onMounted(() => { loadData(); loadFamilyTree() })
+
+function triggerUpload() { fileInput.value?.click() }
+
+async function handleUpload(e) {
+  const file = e.target.files[0]
+  if (!file) return
+  if (file.size > 5 * 1024 * 1024) {
+    ElMessage.warning('图片不能超过5MB')
+    return
+  }
+  const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+  if (!validTypes.includes(file.type)) {
+    ElMessage.warning('仅支持 JPG/PNG/GIF/WebP 格式')
+    return
+  }
+  try {
+    const res = await uploadFile(file)
+    if (res && res.url) {
+      form.photo = res.url
+      ElMessage.success('上传成功')
+    }
+  } catch { ElMessage.error('上传失败') }
+  finally { e.target.value = '' }
+}
 
 function openDialog(row) {
   isEdit.value = !!row
@@ -179,6 +234,7 @@ function openDialog(row) {
   } else {
     Object.assign(form, { id: null, name: '', birthday: '', deathday: '', familyId: null, photo: '', biography: '', story: '' })
   }
+  loadFamilyTree()
   dialogVisible.value = true
 }
 
@@ -236,4 +292,43 @@ function handleDelete(row) {
 .text-muted { color: #c0c4cc; font-size: 13px; }
 .detail-content { padding: 0 10px; }
 .detail-photo { text-align: center; margin-bottom: 20px; }
+.photo-upload { display: flex; align-items: flex-start; }
+.photo-preview {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #e4e7ed;
+}
+.photo-img { width: 100%; height: 100%; }
+.photo-actions {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  cursor: pointer;
+  background: rgba(0,0,0,0.5);
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+.photo-placeholder {
+  width: 120px;
+  height: 120px;
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  gap: 6px;
+  color: #c0c4cc;
+  transition: border-color 0.3s;
+}
+.photo-placeholder:hover { border-color: #409eff; color: #409eff; }
 </style>

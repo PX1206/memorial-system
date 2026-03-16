@@ -3,9 +3,11 @@
 <mapper namespace="com.memorial.system.mapper.FamilyMapper">
 
     <select id="getFamilyList" resultType="com.memorial.system.vo.FamilyVO">
-        SELECT f.id, f.name, f.description, f.phone, f.address,
-               f.founder_name, f.member_count, f.tomb_count, f.create_time
+        SELECT f.id, f.pid, f.name, f.description, f.phone, f.address,
+               f.founder_name, f.member_count, f.tomb_count, f.create_time,
+               pf.name AS parent_name
         FROM family f
+        LEFT JOIN family pf ON pf.id = f.pid AND pf.del_flag = 0
         <where>
             <if test="param.keyword != null and param.keyword != ''">
                 AND f.name LIKE CONCAT('%', #{param.keyword, jdbcType=VARCHAR}, '%')
@@ -13,6 +15,13 @@
             AND f.del_flag = 0
         </where>
         ORDER BY f.id DESC
+    </select>
+
+    <select id="getAllFamilyList" resultType="com.memorial.system.vo.FamilyVO">
+        SELECT f.id, f.pid, f.name, f.description, f.member_count, f.tomb_count
+        FROM family f
+        WHERE f.del_flag = 0
+        ORDER BY f.id ASC
     </select>
 
 </mapper>
