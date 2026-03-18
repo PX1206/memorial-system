@@ -64,6 +64,21 @@ public class LoginUtil {
         return loginUserInfoVo.getUsername();
     }
 
+    /**
+     * 获取当前用户昵称，用于留言/献花等展示；无昵称时回退为账号
+     */
+    public static String getNickname() {
+        LoginUserInfoVO loginUserInfoVo = getLoginUserInfoVo();
+        String nickname = loginUserInfoVo.getNickname();
+        return (nickname != null && !nickname.trim().isEmpty()) ? nickname.trim() : loginUserInfoVo.getUsername();
+    }
+
+    /** 是否超级管理员（角色ID=1），可查看全部数据 */
+    public static boolean isAdmin() {
+        LoginUserInfoVO vo = getLoginUserInfoVo();
+        return "admin".equals(vo.getRole());
+    }
+
     public static void refreshToken() {
         redisUtil.expire(TokenUtil.getToken(), CommonConstant.USER_TOKEN_VALIDITY);
         redisUtil.expire(CommonConstant.USER_TOKEN_SET + LoginUtil.getUserId(), CommonConstant.USER_TOKEN_VALIDITY);

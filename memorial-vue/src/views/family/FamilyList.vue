@@ -25,13 +25,29 @@
         <el-table-column prop="tombCount" label="墓碑数" width="100">
           <template #default="{ row }"><el-tag type="success">{{ row.tombCount }} 座</el-tag></template>
         </el-table-column>
+        <el-table-column label="邀请码" width="180">
+          <template #default="{ row }">
+            <div class="invite-cell">
+              <span class="invite-code">{{ row.inviteCode || '未生成' }}</span>
+              <el-button
+                v-if="canOperate(row) && row.inviteCode"
+                size="small"
+                type="primary"
+                link
+                @click="openInviteDialog(row)"
+              >
+                二维码
+              </el-button>
+            </div>
+          </template>
+        </el-table-column>
         <el-table-column prop="description" label="家族简介" show-overflow-tooltip />
         <el-table-column prop="createTime" label="创建时间" width="170" />
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="{ row }">
-            <el-button size="small" type="primary" link @click="openDialog(row)">编辑</el-button>
+            <el-button v-if="canOperate(row)" size="small" type="primary" link @click="openDialog(row)">编辑</el-button>
             <el-button size="small" type="success" link @click="viewMembers(row)">成员</el-button>
-            <el-button size="small" type="danger" link @click="handleDelete(row)">删除</el-button>
+            <el-button v-if="canOperate(row)" size="small" type="danger" link @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -72,6 +88,24 @@
         <el-button type="primary" :loading="saving" @click="saveFamily">确定</el-button>
       </template>
     </el-dialog>
+
+    <el-dialog v-model="inviteDialogVisible" title="家族邀请码" width="360px" destroy-on-close>
+      <div class="invite-dialog-body" v-if="currentInvite.family">
+        <div class="invite-info">
+          <div class="invite-title">{{ currentInvite.family.name }}</div>
+          <div class="invite-code-large">{{ currentInvite.family.inviteCode }}</div>
+        </div>
+        <div class="invite-qr-wrap">
+          <img v-if="currentInvite.qr" :src="currentInvite.qr" class="invite-qr-img" />
+          <span v-else class="text-muted">二维码生成中...</span>
+        </div>
+        <div class="invite-tip">扫码或转发链接，成员登录后即可加入该家族</div>
+      </div>
+      <template #footer>
+        <el-button @click="inviteDialogVisible = false">关闭</el-button>
+        <el-button type="primary" :disabled="!currentInvite.qr" @click="downloadInviteQR">下载二维码</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -80,6 +114,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Search, Plus } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import QRCode from 'qrcode'
 import { getFamilyPageList, addFamily, updateFamily, deleteFamily, getFamilyTree } from '@/api/family'
 
 const router = useRouter()
@@ -93,6 +128,9 @@ const familyTreeOptions = ref([])
 
 const query = reactive({ keyword: '', pageIndex: 1, pageSize: 10 })
 const tableData = ref([])
+
+const inviteDialogVisible = ref(false)
+const currentInvite = reactive({ family: null, qr: '' })
 
 const form = reactive({ id: null, pid: 0, name: '', description: '', phone: '', address: '' })
 const rules = { name: [{ required: true, message: '请输入家族名称', trigger: 'blur' }] }
@@ -150,6 +188,31 @@ function viewMembers(row) {
   router.push({ path: '/family/member', query: { familyId: row.id, familyName: row.name } })
 }
 
+async function openInviteDialog(row) {
+  currentInvite.family = row
+  currentInvite.qr = ''
+  inviteDialogVisible.value = true
+  try {
+    const baseUrl = window.location.origin
+    const joinUrl = `${baseUrl}/family/join?code=${encodeURIComponent(row.inviteCode)}`
+    currentInvite.qr = await QRCode.toDataURL(joinUrl, { width: 320, margin: 1 })
+  } catch {
+    ElMessage.error('生成二维码失败')
+  }
+}
+
+function downloadInviteQR() {
+  if (!currentInvite.qr || !currentInvite.family) return
+  const link = document.createElement('a')
+  link.download = `家族邀请码_${currentInvite.family.name}.png`
+  link.href = currentInvite.qr
+  link.click()
+}
+
+function canOperate(row) {
+  return row.myRole === '族长' || row.myRole === '管理员'
+}
+
 function handleDelete(row) {
   ElMessageBox.confirm(`确定删除家族 "${row.name}" 吗？`, '提示', { type: 'warning' })
     .then(async () => {
@@ -166,4 +229,13 @@ function handleDelete(row) {
 .toolbar-left { display: flex; gap: 10px; }
 .pagination-wrap { display: flex; justify-content: flex-end; margin-top: 16px; }
 .text-muted { color: #c0c4cc; font-size: 13px; }
+.invite-cell { display: flex; align-items: center; gap: 6px; }
+.invite-code { font-family: monospace; font-size: 13px; }
+.invite-dialog-body { text-align: center; }
+.invite-info { margin-bottom: 8px; }
+.invite-title { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+.invite-code-large { font-family: monospace; font-size: 18px; letter-spacing: 2px; }
+.invite-qr-wrap { margin: 10px 0; display: flex; justify-content: center; }
+.invite-qr-img { width: 260px; height: 260px; border-radius: 8px; box-shadow: 0 0 8px rgba(0,0,0,0.08); }
+.invite-tip { font-size: 13px; color: #909399; }
 </style>

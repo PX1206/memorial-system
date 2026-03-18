@@ -9,6 +9,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 @Data
 @Accessors(chain = true)
@@ -30,13 +31,22 @@ public class TombVO implements Serializable {
 
     private String biography;
     private String story;
+    @ApiModelProperty("墓志铭")
+    private String epitaph;
+    @ApiModelProperty("是否开放访客互动（留言/献花等）")
+    private Boolean visitorActionOpen;
     private Long familyId;
     private String familyName;
     private String qrCode;
+    @ApiModelProperty("二维码识别标识（用于扫码访问链接）")
+    private String qrCodeKey;
     private Integer visitCount;
     private Integer messageCount;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
+
+    @ApiModelProperty("生平事迹列表")
+    private List<TombStoryVO> stories;
 }

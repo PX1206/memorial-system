@@ -22,4 +22,9 @@ public class TombCheckinPageParam extends BasePageOrderParam {
 
     @ApiModelProperty("墓碑ID")
     private Long tombId;
+
+    @ApiModelProperty(value = "当前用户ID（角色2时用于过滤）", hidden = true)
+    private Long currentUserId;
+    @ApiModelProperty(value = "是否超级管理员（角色1可看全部）", hidden = true)
+    private Boolean isAdmin;
 }

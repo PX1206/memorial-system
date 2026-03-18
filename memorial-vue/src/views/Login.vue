@@ -110,24 +110,102 @@
           >
             登录
           </el-button>
+
+          <!-- 右下角注册入口 -->
+          <div class="register-link">
+            <el-button type="primary" link @click="openRegisterDialog">
+              注册
+            </el-button>
+          </div>
         </el-form-item>
 
       </el-form>
 
     </div>
 
+    <!-- 注册弹窗 -->
+    <el-dialog
+      v-model="registerDialogVisible"
+      title="用户注册"
+      width="380px"
+      destroy-on-close
+    >
+      <el-form
+        ref="registerFormRef"
+        :model="registerForm"
+        :rules="registerRules"
+        label-width="80px"
+      >
+        <el-form-item label="账号" prop="username">
+          <el-input v-model="registerForm.username" maxlength="32" />
+        </el-form-item>
+
+        <el-form-item label="密码" prop="password">
+          <el-input v-model="registerForm.password" type="password" show-password />
+        </el-form-item>
+
+        <el-form-item label="确认密码" prop="passwordConfirm">
+          <el-input v-model="registerForm.passwordConfirm" type="password" show-password />
+        </el-form-item>
+
+        <el-form-item label="昵称">
+          <el-input v-model="registerForm.nickname" maxlength="32" />
+        </el-form-item>
+
+        <el-form-item label="手机号" prop="mobile">
+          <el-input
+            v-model="registerForm.mobile"
+            maxlength="11"
+            @input="registerForm.mobile = registerForm.mobile.replace(/\\D/g,'')"
+          />
+        </el-form-item>
+
+        <el-form-item label="图形码" prop="pictureCode">
+          <div class="row">
+            <el-input v-model="registerForm.pictureCode" class="half" />
+            <img
+              :src="registerCaptchaImage"
+              class="captcha-img"
+              @click="getRegisterCaptcha"
+            />
+          </div>
+        </el-form-item>
+
+        <el-form-item label="短信码" prop="smsCode">
+          <div class="row">
+            <el-input v-model="registerForm.smsCode" maxlength="6" class="half" />
+            <el-button
+              class="half"
+              :disabled="registerCountdown>0 || registerSending"
+              @click="sendRegisterSms"
+            >
+              {{ registerCountdown > 0 ? registerCountdown + 's' : '获取验证码' }}
+            </el-button>
+          </div>
+        </el-form-item>
+      </el-form>
+
+      <template #footer>
+        <el-button @click="registerDialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="registerLoading" @click="doRegister">
+          注册
+        </el-button>
+      </template>
+    </el-dialog>
+
   </div>
 </template>
 
 <script setup lang="ts">
 
-import {ref, reactive, onMounted, nextTick} from 'vue'
-import {passwordLoginAPI, smsLoginAPI, getCaptchaAPI, sendSmsCodeAPI} from '@/api/auth'
+import {ref, reactive, onMounted, nextTick, watch} from 'vue'
+import {passwordLoginAPI, smsLoginAPI, getCaptchaAPI, sendSmsCodeAPI, registerAPI} from '@/api/auth'
 import {encryptPassword} from '@/utils/rsa'
-import {useRouter} from 'vue-router'
+import {useRouter, useRoute} from 'vue-router'
 import {ElMessage} from 'element-plus'
 
 const router = useRouter()
+const route = useRoute()
 
 const mode = ref<'password' | 'sms'>('password')
 
@@ -193,7 +271,7 @@ const getCaptcha = async () => {
 
 }
 
-/* 发送短信验证码 */
+/* 发送短信验证码（登录） */
 const sendSms = async () => {
 
   if (sending.value || countdown.value > 0) return
@@ -279,14 +357,107 @@ const login = async () => {
     // 保存完整用户信息
     localStorage.setItem('currentUser', JSON.stringify(res))
 
-    router.push('/')
+    const redirect = (route.query.redirect as string) || '/'
+    router.replace(redirect)
 
   } finally {
     loading.value = false
   }
 }
 
-import { watch } from 'vue'
+/* 注册弹窗相关 */
+const registerDialogVisible = ref(false)
+const registerFormRef = ref()
+const registerForm = reactive({
+  username: '',
+  password: '',
+  passwordConfirm: '',
+  nickname: '',
+  mobile: '',
+  pictureCode: '',
+  smsCode: ''
+})
+const registerCaptchaImage = ref('')
+const registerCaptchaKey = ref('')
+const registerCountdown = ref(0)
+const registerSending = ref(false)
+const registerLoading = ref(false)
+
+const validateRegisterPasswordConfirm = (_rule: any, value: string, callback: (e?: Error) => void) => {
+  if (value !== registerForm.password) callback(new Error('两次输入的密码不一致'))
+  else callback()
+}
+
+const registerRules: Record<string, any> = {
+  username: [{ required: true, message: '请输入账号', trigger: 'blur' }],
+  password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
+  passwordConfirm: [
+    { required: true, message: '请确认密码', trigger: 'blur' },
+    { validator: validateRegisterPasswordConfirm, trigger: 'blur' }
+  ],
+  mobile: [
+    { required: true, message: '请输入手机号', trigger: 'blur' },
+    { pattern: /^1[3-9]\d{9}$/, message: '手机号格式错误', trigger: 'blur' }
+  ],
+  pictureCode: [{ required: true, message: '请输入图片验证码', trigger: 'blur' }],
+  smsCode: [{ required: true, message: '请输入短信验证码', trigger: 'blur' }]
+}
+
+const openRegisterDialog = () => {
+  registerDialogVisible.value = true
+  getRegisterCaptcha()
+}
+
+const getRegisterCaptcha = async () => {
+  try {
+    const res = await getCaptchaAPI()
+    registerCaptchaImage.value = res.image
+    registerCaptchaKey.value = res.key
+  } catch {
+    ElMessage.error('获取验证码失败')
+  }
+}
+
+const sendRegisterSms = async () => {
+  if (registerSending.value || registerCountdown.value > 0) return
+  await registerFormRef.value.validateField(['mobile', 'pictureCode'])
+  try {
+    registerSending.value = true
+    await sendSmsCodeAPI({
+      mobile: registerForm.mobile,
+      key: registerCaptchaKey.value,
+      pictureCode: registerForm.pictureCode
+    })
+    ElMessage.success('短信已发送')
+    registerCountdown.value = 60
+    const timer = setInterval(() => {
+      registerCountdown.value--
+      if (registerCountdown.value <= 0) clearInterval(timer)
+    }, 1000)
+  } finally {
+    registerSending.value = false
+  }
+}
+
+const doRegister = async () => {
+  if (registerLoading.value) return
+  try {
+    await registerFormRef.value.validate()
+    registerLoading.value = true
+    const cipher = encryptPassword(registerForm.password)
+    await registerAPI({
+      username: registerForm.username.trim(),
+      password: cipher,
+      mobile: registerForm.mobile,
+      smsCode: registerForm.smsCode,
+      nickname: registerForm.nickname?.trim() || undefined
+    })
+    ElMessage.success('注册成功，请登录')
+    registerDialogVisible.value = false
+  } finally {
+    registerLoading.value = false
+  }
+}
 
 watch(mode, (val) => {
 
@@ -370,6 +541,12 @@ onMounted(() => {
   width: 48%;
   height: 36px;
   cursor: pointer;
+}
+
+.register-link {
+  margin-top: 8px;
+  text-align: right;
+  font-size: 18px;
 }
 
 </style>

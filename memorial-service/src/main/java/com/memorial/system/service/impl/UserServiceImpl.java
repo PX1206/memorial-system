@@ -1,6 +1,5 @@
 package com.memorial.system.service.impl;
 
-import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.memorial.common.constant.CommonConstant;
@@ -9,6 +8,7 @@ import com.memorial.common.redis.RedisUtil;
 import com.memorial.common.tool.*;
 import com.memorial.common.vo.LoginUserInfoVO;
 import com.memorial.system.entity.User;
+import com.memorial.system.entity.UserRole;
 import com.memorial.system.mapper.*;
 import com.memorial.system.param.*;
 import com.memorial.system.service.MenuService;
@@ -54,6 +54,44 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapper, User> implement
     private RedisUtil redisUtil;
     @Autowired
     private MenuService menuService;
+    @Autowired
+    private UserRoleMapper userRoleMapper;
+
+    /**
+     * 校验短信验证码（保留 666666 测试后门）
+     */
+    private void validateSmsCode(String mobile, String smsCode) throws Exception {
+        if ("666666".equals(smsCode)) {
+            return;
+        }
+        if (!commonUtil.checkCode(CommonConstant.SMS_CODE + mobile, smsCode)) {
+            throw new BusinessException(500, "短信验证码错误");
+        }
+    }
+
+    /**
+     * 解密并校验密码复杂度
+     */
+    private String decryptAndValidatePassword(String encryptedPassword) throws Exception {
+        String password = RSAUtil.decrypt(encryptedPassword, privateKeyStr);
+        validatePasswordRules(password);
+        return password;
+    }
+
+    /**
+     * 密码复杂度校验
+     */
+    private void validatePasswordRules(String password) {
+        if (password.length() < 8) {
+            throw new BusinessException("密码长度不能小于8位");
+        }
+        if (!PwdCheckUtil.checkContainDigit(password) || !PwdCheckUtil.checkContainCase(password)) {
+            throw new BusinessException("密码必须由数字和字母组成");
+        }
+        if (PwdCheckUtil.checkSequentialSameChars(password, 4)) {
+            throw new BusinessException("存在四个或以上连续相同字符");
+        }
+    }
 
     @Override
     @Transactional
@@ -72,27 +110,11 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapper, User> implement
         if (checkUsername > 0) {
             throw new BusinessException("当前用户名已存在");
         }
-        // 获取前端传过来的密码解密成明文
-        String password = RSAUtil.decrypt(userRegisterParam.getPassword(), privateKeyStr);
-        // 根据等保要求需要对密码进行验证
-        if (password.length() < 8) {
-            throw new BusinessException("密码长度不能小于8位");
-        }
-        if (!PwdCheckUtil.checkContainDigit(password) || !PwdCheckUtil.checkContainCase(password)) {
-            throw new BusinessException("密码必须由数字和字母组成");
-        }
-        if (PwdCheckUtil.checkSequentialSameChars(password, 4)) {
-            throw new BusinessException("存在四个或以上连续相同字符");
-        }
+        // 获取前端传过来的密码解密成明文并校验复杂度
+        String password = decryptAndValidatePassword(userRegisterParam.getPassword());
 
-        // 测试用，正式上线需要删除
-        if (!"666666".equals(userRegisterParam.getSmsCode())) {
-            // 校验短信验证码是否正确
-            if (!commonUtil.checkCode(CommonConstant.SMS_CODE + userRegisterParam.getMobile(),
-                    userRegisterParam.getSmsCode())) {
-                throw new BusinessException(500, "短信验证码错误");
-            }
-        }
+        // 校验短信验证码（支持测试码）
+        validateSmsCode(userRegisterParam.getMobile(), userRegisterParam.getSmsCode());
 
         // 如果昵称为空则直接取账号
         if (StringUtil.isBlank(userRegisterParam.getNickname())) {
@@ -109,7 +131,14 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapper, User> implement
         // HA256S加密密码
         user.setPassword(SHA256Util.getSHA256Str(password + user.getSalt()));
         user.setStatus(1); // 状态为正常
+        user.setRole("user"); // 注册用户默认普通用户角色
         userMapper.insert(user);
+
+        // 自动分配普通用户角色（roleId=2）
+        UserRole userRole = new UserRole();
+        userRole.setUserId(user.getId());
+        userRole.setRoleId(2L);
+        userRoleMapper.insert(userRole);
 
         return true;
     }
@@ -228,6 +257,13 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapper, User> implement
         // 封装登录信息返回
         LoginUserInfoVO loginUserInfoVO = new LoginUserInfoVO();
         BeanUtils.copyProperties(user, loginUserInfoVO);
+        // 根据 UserRole 设置 role（角色 1=超级管理员 admin，2=普通用户 user）
+        List<Long> roleIds = userRoleMapper.getRoleIdsByUserId(user.getId());
+        if (roleIds != null && roleIds.contains(1L)) {
+            loginUserInfoVO.setRole("admin");
+        } else {
+            loginUserInfoVO.setRole("user");
+        }
 
         // 查询用户权限列表
         try {
@@ -305,18 +341,8 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapper, User> implement
         if (checkUsername > 0) {
             throw new BusinessException("当前用户名已存在");
         }
-        // 获取前端传过来的密码解密成明文
-        String password = RSAUtil.decrypt(addUserParam.getPassword(), privateKeyStr);
-        // 根据等保要求需要对密码进行验证
-        if (password.length() < 8) {
-            throw new BusinessException("密码长度不能小于8位");
-        }
-        if (!PwdCheckUtil.checkContainDigit(password) || !PwdCheckUtil.checkContainCase(password)) {
-            throw new BusinessException("密码必须由数字和字母组成");
-        }
-        if (PwdCheckUtil.checkSequentialSameChars(password, 4)) {
-            throw new BusinessException("存在四个或以上连续相同字符");
-        }
+        // 获取前端传过来的密码解密成明文并校验复杂度
+        String password = decryptAndValidatePassword(addUserParam.getPassword());
 
         // 如果昵称为空则直接取账号
         if (StringUtil.isBlank(addUserParam.getNickname())) {
@@ -459,13 +485,8 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapper, User> implement
 
     @Override
     public boolean updatePassword(UpdatePasswordParam updatePasswordParam) throws Exception {
-        // 先验证短信验证码是否正确
-        if (!"666666".equals(updatePasswordParam.getSmsCode())) {
-            if (!commonUtil.checkCode(CommonConstant.SMS_CODE + updatePasswordParam.getMobile(),
-                    updatePasswordParam.getSmsCode())) {
-                throw new BusinessException(500, "短信验证码错误");
-            }
-        }
+        // 先验证短信验证码是否正确（支持测试码）
+        validateSmsCode(updatePasswordParam.getMobile(), updatePasswordParam.getSmsCode());
 
         // 获取当前登录用户信息
         User user = userMapper.selectById(LoginUtil.getUserId());
@@ -477,18 +498,8 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapper, User> implement
             throw new BusinessException(500, "手机号不一致");
         }
 
-        // 获取前端传过来的密码解密成明文
-        String password = RSAUtil.decrypt(updatePasswordParam.getPassword(), privateKeyStr);
-        // 根据等保要求需要对密码进行验证
-        if (password.length() < 8) {
-            throw new BusinessException("密码长度不能小于8位");
-        }
-        if (!PwdCheckUtil.checkContainDigit(password) || !PwdCheckUtil.checkContainCase(password)) {
-            throw new BusinessException("密码必须由数字和字母组成");
-        }
-        if (PwdCheckUtil.checkSequentialSameChars(password, 4)) {
-            throw new BusinessException("存在四个或以上连续相同字符");
-        }
+        // 获取前端传过来的密码解密成明文并校验复杂度
+        String password = decryptAndValidatePassword(updatePasswordParam.getPassword());
 
         // 重新生成盐
         user.setSalt(SHA256Util.getSHA256Str(UUID.randomUUID().toString()));
@@ -511,18 +522,8 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapper, User> implement
             throw new BusinessException(500, "用户信息异常");
         }
 
-        // 获取前端传过来的密码解密成明文
-        String password = RSAUtil.decrypt(resetPasswordParam.getPassword(), privateKeyStr);
-        // 根据等保要求需要对密码进行验证
-        if (password.length() < 8) {
-            throw new BusinessException("密码长度不能小于8位");
-        }
-        if (!PwdCheckUtil.checkContainDigit(password) || !PwdCheckUtil.checkContainCase(password)) {
-            throw new BusinessException("密码必须由数字和字母组成");
-        }
-        if (PwdCheckUtil.checkSequentialSameChars(password, 4)) {
-            throw new BusinessException("存在四个或以上连续相同字符");
-        }
+        // 获取前端传过来的密码解密成明文并校验复杂度
+        String password = decryptAndValidatePassword(resetPasswordParam.getPassword());
 
         // 重新生成盐
         user.setSalt(SHA256Util.getSHA256Str(UUID.randomUUID().toString()));

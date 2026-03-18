@@ -4,13 +4,21 @@
 
     <select id="getFamilyList" resultType="com.memorial.system.vo.FamilyVO">
         SELECT f.id, f.pid, f.name, f.description, f.phone, f.address,
-               f.founder_name, f.member_count, f.tomb_count, f.create_time,
-               pf.name AS parent_name
+               f.founder_name, f.member_count, f.tomb_count, f.invite_code, f.create_time,
+               pf.name AS parent_name,
+               (CASE WHEN f.founder_id = #{param.currentUserId} THEN '族长'
+                     ELSE (SELECT m.role FROM family_member m WHERE m.family_id = f.id AND m.user_id = #{param.currentUserId} AND m.del_flag = 0 LIMIT 1)
+               END) AS myRole
         FROM family f
         LEFT JOIN family pf ON pf.id = f.pid AND pf.del_flag = 0
         <where>
             <if test="param.keyword != null and param.keyword != ''">
                 AND f.name LIKE CONCAT('%', #{param.keyword, jdbcType=VARCHAR}, '%')
+            </if>
+            <!-- 角色2普通用户：只能看自己创建的家族或加入的家族 -->
+            <if test="param.isAdmin == false and param.currentUserId != null">
+                AND (f.founder_id = #{param.currentUserId}
+                     OR f.id IN (SELECT family_id FROM family_member WHERE user_id = #{param.currentUserId} AND del_flag = 0))
             </if>
             AND f.del_flag = 0
         </where>
@@ -18,10 +26,50 @@
     </select>
 
     <select id="getAllFamilyList" resultType="com.memorial.system.vo.FamilyVO">
-        SELECT f.id, f.pid, f.name, f.description, f.member_count, f.tomb_count
+        SELECT f.id, f.pid, f.name, f.description, f.member_count, f.tomb_count, f.invite_code
         FROM family f
-        WHERE f.del_flag = 0
+        <where>
+            <if test="isAdmin == false and currentUserId != null">
+                AND (f.founder_id = #{currentUserId}
+                     OR f.id IN (SELECT family_id FROM family_member WHERE user_id = #{currentUserId} AND del_flag = 0))
+            </if>
+            AND f.del_flag = 0
+        </where>
         ORDER BY f.id ASC
+    </select>
+
+    <!-- 成员视角：显示完整家族组织（用户加入的家族及其所有祖先、子孙） -->
+    <select id="getFamilyTreeForMember" resultType="com.memorial.system.vo.FamilyVO">
+        <choose>
+            <when test="isAdmin != null and isAdmin == true">
+                SELECT f.id, f.pid, f.name, f.description, f.member_count, f.tomb_count, f.invite_code
+                FROM family f WHERE f.del_flag = 0 ORDER BY f.id ASC
+            </when>
+            <otherwise>
+                WITH RECURSIVE
+            my_families AS (
+                SELECT id FROM family
+                WHERE (founder_id = #{currentUserId} OR id IN (SELECT family_id FROM family_member WHERE user_id = #{currentUserId} AND del_flag = 0))
+                  AND del_flag = 0
+            ),
+            walk_up AS (
+                SELECT id, pid FROM family WHERE id IN (SELECT id FROM my_families)
+                UNION
+                SELECT f.id, f.pid FROM family f INNER JOIN walk_up w ON f.id = w.pid WHERE f.del_flag = 0 AND w.pid > 0
+            ),
+            roots AS (
+                SELECT id FROM walk_up WHERE pid = 0 OR pid IS NULL
+            ),
+            walk_down AS (
+                SELECT id, pid FROM family WHERE id IN (SELECT id FROM roots) AND del_flag = 0
+                UNION ALL
+                SELECT f.id, f.pid FROM family f INNER JOIN walk_down w ON f.pid = w.id WHERE f.del_flag = 0
+            )
+            SELECT DISTINCT f.id, f.pid, f.name, f.description, f.member_count, f.tomb_count, f.invite_code
+            FROM family f WHERE f.id IN (SELECT id FROM walk_down) AND f.del_flag = 0
+            ORDER BY f.id ASC
+            </otherwise>
+        </choose>
     </select>
 
 </mapper>

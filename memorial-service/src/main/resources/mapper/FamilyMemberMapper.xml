@@ -3,21 +3,63 @@
 <mapper namespace="com.memorial.system.mapper.FamilyMemberMapper">
 
     <select id="getMemberList" resultType="com.memorial.system.vo.FamilyMemberVO">
-        SELECT m.id, m.family_id, m.name, m.relation, m.phone, m.role,
-               m.avatar, m.create_time,
-               f.name AS family_name
-        FROM family_member m
-        LEFT JOIN family f ON f.id = m.family_id AND f.del_flag = 0
-        <where>
-            <if test="param.familyId != null">
-                AND m.family_id = #{param.familyId}
-            </if>
-            <if test="param.keyword != null and param.keyword != ''">
-                AND m.name LIKE CONCAT('%', #{param.keyword, jdbcType=VARCHAR}, '%')
-            </if>
-            AND m.del_flag = 0
-        </where>
-        ORDER BY m.id ASC
+        <choose>
+            <!-- 指定家族：查询该家族及其所有子孙家族下的成员（MySQL8 递归 CTE） -->
+            <when test="param.familyId != null">
+                WITH RECURSIVE family_ids AS (
+                    SELECT id
+                    FROM family
+                    WHERE id = #{param.familyId}
+                      AND del_flag = 0
+                    UNION ALL
+                    SELECT f.id
+                    FROM family f
+                    INNER JOIN family_ids fi ON f.pid = fi.id
+                    WHERE f.del_flag = 0
+                )
+                SELECT m.id, m.family_id, m.name, m.relation, m.phone, m.role,
+                       m.avatar, m.create_time,
+                       f.name AS family_name
+                FROM family_member m
+                LEFT JOIN family f ON f.id = m.family_id AND f.del_flag = 0
+                <where>
+                    AND m.family_id IN (SELECT id FROM family_ids)
+                    <if test="param.isAdmin == false and param.currentUserId != null">
+                        AND #{param.familyId} IN (SELECT id FROM family WHERE (founder_id = #{param.currentUserId} OR id IN (SELECT family_id FROM family_member WHERE user_id = #{param.currentUserId} AND del_flag = 0)) AND del_flag = 0)
+                    </if>
+                    <if test="param.keyword != null and param.keyword != ''">
+                        AND m.name LIKE CONCAT('%', #{param.keyword, jdbcType=VARCHAR}, '%')
+                    </if>
+                    AND m.del_flag = 0
+                </where>
+                ORDER BY m.id ASC
+            </when>
+
+            <!-- familyId 为空：查询全部家族成员 -->
+            <otherwise>
+                SELECT m.id, m.family_id, m.name, m.relation, m.phone, m.role,
+                       m.avatar, m.create_time,
+                       f.name AS family_name
+                FROM family_member m
+                LEFT JOIN family f ON f.id = m.family_id AND f.del_flag = 0
+                <where>
+                    <if test="param.isAdmin == false and param.currentUserId != null">
+                        AND m.family_id IN (SELECT id FROM family WHERE (founder_id = #{param.currentUserId} OR id IN (SELECT family_id FROM family_member WHERE user_id = #{param.currentUserId} AND del_flag = 0)) AND del_flag = 0)
+                    </if>
+                    <if test="param.keyword != null and param.keyword != ''">
+                        AND m.name LIKE CONCAT('%', #{param.keyword, jdbcType=VARCHAR}, '%')
+                    </if>
+                    AND m.del_flag = 0
+                </where>
+                ORDER BY m.id ASC
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="getMemberRoleInFamily" resultType="java.lang.String">
+        SELECT m.role FROM family_member m
+        WHERE m.family_id = #{familyId} AND m.user_id = #{userId} AND m.del_flag = 0
+        LIMIT 1
     </select>
 
 </mapper>

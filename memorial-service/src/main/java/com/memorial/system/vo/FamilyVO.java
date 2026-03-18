@@ -27,6 +27,12 @@ public class FamilyVO implements Serializable {
     private Integer memberCount;
     private Integer tombCount;
 
+    /** 家族邀请码 */
+    private String inviteCode;
+
+    /** 当前用户在该家族的角色：族长/管理员/成员，用于前端控制操作按钮 */
+    private String myRole;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;

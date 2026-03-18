@@ -17,4 +17,9 @@ public interface TombMessageService extends BaseService<TombMessage> {
     boolean deleteMessage(Long id) throws Exception;
 
     boolean addMessage(Long tombId, String visitorName, String content) throws Exception;
+
+    /**
+     * 提交留言（需要登录，支持匿名姓名展示）
+     */
+    boolean addMessageAuth(Long tombId, Long userId, String visitorName, String content) throws Exception;
 }

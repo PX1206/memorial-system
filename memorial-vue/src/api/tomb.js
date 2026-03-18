@@ -20,6 +20,23 @@ export function getTombDetail(id) {
   return request.get(`/tomb/detail/${id}`)
 }
 
+// 墓碑事迹（管理端）
+export function getTombStoryList(tombId) {
+  return request.get(`/tomb/story/list/${tombId}`)
+}
+
+export function addTombStory(data) {
+  return request.post('/tomb/story/add', data)
+}
+
+export function updateTombStory(data) {
+  return request.post('/tomb/story/update', data)
+}
+
+export function deleteTombStory(id) {
+  return request.post(`/tomb/story/delete/${id}`)
+}
+
 export function getMessagePageList(data) {
   return request.post('/tomb/message/getPageList', data)
 }
@@ -43,6 +60,20 @@ export function getCheckinPageList(data) {
 // 游客端接口（公开）
 export function getMemorialDetail(id) {
   return request.get(`/open/memorial/detail/${id}`)
+}
+
+// 游客端：按二维码标识获取墓碑详情（扫码访问）
+export function getMemorialDetailByCode(code) {
+  return request.get(`/open/memorial/detail/code/${encodeURIComponent(code)}`)
+}
+
+// 游客端：查看记录（只读）
+export function getMemorialMessagePageList(data) {
+  return request.post('/open/memorial/message/getPageList', data)
+}
+
+export function getMemorialCheckinPageList(data) {
+  return request.post('/open/memorial/checkin/getPageList', data)
 }
 
 export function submitMessage(data) {

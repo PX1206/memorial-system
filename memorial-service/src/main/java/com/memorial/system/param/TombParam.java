@@ -36,6 +36,12 @@ public class TombParam implements Serializable {
     @ApiModelProperty("生平事迹")
     private String story;
 
+    @ApiModelProperty("墓志铭")
+    private String epitaph;
+
+    @ApiModelProperty("是否开放访客互动（留言/献花等）：true开放，false仅家族成员可互动")
+    private Boolean visitorActionOpen;
+
     @ApiModelProperty("所属家族ID")
     private Long familyId;
 }

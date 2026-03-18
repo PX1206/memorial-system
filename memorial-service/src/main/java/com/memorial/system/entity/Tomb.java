@@ -39,11 +39,17 @@ public class Tomb extends BaseEntity {
     @ApiModelProperty("生平事迹")
     private String story;
 
+    @ApiModelProperty("墓志铭")
+    private String epitaph;
+
+    @ApiModelProperty("是否开放访客互动（留言/献花等）：true开放，false仅家族成员可互动")
+    private Boolean visitorActionOpen;
+
     @ApiModelProperty("所属家族ID")
     private Long familyId;
 
-    @ApiModelProperty("二维码URL")
-    private String qrCode;
+    @ApiModelProperty("二维码识别标识（随机字符串，唯一，用于扫码访问）")
+    private String qrCodeKey;
 
     @ApiModelProperty("访问量")
     private Integer visitCount;

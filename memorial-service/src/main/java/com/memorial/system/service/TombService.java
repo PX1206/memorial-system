@@ -20,4 +20,9 @@ public interface TombService extends BaseService<Tomb> {
     boolean deleteTomb(Long id) throws Exception;
 
     TombVO getTombDetail(Long id) throws Exception;
+
+    /**
+     * 根据二维码标识获取墓碑详情（扫码访问，访问量+1）
+     */
+    TombVO getTombDetailByCode(String code) throws Exception;
 }

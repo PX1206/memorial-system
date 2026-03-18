@@ -3,7 +3,6 @@ package com.memorial.common.thread;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.stereotype.Component;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -14,7 +13,6 @@ import java.util.concurrent.ThreadPoolExecutor;
  */
 @Configuration
 @EnableAsync // 启动多线程
-@Component
 public class TaskThreadPoolConfig {
 
     @Bean(name = "optimizeTaskExecutor")

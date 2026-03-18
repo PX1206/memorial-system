@@ -15,4 +15,6 @@ public interface TombMapper extends BaseMapper<Tomb> {
     IPage<TombVO> getTombList(@Param("page") Page page, @Param("param") TombPageParam param);
 
     TombVO getTombVO(@Param("id") Long id);
+
+    TombVO getTombVOByCode(@Param("code") String code);
 }

@@ -61,6 +61,7 @@ CREATE TABLE IF NOT EXISTS `tomb` (
     `story` TEXT DEFAULT NULL COMMENT '生平事迹',
     `family_id` BIGINT DEFAULT NULL COMMENT '所属家族ID',
     `qr_code` VARCHAR(500) DEFAULT NULL COMMENT '二维码URL',
+    `qr_code_key` VARCHAR(32) DEFAULT NULL COMMENT '二维码识别标识（随机字符串，唯一）',
     `visit_count` INT DEFAULT 0 COMMENT '访问量',
     `message_count` INT DEFAULT 0 COMMENT '留言数',
     `user_id` BIGINT DEFAULT NULL COMMENT '创建用户ID',
@@ -70,7 +71,8 @@ CREATE TABLE IF NOT EXISTS `tomb` (
     `update_time` DATETIME DEFAULT NULL COMMENT '修改时间',
     `update_by` BIGINT DEFAULT NULL COMMENT '修改人',
     `del_flag` TINYINT DEFAULT 0 COMMENT '删除标识',
-    PRIMARY KEY (`id`)
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_qr_code_key` (`qr_code_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='墓碑表';
 
 -- 墓碑留言表

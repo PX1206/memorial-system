@@ -11,9 +11,11 @@ import com.memorial.common.pagination.Paging;
 import com.memorial.common.tool.LoginUtil;
 import com.memorial.system.entity.Role;
 import com.memorial.system.entity.RoleMenu;
+import com.memorial.system.entity.User;
 import com.memorial.system.entity.UserRole;
 import com.memorial.system.mapper.RoleMapper;
 import com.memorial.system.mapper.RoleMenuMapper;
+import com.memorial.system.mapper.UserMapper;
 import com.memorial.system.mapper.UserRoleMapper;
 import com.memorial.system.param.RoleMenuParam;
 import com.memorial.system.param.RolePageParam;
@@ -43,6 +45,9 @@ public class RoleServiceImpl extends BaseServiceImpl<RoleMapper, Role> implement
 
     @Autowired
     private UserRoleMapper userRoleMapper;
+
+    @Autowired
+    private UserMapper userMapper;
 
     @Override
     public Paging<RoleVO> getRolePageList(RolePageParam rolePageParam) throws Exception {
@@ -165,6 +170,16 @@ public class RoleServiceImpl extends BaseServiceImpl<RoleMapper, Role> implement
                 userRole.setRoleId(roleId);
                 userRoleMapper.insert(userRole);
             }
+        }
+        // 同步 User.role 字段（角色1=admin，否则=user）
+        User user = userMapper.selectById(userId);
+        if (user != null) {
+            List<Long> roleIds = userRoleParam.getRoleIds();
+            String role = (roleIds != null && roleIds.contains(1L)) ? "admin" : "user";
+            user.setRole(role);
+            user.setUpdateBy(LoginUtil.getUserId());
+            user.setUpdateTime(new Date());
+            userMapper.updateById(user);
         }
         return true;
     }

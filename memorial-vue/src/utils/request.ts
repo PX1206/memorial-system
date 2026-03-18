@@ -28,6 +28,7 @@ request.interceptors.response.use(
       router.replace('/login')
       return Promise.reject(res)
     }
+    // 429/403 等业务错误统一走后端 message
     msgError(res.message || '请求失败')
     return Promise.reject(res)
   },
@@ -39,6 +40,10 @@ request.interceptors.response.use(
         localStorage.removeItem('token')
         localStorage.removeItem('currentUser')
         router.replace('/login')
+      } else if (error.response.status === 429) {
+        msgWarning(res?.message || '操作过于频繁，请稍后再试')
+      } else if (error.response.status === 403) {
+        msgWarning(res?.message || '暂无权限执行该操作')
       } else {
         msgError(res?.message || '服务器错误')
       }

@@ -18,6 +18,10 @@
             <if test="param.tombId != null">
                 AND c.tomb_id = #{param.tombId}
             </if>
+            <!-- 角色2普通用户：只能看自己家族下墓碑的打卡记录 -->
+            <if test="param.isAdmin == false and param.currentUserId != null">
+                AND (t.family_id IN (SELECT id FROM family WHERE (founder_id = #{param.currentUserId} OR id IN (SELECT family_id FROM family_member WHERE user_id = #{param.currentUserId} AND del_flag = 0)) AND del_flag = 0) OR (t.family_id IS NULL AND (t.user_id = #{param.currentUserId} OR t.create_by = #{param.currentUserId})))
+            </if>
             AND c.del_flag = 0
         </where>
         ORDER BY c.id DESC

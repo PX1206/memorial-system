@@ -48,6 +48,9 @@ public class Family extends BaseEntity {
     @ApiModelProperty("墓碑数")
     private Integer tombCount;
 
+    @ApiModelProperty("家族邀请码")
+    private String inviteCode;
+
     @ApiModelProperty("状态：0禁用 1正常")
     private Integer status;
 

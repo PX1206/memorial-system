@@ -16,5 +16,7 @@ public interface FamilyMapper extends BaseMapper<Family> {
 
     IPage<FamilyVO> getFamilyList(@Param("page") Page page, @Param("param") FamilyPageParam param);
 
-    List<FamilyVO> getAllFamilyList();
+    List<FamilyVO> getAllFamilyList(@Param("currentUserId") Long currentUserId, @Param("isAdmin") Boolean isAdmin);
+
+    List<FamilyVO> getFamilyTreeForMember(@Param("currentUserId") Long currentUserId, @Param("isAdmin") Boolean isAdmin);
 }

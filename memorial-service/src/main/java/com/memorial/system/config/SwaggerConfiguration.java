@@ -35,8 +35,8 @@ public class SwaggerConfiguration {
 
     private ApiInfo groupApiInfo() {
         return new ApiInfoBuilder()
-                .title("保险管理接口文档")
-                .description("<div style='font-size:14px;color:red;'>扫墓管理APIs</div>")
+                .title("纪念馆管理接口文档")
+                .description("<div style='font-size:14px;color:red;'>数字纪念馆 / 扫墓管理 APIs</div>")
                 .termsOfServiceUrl("http://localhost:2168/")
                 .contact(new Contact("Sakura","https://github.com/PX1206/Sakura-Cloud","97442433@qq.com"))
                 .version("1.0")

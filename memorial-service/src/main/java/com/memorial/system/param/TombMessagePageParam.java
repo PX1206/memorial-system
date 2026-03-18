@@ -22,4 +22,10 @@ public class TombMessagePageParam extends BasePageOrderParam {
 
     @ApiModelProperty("墓碑ID")
     private Long tombId;
+
+    @ApiModelProperty("当前登录用户ID（游客端用来展示自己的留言）")
+    private Long currentUserId;
+
+    @ApiModelProperty(value = "是否超级管理员（角色1可看全部）", hidden = true)
+    private Boolean isAdmin;
 }

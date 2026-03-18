@@ -45,6 +45,11 @@ const routes = [
         component: () => import('@/views/family/FamilyMember.vue'),
         meta: { requiresAuth: true }
       },
+      {
+        path: 'family/join',
+        component: () => import('@/views/family/FamilyJoin.vue'),
+        meta: { requiresAuth: true }
+      },
 
       // 用户管理
       {
@@ -102,7 +107,7 @@ router.beforeEach((to, from, next) => {
   }
 
   if (to.meta.requiresAuth && !token) {
-    return next('/login')
+    return next({ path: '/login', query: { redirect: to.fullPath } })
   }
 
   next()
