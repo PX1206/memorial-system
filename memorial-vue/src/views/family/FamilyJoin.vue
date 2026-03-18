@@ -13,12 +13,6 @@
             <el-option v-for="r in relations" :key="r" :label="r" :value="r" />
           </el-select>
         </el-form-item>
-        <el-form-item label="家族角色">
-          <el-select v-model="form.role" placeholder="默认成员" style="width: 100%">
-            <el-option label="成员" value="成员" />
-            <el-option label="管理员" value="管理员" />
-          </el-select>
-        </el-form-item>
       </el-form>
 
       <div class="join-actions">

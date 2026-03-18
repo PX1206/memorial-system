@@ -17,18 +17,28 @@
                     INNER JOIN family_ids fi ON f.pid = fi.id
                     WHERE f.del_flag = 0
                 )
-                SELECT m.id, m.family_id, m.name, m.relation, m.phone, m.role,
+                SELECT m.id, m.family_id, m.user_id, m.name, m.bind_code, m.relation, m.phone, m.role,
                        m.avatar, m.create_time,
-                       f.name AS family_name
+                       f.name AS family_name,
+                       u.nickname AS user_nickname
                 FROM family_member m
                 LEFT JOIN family f ON f.id = m.family_id AND f.del_flag = 0
+                LEFT JOIN user u ON u.id = m.user_id AND u.del_flag = 0
                 <where>
                     AND m.family_id IN (SELECT id FROM family_ids)
                     <if test="param.isAdmin == false and param.currentUserId != null">
-                        AND #{param.familyId} IN (SELECT id FROM family WHERE (founder_id = #{param.currentUserId} OR id IN (SELECT family_id FROM family_member WHERE user_id = #{param.currentUserId} AND del_flag = 0)) AND del_flag = 0)
+                        AND (SELECT COALESCE(root_id, id) FROM family WHERE id = #{param.familyId} LIMIT 1) IN (
+                            SELECT DISTINCT COALESCE(f2.root_id, f2.id) FROM family f2 WHERE f2.del_flag = 0
+                            AND (f2.founder_id = #{param.currentUserId}
+                                 OR f2.id IN (SELECT family_id FROM family_member WHERE user_id = #{param.currentUserId} AND del_flag = 0)
+                                 OR COALESCE(f2.root_id, f2.id) IN (SELECT family_id FROM family_admin WHERE user_id = #{param.currentUserId}))
+                        )
                     </if>
                     <if test="param.keyword != null and param.keyword != ''">
-                        AND m.name LIKE CONCAT('%', #{param.keyword, jdbcType=VARCHAR}, '%')
+                        AND (m.name LIKE CONCAT('%', #{param.keyword, jdbcType=VARCHAR}, '%')
+                             OR u.nickname LIKE CONCAT('%', #{param.keyword, jdbcType=VARCHAR}, '%')
+                             OR u.mobile LIKE CONCAT('%', #{param.keyword, jdbcType=VARCHAR}, '%')
+                             OR m.phone LIKE CONCAT('%', #{param.keyword, jdbcType=VARCHAR}, '%'))
                     </if>
                     AND m.del_flag = 0
                 </where>
@@ -37,17 +47,27 @@
 
             <!-- familyId 为空：查询全部家族成员 -->
             <otherwise>
-                SELECT m.id, m.family_id, m.name, m.relation, m.phone, m.role,
+                SELECT m.id, m.family_id, m.user_id, m.name, m.bind_code, m.relation, m.phone, m.role,
                        m.avatar, m.create_time,
-                       f.name AS family_name
+                       f.name AS family_name,
+                       u.nickname AS user_nickname
                 FROM family_member m
                 LEFT JOIN family f ON f.id = m.family_id AND f.del_flag = 0
+                LEFT JOIN user u ON u.id = m.user_id AND u.del_flag = 0
                 <where>
                     <if test="param.isAdmin == false and param.currentUserId != null">
-                        AND m.family_id IN (SELECT id FROM family WHERE (founder_id = #{param.currentUserId} OR id IN (SELECT family_id FROM family_member WHERE user_id = #{param.currentUserId} AND del_flag = 0)) AND del_flag = 0)
+                        AND (SELECT COALESCE(f.root_id, f.id) FROM family f WHERE f.id = m.family_id AND f.del_flag = 0 LIMIT 1) IN (
+                            SELECT DISTINCT COALESCE(f2.root_id, f2.id) FROM family f2 WHERE f2.del_flag = 0
+                            AND (f2.founder_id = #{param.currentUserId}
+                                 OR f2.id IN (SELECT family_id FROM family_member WHERE user_id = #{param.currentUserId} AND del_flag = 0)
+                                 OR COALESCE(f2.root_id, f2.id) IN (SELECT family_id FROM family_admin WHERE user_id = #{param.currentUserId}))
+                        )
                     </if>
                     <if test="param.keyword != null and param.keyword != ''">
-                        AND m.name LIKE CONCAT('%', #{param.keyword, jdbcType=VARCHAR}, '%')
+                        AND (m.name LIKE CONCAT('%', #{param.keyword, jdbcType=VARCHAR}, '%')
+                             OR u.nickname LIKE CONCAT('%', #{param.keyword, jdbcType=VARCHAR}, '%')
+                             OR u.mobile LIKE CONCAT('%', #{param.keyword, jdbcType=VARCHAR}, '%')
+                             OR m.phone LIKE CONCAT('%', #{param.keyword, jdbcType=VARCHAR}, '%'))
                     </if>
                     AND m.del_flag = 0
                 </where>

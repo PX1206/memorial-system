@@ -6,6 +6,7 @@ import com.memorial.common.enums.OperationLogType;
 import com.memorial.common.log.Module;
 import com.memorial.common.log.OperationLog;
 import com.memorial.common.pagination.Paging;
+import com.memorial.system.param.DesignateAdminParam;
 import com.memorial.system.param.FamilyPageParam;
 import com.memorial.system.param.FamilyParam;
 import com.memorial.system.service.FamilyService;
@@ -64,5 +65,13 @@ public class FamilyController extends BaseController {
     public ApiResult<List<FamilyVO>> getTree() throws Exception {
         List<FamilyVO> tree = familyService.getFamilyTree();
         return ApiResult.ok(tree);
+    }
+
+    @PostMapping("/designateAdmin")
+    @OperationLog(name = "指定管理员", type = OperationLogType.UPDATE)
+    @ApiOperation(value = "超级管理员指定管理员")
+    public ApiResult<Boolean> designateAdmin(@Validated @RequestBody DesignateAdminParam param) throws Exception {
+        boolean flag = familyService.designateAdmin(param.getFamilyId(), param.getUserId());
+        return ApiResult.result(flag);
     }
 }

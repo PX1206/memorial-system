@@ -48,6 +48,9 @@ public class Tomb extends BaseEntity {
     @ApiModelProperty("所属家族ID")
     private Long familyId;
 
+    @ApiModelProperty("所处位置")
+    private String address;
+
     @ApiModelProperty("二维码识别标识（随机字符串，唯一，用于扫码访问）")
     private String qrCodeKey;
 

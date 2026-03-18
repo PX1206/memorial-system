@@ -8,7 +8,9 @@ import com.memorial.common.pagination.PageInfo;
 import com.memorial.common.pagination.Paging;
 import com.memorial.common.tool.LoginUtil;
 import com.memorial.system.entity.Family;
+import com.memorial.system.entity.FamilyAdmin;
 import com.memorial.system.entity.FamilyMember;
+import com.memorial.system.mapper.FamilyAdminMapper;
 import com.memorial.system.mapper.FamilyMapper;
 import com.memorial.system.mapper.FamilyMemberMapper;
 import com.memorial.system.param.FamilyPageParam;
@@ -35,6 +37,9 @@ public class FamilyServiceImpl extends BaseServiceImpl<FamilyMapper, Family> imp
     @Autowired
     private FamilyMemberMapper familyMemberMapper;
 
+    @Autowired
+    private FamilyAdminMapper familyAdminMapper;
+
     @Override
     public Paging<FamilyVO> getFamilyPageList(FamilyPageParam param) throws Exception {
         param.setCurrentUserId(LoginUtil.getUserId());
@@ -43,7 +48,7 @@ public class FamilyServiceImpl extends BaseServiceImpl<FamilyMapper, Family> imp
         IPage<FamilyVO> iPage = familyMapper.getFamilyList(page, param);
         Paging<FamilyVO> paging = new Paging<>(iPage);
         if (LoginUtil.isAdmin() && paging.getRecords() != null) {
-            paging.getRecords().forEach(vo -> vo.setMyRole("族长"));
+            paging.getRecords().forEach(vo -> vo.setMyRole("admin"));
         }
         return paging;
     }
@@ -51,24 +56,34 @@ public class FamilyServiceImpl extends BaseServiceImpl<FamilyMapper, Family> imp
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean addFamily(FamilyParam param) throws Exception {
+        String type = param.getType() != null ? param.getType().trim() : "家族";
         Long pid = param.getPid() != null ? param.getPid() : 0L;
-        if (pid != null && pid > 0) {
+        Long rootId = null;
+
+        if ("家庭".equals(type) || "支族".equals(type)) {
+            if (pid == null || pid <= 0) {
+                throw new BusinessException(500, "创建家庭或支族时必须选择上级");
+            }
             Family parent = familyMapper.selectById(pid);
-            if (parent != null) checkFamilyAdminAccess(parent);
+            if (parent == null) throw new BusinessException(500, "上级不存在");
+            checkCanCreateSubFamily(parent);
+            rootId = parent.getRootId() != null ? parent.getRootId() : parent.getId();
         }
+
         Family family = new Family();
         family.setPid(pid);
+        family.setType(type);
         family.setName(param.getName());
         family.setDescription(param.getDescription());
         family.setPhone(param.getPhone());
         family.setAddress(param.getAddress());
         family.setFounderId(LoginUtil.getUserId());
         family.setFounderName(LoginUtil.getUserName());
-        // 初始时尚未真正添加成员，这里从 0 开始，后续通过成员表维护
+        family.setChiefId(param.getChiefId());
         family.setMemberCount(0);
         family.setTombCount(0);
         family.setStatus(1);
-        // 生成简单的邀请码（长度 8，字母数字），尽量避免重复
+
         String inviteCode;
         do {
             inviteCode = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 8).toUpperCase();
@@ -81,19 +96,20 @@ public class FamilyServiceImpl extends BaseServiceImpl<FamilyMapper, Family> imp
         family.setCreateTime(new Date());
         familyMapper.insert(family);
 
-        // 创建人自动成为该家族成员，角色为“族长”
-        FamilyMember founder = new FamilyMember();
-        founder.setFamilyId(family.getId());
-        founder.setUserId(LoginUtil.getUserId());
-        founder.setName(LoginUtil.getUserName());
-        founder.setRelation("族长");
-        founder.setRole("族长");
-        founder.setCreateBy(LoginUtil.getUserId());
-        founder.setCreateTime(new Date());
-        familyMemberMapper.insert(founder);
-
-        family.setMemberCount(1);
-        familyMapper.updateById(family);
+        if ("家族".equals(type)) {
+            family.setRootId(family.getId());
+            familyMapper.updateById(family);
+            FamilyAdmin admin = new FamilyAdmin();
+            admin.setFamilyId(family.getId());
+            admin.setUserId(LoginUtil.getUserId());
+            admin.setRole("super_admin");
+            admin.setCreateBy(LoginUtil.getUserId());
+            admin.setCreateTime(new Date());
+            familyAdminMapper.insert(admin);
+        } else {
+            family.setRootId(rootId);
+            familyMapper.updateById(family);
+        }
         return true;
     }
 
@@ -109,6 +125,8 @@ public class FamilyServiceImpl extends BaseServiceImpl<FamilyMapper, Family> imp
         }
         checkFamilyAdminAccess(family);
         family.setPid(param.getPid() != null ? param.getPid() : 0L);
+        family.setType(param.getType());
+        family.setChiefId(param.getChiefId());
         family.setName(param.getName());
         family.setDescription(param.getDescription());
         family.setPhone(param.getPhone());
@@ -164,20 +182,85 @@ public class FamilyServiceImpl extends BaseServiceImpl<FamilyMapper, Family> imp
         }
     }
 
-    /** 操作权限：仅族长或管理员可执行 */
+    /** 新增下级家族/家庭：当前用户需为自己所在的家族或家庭节点创建，成员即可 */
+    private void checkCanCreateSubFamily(Family parent) {
+        if (LoginUtil.isAdmin()) return;
+        Long userId = LoginUtil.getUserId();
+        if (Objects.equals(parent.getFounderId(), userId)) return;
+        Long rootId = parent.getRootId() != null ? parent.getRootId() : parent.getId();
+        String adminRole = familyAdminMapper.getRoleInFamily(rootId, userId);
+        if ("super_admin".equals(adminRole) || "admin".equals(adminRole)) return;
+        if (Objects.equals(parent.getChiefId(), userId)) return;
+        Integer count = familyMemberMapper.selectCount(Wrappers.<FamilyMember>lambdaQuery()
+                .eq(FamilyMember::getFamilyId, parent.getId())
+                .eq(FamilyMember::getUserId, userId)
+                .eq(FamilyMember::getDelFlag, false));
+        if (count == null || count <= 0) {
+            throw new BusinessException(403, "只能在自己所在的家族或家庭下创建下级");
+        }
+    }
+
+    /** 操作权限：超级管理员/管理员/族长可执行；普通成员也可执行（添加成员、创建下级等） */
     private void checkFamilyAdminAccess(Family family) {
         if (LoginUtil.isAdmin()) return;
+        Long rootId = family.getRootId() != null ? family.getRootId() : family.getId();
+        String adminRole = familyAdminMapper.getRoleInFamily(rootId, LoginUtil.getUserId());
+        if ("super_admin".equals(adminRole) || "admin".equals(adminRole)) return;
+        if (Objects.equals(family.getChiefId(), LoginUtil.getUserId())) return;
         checkFamilyAccess(family);
-        String role = getMemberRoleInFamily(family.getId());
-        if (role == null || "成员".equals(role)) {
-            throw new BusinessException(403, "仅族长或管理员可执行该操作");
+        // 通过 checkFamilyAccess 表示已是创始人或成员，允许操作
+    }
+
+    /**
+     * 指定家族管理员。超级管理员可将某用户设为管理员，管理员拥有对当前根家族及所有下级分支的完整权限（递归包含所有家庭/支族）。
+     * 传入任意家族节点 ID 均可，内部会解析到根家族后写入 family_admin。
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean designateAdmin(Long familyId, Long userId) throws Exception {
+        Family family = familyMapper.selectById(familyId);
+        if (family == null) throw new BusinessException(500, "家族不存在");
+        Long rootId = family.getRootId() != null ? family.getRootId() : family.getId();
+        Family rootFamily = familyMapper.selectById(rootId);
+        if (rootFamily == null || !"家族".equals(rootFamily.getType())) {
+            throw new BusinessException(500, "根家族不存在");
         }
+        String myRole = familyAdminMapper.getRoleInFamily(rootId, LoginUtil.getUserId());
+        if (!"super_admin".equals(myRole)) {
+            throw new BusinessException(403, "仅超级管理员可指定管理员");
+        }
+        FamilyAdmin existing = familyAdminMapper.selectOne(
+                Wrappers.<FamilyAdmin>lambdaQuery()
+                        .eq(FamilyAdmin::getFamilyId, rootId)
+                        .eq(FamilyAdmin::getUserId, userId));
+        if (existing != null) {
+            if ("super_admin".equals(existing.getRole())) {
+                throw new BusinessException(500, "不能修改超级管理员");
+            }
+            existing.setRole("admin");
+            existing.setCreateBy(LoginUtil.getUserId());
+            existing.setCreateTime(new Date());
+            familyAdminMapper.updateById(existing);
+        } else {
+            FamilyAdmin admin = new FamilyAdmin();
+            admin.setFamilyId(rootId);
+            admin.setUserId(userId);
+            admin.setRole("admin");
+            admin.setCreateBy(LoginUtil.getUserId());
+            admin.setCreateTime(new Date());
+            familyAdminMapper.insert(admin);
+        }
+        return true;
     }
 
     private String getMemberRoleInFamily(Long familyId) {
         Long userId = LoginUtil.getUserId();
         Family f = familyMapper.selectById(familyId);
-        if (f != null && Objects.equals(f.getFounderId(), userId)) return "族长";
+        if (f == null) return null;
+        Long rootId = f.getRootId() != null ? f.getRootId() : f.getId();
+        String adminRole = familyAdminMapper.getRoleInFamily(rootId, userId);
+        if ("super_admin".equals(adminRole) || "admin".equals(adminRole)) return "admin";
+        if (Objects.equals(f.getChiefId(), userId)) return "chief";
         return familyMemberMapper.getMemberRoleInFamily(userId, familyId);
     }
 }

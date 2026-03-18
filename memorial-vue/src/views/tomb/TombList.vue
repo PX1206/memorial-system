@@ -44,6 +44,7 @@
               <span v-else class="text-muted">未关联</span>
             </template>
           </el-table-column>
+          <el-table-column prop="address" label="所处位置" width="140" show-overflow-tooltip />
         <el-table-column label="二维码" width="100" align="center">
           <template #default="{ row }">
             <el-button size="small" type="primary" link @click="openQrDialog(row)">查看</el-button>
@@ -84,14 +85,14 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="所属家族">
+            <el-form-item label="所属家庭">
               <el-tree-select
                 v-model="form.familyId"
-                :data="familyTreeOptions"
+                :data="tombFamilyOptions"
                 :props="{ value: 'id', label: 'name', children: 'children' }"
                 check-strictly
                 clearable
-                placeholder="选择所属家族"
+                :placeholder="isSuperAdmin ? '选择所属家族/家庭' : '只能选择家庭'"
                 style="width: 100%"
               />
             </el-form-item>
@@ -114,6 +115,9 @@
         </el-form-item>
         <el-form-item label="墓志铭">
           <el-input v-model="form.epitaph" maxlength="255" show-word-limit placeholder="如：音容宛在，永垂不朽" />
+        </el-form-item>
+        <el-form-item label="所处位置">
+          <el-input v-model="form.address" placeholder="记录墓地所处位置（可选）" />
         </el-form-item>
         <el-form-item label="开放互动">
           <el-switch
@@ -217,6 +221,7 @@
         <el-descriptions :column="2" border>
           <el-descriptions-item label="逝者姓名">{{ detailData.name }}</el-descriptions-item>
           <el-descriptions-item label="所属家族">{{ detailData.familyName || '未关联' }}</el-descriptions-item>
+          <el-descriptions-item label="所处位置" :span="2">{{ detailData.address || '暂无' }}</el-descriptions-item>
           <el-descriptions-item label="出生日期">{{ detailData.birthday }}</el-descriptions-item>
           <el-descriptions-item label="逝世日期">{{ detailData.deathday }}</el-descriptions-item>
           <el-descriptions-item label="访问量">{{ detailData.visitCount }}</el-descriptions-item>
@@ -341,6 +346,7 @@ const total = ref(0)
 const detailData = ref({})
 const familyTreeOptions = ref([])
 const treeLoading = ref(false)
+const isSuperAdmin = ref(false)
 const familyTreeData = ref([])
 const selectedFamilyId = ref(null)
 const selectedFamilyName = ref('')
@@ -350,7 +356,7 @@ const tableData = ref([])
 
 const form = reactive({
   id: null, name: '', birthday: '', deathday: '',
-  familyId: null, photo: '', biography: '', story: '', epitaph: '', visitorActionOpen: true
+  familyId: null, photo: '', biography: '', story: '', epitaph: '', address: '', visitorActionOpen: true
 })
 
 const rules = {
@@ -372,7 +378,24 @@ async function loadData() {
   finally { loading.value = false }
 }
 
+function collectFamilies(nodes, acc = []) {
+  if (!nodes || !nodes.length) return acc
+  for (const n of nodes) {
+    if (n.type === '家庭') acc.push({ ...n, children: undefined })
+    collectFamilies(n.children, acc)
+  }
+  return acc
+}
+
+const tombFamilyOptions = computed(() => {
+  const raw = familyTreeOptions.value || []
+  if (isSuperAdmin.value) return raw
+  return collectFamilies(raw)
+})
+
 async function loadFamilyTree() {
+  const u = JSON.parse(localStorage.getItem('currentUser') || '{}')
+  isSuperAdmin.value = u.role === 'admin'
   treeLoading.value = true
   try {
     const tree = await getFamilyTree()
@@ -435,7 +458,7 @@ function openDialog(row) {
     Object.assign(form, { visitorActionOpen: true, ...row })
     if (form.visitorActionOpen === null || form.visitorActionOpen === undefined) form.visitorActionOpen = true
   } else {
-    Object.assign(form, { id: null, name: '', birthday: '', deathday: '', familyId: null, photo: '', biography: '', story: '', epitaph: '', visitorActionOpen: true })
+    Object.assign(form, { id: null, name: '', birthday: '', deathday: '', familyId: null, photo: '', biography: '', story: '', epitaph: '', address: '', visitorActionOpen: true })
   }
   loadFamilyTree()
   dialogVisible.value = true

@@ -37,6 +37,8 @@ public class TombVO implements Serializable {
     private Boolean visitorActionOpen;
     private Long familyId;
     private String familyName;
+    @ApiModelProperty("所处位置")
+    private String address;
     private String qrCode;
     @ApiModelProperty("二维码识别标识（用于扫码访问链接）")
     private String qrCodeKey;

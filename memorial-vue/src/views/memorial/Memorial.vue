@@ -9,6 +9,7 @@
           <h2 class="name">{{ tomb.name || '加载中...' }}</h2>
           <div class="epitaph-under-name" v-if="tomb.epitaph">{{ tomb.epitaph }}</div>
           <div class="dates" v-if="tomb.birthday">{{ tomb.birthday }} — {{ tomb.deathday }}</div>
+          <div class="address" v-if="tomb.address">所处位置：{{ tomb.address }}</div>
           <div class="meta">
             <el-tag size="small" type="info">访问量 {{ tomb.visitCount ?? 0 }}</el-tag>
             <el-tag size="small" type="success">留言数 {{ tomb.messageCount ?? 0 }}</el-tag>
@@ -720,6 +721,7 @@ function toPreview(html) {
 .name { margin: 0 0 6px; font-size: 22px; }
 .epitaph-under-name { color: #909399; font-size: 13px; line-height: 1.6; margin-bottom: 6px; font-style: italic; }
 .dates { color: #909399; font-size: 13px; margin-bottom: 10px; }
+.address { color: #909399; font-size: 13px; margin-bottom: 10px; }
 .meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
 .actions { display: flex; flex-wrap: wrap; gap: 10px; }
 .name-setting { margin-top: 10px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }

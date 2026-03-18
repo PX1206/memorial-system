@@ -50,6 +50,11 @@ const routes = [
         component: () => import('@/views/family/FamilyJoin.vue'),
         meta: { requiresAuth: true }
       },
+      {
+        path: 'family/member/bind',
+        component: () => import('@/views/family/FamilyMemberBind.vue'),
+        meta: { requiresAuth: true }
+      },
 
       // 用户管理
       {

@@ -18,14 +18,19 @@
                     WHERE f.del_flag = 0
                 )
                 SELECT t.id, t.name, t.photo, t.birthday, t.deathday, t.biography, t.story, t.epitaph, t.visitor_action_open,
-                       t.family_id, fam.name AS family_name, t.qr_code_key, t.visit_count, t.message_count,
+                       t.family_id, fam.name AS family_name, t.address, t.qr_code_key, t.visit_count, t.message_count,
                        t.create_time
                 FROM tomb t
                 LEFT JOIN family fam ON t.family_id = fam.id AND fam.del_flag = 0
                 <where>
                     AND t.family_id IN (SELECT id FROM family_ids)
                     <if test="param.isAdmin == false and param.currentUserId != null">
-                        AND #{param.familyId} IN (SELECT id FROM family WHERE (founder_id = #{param.currentUserId} OR id IN (SELECT family_id FROM family_member WHERE user_id = #{param.currentUserId} AND del_flag = 0)) AND del_flag = 0)
+                        AND (SELECT COALESCE(root_id, id) FROM family WHERE id = #{param.familyId} LIMIT 1) IN (
+                            SELECT DISTINCT COALESCE(f2.root_id, f2.id) FROM family f2 WHERE f2.del_flag = 0
+                            AND (f2.founder_id = #{param.currentUserId}
+                                 OR f2.id IN (SELECT family_id FROM family_member WHERE user_id = #{param.currentUserId} AND del_flag = 0)
+                                 OR COALESCE(f2.root_id, f2.id) IN (SELECT family_id FROM family_admin WHERE user_id = #{param.currentUserId}))
+                        )
                     </if>
                     <if test="param.keyword != null and param.keyword != ''">
                         AND t.name LIKE CONCAT('%', #{param.keyword, jdbcType=VARCHAR}, '%')
@@ -38,13 +43,18 @@
             <!-- familyId 为空：查询全部墓碑 -->
             <otherwise>
                 SELECT t.id, t.name, t.photo, t.birthday, t.deathday, t.biography, t.story, t.epitaph, t.visitor_action_open,
-                       t.family_id, fam.name AS family_name, t.qr_code_key, t.visit_count, t.message_count,
+                       t.family_id, fam.name AS family_name, t.address, t.qr_code_key, t.visit_count, t.message_count,
                        t.create_time
                 FROM tomb t
                 LEFT JOIN family fam ON t.family_id = fam.id AND fam.del_flag = 0
                 <where>
                     <if test="param.isAdmin == false and param.currentUserId != null">
-                        AND (t.family_id IN (SELECT id FROM family WHERE (founder_id = #{param.currentUserId} OR id IN (SELECT family_id FROM family_member WHERE user_id = #{param.currentUserId} AND del_flag = 0)) AND del_flag = 0) OR (t.family_id IS NULL AND (t.user_id = #{param.currentUserId} OR t.create_by = #{param.currentUserId})))
+                        AND ((t.family_id IS NOT NULL AND (SELECT COALESCE(f.root_id, f.id) FROM family f WHERE f.id = t.family_id AND f.del_flag = 0 LIMIT 1) IN (
+                            SELECT DISTINCT COALESCE(f2.root_id, f2.id) FROM family f2 WHERE f2.del_flag = 0
+                            AND (f2.founder_id = #{param.currentUserId}
+                                 OR f2.id IN (SELECT family_id FROM family_member WHERE user_id = #{param.currentUserId} AND del_flag = 0)
+                                 OR COALESCE(f2.root_id, f2.id) IN (SELECT family_id FROM family_admin WHERE user_id = #{param.currentUserId}))
+                        )) OR (t.family_id IS NULL AND (t.user_id = #{param.currentUserId} OR t.create_by = #{param.currentUserId})))
                     </if>
                     <if test="param.keyword != null and param.keyword != ''">
                         AND t.name LIKE CONCAT('%', #{param.keyword, jdbcType=VARCHAR}, '%')
@@ -58,7 +68,7 @@
 
     <select id="getTombVO" resultType="com.memorial.system.vo.TombVO">
         SELECT t.id, t.name, t.photo, t.birthday, t.deathday, t.biography, t.story, t.epitaph, t.visitor_action_open,
-               t.family_id, f.name AS family_name, t.qr_code_key, t.visit_count, t.message_count,
+               t.family_id, f.name AS family_name, t.address, t.qr_code_key, t.visit_count, t.message_count,
                t.create_time
         FROM tomb t
         LEFT JOIN family f ON t.family_id = f.id AND f.del_flag = 0
@@ -67,7 +77,7 @@
 
     <select id="getTombVOByCode" resultType="com.memorial.system.vo.TombVO">
         SELECT t.id, t.name, t.photo, t.birthday, t.deathday, t.biography, t.story, t.epitaph, t.visitor_action_open,
-               t.family_id, f.name AS family_name, t.qr_code_key, t.visit_count, t.message_count,
+               t.family_id, f.name AS family_name, t.address, t.qr_code_key, t.visit_count, t.message_count,
                t.create_time
         FROM tomb t
         LEFT JOIN family f ON t.family_id = f.id AND f.del_flag = 0

@@ -12,7 +12,8 @@ public interface FamilyMemberService extends BaseService<FamilyMember> {
 
     Paging<FamilyMemberVO> getMemberPageList(FamilyMemberPageParam param) throws Exception;
 
-    boolean addMember(FamilyMemberParam param) throws Exception;
+    /** 添加成员，返回创建的成员信息（含 bindCode 用于生成二维码） */
+    FamilyMemberVO addMember(FamilyMemberParam param) throws Exception;
 
     boolean updateMember(FamilyMemberParam param) throws Exception;
 
@@ -25,4 +26,13 @@ public interface FamilyMemberService extends BaseService<FamilyMember> {
 
     /** 获取当前用户在指定家族的角色：族长/管理员/成员，非成员返回 null */
     String getMyRoleInFamily(Long familyId) throws Exception;
+
+    /** 扫码绑定：当前用户绑定到指定成员（一用户可绑定多成员） */
+    boolean bindUserToMember(String bindCode) throws Exception;
+
+    /** 解绑成员：清除成员的关联用户 */
+    boolean unbindMember(Long memberId) throws Exception;
+
+    /** 为成员生成绑定码（用于尚无 bind_code 的旧数据） */
+    FamilyMemberVO ensureBindCode(Long memberId) throws Exception;
 }

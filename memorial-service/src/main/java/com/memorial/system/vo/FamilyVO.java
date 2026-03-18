@@ -18,12 +18,14 @@ public class FamilyVO implements Serializable {
 
     private Long id;
     private Long pid;
+    private String type;
     private String parentName;
     private String name;
     private String description;
     private String phone;
     private String address;
     private String founderName;
+    private Long chiefId;
     private Integer memberCount;
     private Integer tombCount;
 

@@ -1,6 +1,10 @@
 <template>
   <el-container class="layout-container">
-    <el-aside :width="isCollapse ? '64px' : '210px'" class="layout-aside">
+    <div v-if="isMobile && !isCollapse" class="layout-mask" @click="isCollapse = true" />
+    <el-aside
+      :width="isCollapse ? '64px' : '210px'"
+      :class="['layout-aside', { 'aside-mobile': isMobile, 'aside-mobile-open': isMobile && !isCollapse }]"
+    >
       <div class="logo-wrap">
         <el-icon :size="24"><Compass /></el-icon>
         <span v-show="!isCollapse" class="logo-text">管理系统</span>
@@ -39,8 +43,9 @@
     <el-container>
       <el-header class="layout-header">
         <div class="header-left">
-          <el-icon class="collapse-btn" @click="isCollapse = !isCollapse">
-            <Fold v-if="!isCollapse" />
+          <el-icon class="collapse-btn" :title="isCollapse ? '展开菜单' : '收起菜单'" @click="toggleSidebar">
+            <MenuIcon v-if="isMobile" />
+            <Fold v-else-if="!isCollapse" />
             <Expand v-else />
           </el-icon>
           <el-breadcrumb separator="/">
@@ -78,7 +83,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import {
   Compass, DataAnalysis, Place, Connection, User, Setting,
@@ -93,6 +98,16 @@ const route = useRoute()
 const permissionStore = usePermissionStore()
 
 const isCollapse = ref(false)
+const isMobile = ref(false)
+
+function checkMobile() {
+  isMobile.value = window.innerWidth < 768
+  if (isMobile.value) isCollapse.value = true
+}
+
+function toggleSidebar() {
+  isCollapse.value = !isCollapse.value
+}
 const defaultAvatar = 'https://i.pravatar.cc/150?img=3'
 const user = reactive({ username: '', avatar: '', role: '' })
 const userMenus = ref<any[]>([])
@@ -107,7 +122,6 @@ function refreshUserDisplay() {
 }
 
 window.addEventListener('user-info-updated', refreshUserDisplay)
-onUnmounted(() => window.removeEventListener('user-info-updated', refreshUserDisplay))
 
 const iconMap: Record<string, any> = {
   DataAnalysis, Place, Connection, User, Setting,
@@ -165,7 +179,19 @@ async function loadUserMenusAndPermissions() {
   }
 }
 
-onMounted(() => loadUserMenusAndPermissions())
+watch(() => route.path, () => {
+  if (isMobile.value) isCollapse.value = true
+})
+
+onMounted(() => {
+  loadUserMenusAndPermissions()
+  checkMobile()
+  window.addEventListener('resize', checkMobile)
+})
+onUnmounted(() => {
+  window.removeEventListener('user-info-updated', refreshUserDisplay)
+  window.removeEventListener('resize', checkMobile)
+})
 
 const goProfile = () => router.push('/profile')
 
@@ -270,5 +296,51 @@ const logout = async () => {
   background: #f0f2f5;
   padding: 20px;
   overflow-y: auto;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .layout-mask {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0,0,0,.4);
+  }
+
+  .layout-aside.aside-mobile {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    z-index: 1001;
+    transform: translateX(-100%);
+    transition: transform .28s;
+  }
+
+  .layout-aside.aside-mobile.aside-mobile-open {
+    transform: translateX(0);
+  }
+
+  .layout-aside.aside-mobile .el-menu {
+    width: 260px !important;
+  }
+
+  .layout-header {
+    padding: 0 12px;
+  }
+
+  .header-left .el-breadcrumb {
+    display: none;
+  }
+
+  .layout-main {
+    padding: 12px;
+  }
+
+  .username {
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 </style>

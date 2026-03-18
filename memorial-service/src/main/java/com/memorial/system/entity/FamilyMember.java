@@ -32,6 +32,9 @@ public class FamilyMember extends BaseEntity {
     @ApiModelProperty("关联用户ID")
     private Long userId;
 
+    @ApiModelProperty("扫码绑定码，用于用户扫码关联到此成员")
+    private String bindCode;
+
     @ApiModelProperty("与族长关系")
     private String relation;
 

@@ -173,9 +173,12 @@ public class FamilyMemberApplyServiceImpl implements FamilyMemberApplyService {
     private void checkFamilyAdminAccess(Family family) {
         Long userId = LoginUtil.getUserId();
         if (family.getFounderId() != null && family.getFounderId().equals(userId)) return;
-        String role = familyMemberMapper.getMemberRoleInFamily(userId, family.getId());
-        if (role == null || "成员".equals(role)) {
-            throw new BusinessException(403, "仅族长或管理员可审核申请");
+        Integer count = familyMemberMapper.selectCount(Wrappers.<FamilyMember>lambdaQuery()
+                .eq(FamilyMember::getFamilyId, family.getId())
+                .eq(FamilyMember::getUserId, userId)
+                .eq(FamilyMember::getDelFlag, false));
+        if (count == null || count <= 0) {
+            throw new BusinessException(403, "仅家族成员可审核申请");
         }
     }
 

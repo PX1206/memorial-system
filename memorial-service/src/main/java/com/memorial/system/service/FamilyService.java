@@ -20,4 +20,7 @@ public interface FamilyService extends BaseService<Family> {
     boolean deleteFamily(Long id) throws Exception;
 
     List<FamilyVO> getFamilyTree() throws Exception;
+
+    /** 超级管理员指定某用户为管理员（仅 家族 层级） */
+    boolean designateAdmin(Long familyId, Long userId) throws Exception;
 }

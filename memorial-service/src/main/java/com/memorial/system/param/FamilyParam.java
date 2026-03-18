@@ -17,10 +17,16 @@ public class FamilyParam implements Serializable {
     @ApiModelProperty("家族ID（修改时必传）")
     private Long id;
 
-    @ApiModelProperty("上级家族ID，0表示顶级")
+    @ApiModelProperty("上级家族ID，0表示顶级（创建家庭/支族时必填）")
     private Long pid;
 
-    @NotBlank(message = "家族名称不能为空")
+    @ApiModelProperty("类型：家族/家庭/支族，创建时必选")
+    private String type;
+
+    @ApiModelProperty("族长用户ID（家庭/支族时可指定）")
+    private Long chiefId;
+
+    @NotBlank(message = "名称不能为空")
     @ApiModelProperty(value = "家族名称", required = true)
     private String name;
 

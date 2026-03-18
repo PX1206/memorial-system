@@ -36,9 +36,14 @@ export function getFamilyTree() {
   return request.get('/family/getTree')
 }
 
-/** 获取当前用户在指定家族的角色（族长/管理员/成员） */
+/** 获取当前用户在指定家族的角色 */
 export function getMyRoleInFamily(familyId) {
   return request.get(`/family/member/myRole/${familyId}`)
+}
+
+/** 超级管理员指定管理员 */
+export function designateAdmin(data) {
+  return request.post('/family/designateAdmin', data)
 }
 
 export function joinFamilyByInviteCode(data) {
@@ -60,4 +65,19 @@ export function approveFamilyApply(id) {
 
 export function rejectFamilyApply(id, reason) {
   return request.post(`/family/member/apply/reject/${id}`, { reason })
+}
+
+/** 扫码绑定：当前用户绑定到指定成员 */
+export function bindMemberByCode(data) {
+  return request.post('/family/member/bindByCode', data)
+}
+
+/** 解绑成员：清除成员的关联用户 */
+export function unbindMember(id) {
+  return request.post(`/family/member/unbind/${id}`)
+}
+
+/** 为成员生成/获取绑定码（用于展示二维码） */
+export function ensureMemberBindCode(id) {
+  return request.post(`/family/member/ensureBindCode/${id}`)
 }

@@ -44,4 +44,7 @@ public class TombParam implements Serializable {
 
     @ApiModelProperty("所属家族ID")
     private Long familyId;
+
+    @ApiModelProperty("所处位置（非必填）")
+    private String address;
 }

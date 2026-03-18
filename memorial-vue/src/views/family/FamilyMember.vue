@@ -22,12 +22,15 @@
       <el-card class="right-card">
         <div class="toolbar">
           <div class="toolbar-left">
+            <el-button v-if="isMobile" class="tree-toggle-btn" @click="treeDrawerVisible = true">
+              <el-icon><List /></el-icon>选择家族
+            </el-button>
             <span class="family-title">{{ currentFamilyTitle }}</span>
             <el-input
               v-model="query.keyword"
-              placeholder="搜索成员姓名"
+              placeholder="搜索"
               clearable
-              style="width: 220px"
+              class="search-input"
               @clear="handleSearch"
             />
             <el-button type="primary" @click="handleSearch">搜索</el-button>
@@ -54,7 +57,13 @@
 
         <el-table :data="tableData" border stripe v-loading="loading">
           <el-table-column prop="id" label="ID" width="70" />
-          <el-table-column prop="name" label="姓名" />
+          <el-table-column prop="name" label="姓名" width="100" />
+          <el-table-column prop="userNickname" label="绑定用户" width="110">
+            <template #default="{ row }">
+              <span v-if="row.userNickname" class="user-nickname">{{ row.userNickname }}</span>
+              <span v-else class="text-muted">-</span>
+            </template>
+          </el-table-column>
           <el-table-column prop="familyName" label="所属家族" width="140">
             <template #default="{ row }">
               <el-tag type="warning">{{ row.familyName || familyName }}</el-tag>
@@ -70,9 +79,11 @@
             </template>
           </el-table-column>
           <el-table-column prop="createTime" label="加入时间" width="170" />
-          <el-table-column v-if="canOperate" label="操作" width="150" fixed="right">
+          <el-table-column v-if="canOperate" label="操作" width="260" fixed="right">
             <template #default="{ row }">
               <el-button size="small" type="primary" link @click="openDialog(row)">编辑</el-button>
+              <el-button v-if="!row.userId && !row.userNickname" size="small" type="success" link @click="openBindQrDialog(row)">绑定二维码</el-button>
+              <el-button v-else-if="row.userId || row.userNickname" size="small" type="warning" link @click="handleUnbind(row)">解绑</el-button>
               <el-button size="small" type="danger" link @click="handleRemove(row)">移除</el-button>
             </template>
           </el-table-column>
@@ -91,6 +102,17 @@
         </div>
       </el-card>
     </div>
+
+    <el-drawer v-model="treeDrawerVisible" title="选择家族" direction="ltr" size="280px">
+      <el-tree
+        :data="familyTreeData"
+        :props="{ label: 'name', children: 'children' }"
+        node-key="id"
+        highlight-current
+        default-expand-all
+        @node-click="(node) => { handleTreeNodeClick(node); treeDrawerVisible = false }"
+      />
+    </el-drawer>
 
     <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑成员' : '添加成员'" width="500px" destroy-on-close>
       <el-form :model="form" :rules="rules" ref="formRef" label-width="90px">
@@ -116,7 +138,7 @@
             <el-option v-if="canSetAdmin" label="管理员" value="管理员" />
             <el-option label="成员" value="成员" />
           </el-select>
-          <span v-if="!canSetRole" class="role-hint">仅族长可设置管理员</span>
+          <span v-if="!canSetRole" class="role-hint">仅超级管理员可指定管理员</span>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -124,21 +146,42 @@
         <el-button type="primary" :loading="saving" @click="saveMember">确定</el-button>
       </template>
     </el-dialog>
+
+    <el-dialog v-model="bindQrVisible" title="成员绑定二维码" width="360px" destroy-on-close>
+      <div class="bind-qr-body" v-if="currentBind.member">
+        <div class="bind-qr-info">
+          <div class="bind-qr-name">{{ currentBind.member.name }}（{{ currentBind.member.familyName }}）</div>
+          <div class="bind-qr-code">{{ currentBind.member.bindCode }}</div>
+        </div>
+        <div class="bind-qr-wrap">
+          <img v-if="currentBind.qr" :src="currentBind.qr" class="bind-qr-img" />
+          <span v-else class="text-muted">二维码生成中...</span>
+        </div>
+        <div class="bind-qr-tip">扫码或转发链接，用户登录后即可绑定到该成员</div>
+      </div>
+      <template #footer>
+        <el-button @click="bindQrVisible = false">关闭</el-button>
+        <el-button type="primary" :disabled="!currentBind.qr" @click="downloadBindQR">下载二维码</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed, nextTick } from 'vue'
+import { ref, reactive, onMounted, onUnmounted, computed, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { Plus, ArrowLeft } from '@element-plus/icons-vue'
+import { Plus, ArrowLeft, List } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getMemberPageList, addFamilyMember, updateFamilyMember, removeFamilyMember, getFamilyTree, getFamilyApplyList, approveFamilyApply, rejectFamilyApply, getMyRoleInFamily } from '@/api/family'
+import { getMemberPageList, addFamilyMember, updateFamilyMember, removeFamilyMember, unbindMember, getFamilyTree, getFamilyApplyList, approveFamilyApply, rejectFamilyApply, getMyRoleInFamily, ensureMemberBindCode } from '@/api/family'
+import QRCode from 'qrcode'
 
 const router = useRouter()
 const route = useRoute()
 const loading = ref(false)
 const saving = ref(false)
 const dialogVisible = ref(false)
+const bindQrVisible = ref(false)
+const currentBind = reactive({ member: null, qr: '' })
 const isEdit = ref(false)
 const formRef = ref()
 const total = ref(0)
@@ -146,6 +189,12 @@ const familyTreeOptions = ref([])
 const treeLoading = ref(false)
 const familyTreeData = ref([])
 const treeRef = ref()
+const treeDrawerVisible = ref(false)
+const isMobile = ref(false)
+
+function checkMobile() {
+  isMobile.value = window.innerWidth < 768
+}
 
 const familyId = ref(route.query.familyId !== undefined ? Number(route.query.familyId) : null)
 const familyName = ref(route.query.familyName || '')
@@ -157,8 +206,8 @@ const tableData = ref([])
 const applyList = ref([])
 const applyLoading = ref(false)
 const myRoleInFamily = ref(null)
-const canOperate = computed(() => myRoleInFamily.value === '族长' || myRoleInFamily.value === '管理员')
-const canSetAdmin = computed(() => myRoleInFamily.value === '族长')
+const canOperate = computed(() => ['admin', 'chief', 'member'].includes(myRoleInFamily.value))
+const canSetAdmin = computed(() => myRoleInFamily.value === 'admin')
 const canSetRole = computed(() => canOperate.value)
 
 const form = reactive({ id: null, familyId: familyId.value, name: '', relation: '', phone: '', role: '成员' })
@@ -196,6 +245,8 @@ async function loadFamilyTree() {
 }
 
 onMounted(async () => {
+  checkMobile()
+  window.addEventListener('resize', checkMobile)
   await loadFamilyTree()
   await nextTick()
   const key = familyId.value === null ? -1 : familyId.value
@@ -204,6 +255,7 @@ onMounted(async () => {
   await loadData()
   await loadApplyList()
 })
+onUnmounted(() => window.removeEventListener('resize', checkMobile))
 
 function goBack() { router.push('/family') }
 
@@ -296,15 +348,64 @@ function saveMember() {
       if (isEdit.value) {
         await updateFamilyMember(form)
         ElMessage.success('修改成功')
+        dialogVisible.value = false
+        loadData()
       } else {
-        await addFamilyMember(form)
+        const vo = await addFamilyMember(form)
         ElMessage.success('添加成功')
+        dialogVisible.value = false
+        loadData()
+        if (vo && vo.bindCode) {
+          currentBind.member = vo
+          currentBind.qr = ''
+          bindQrVisible.value = true
+          try {
+            const baseUrl = window.location.origin
+            const bindUrl = `${baseUrl}/family/member/bind?code=${encodeURIComponent(vo.bindCode)}`
+            currentBind.qr = await QRCode.toDataURL(bindUrl, { width: 320, margin: 1 })
+          } catch {
+            ElMessage.error('生成二维码失败')
+          }
+        }
       }
-      dialogVisible.value = false
-      loadData()
     } catch { /* */ }
     finally { saving.value = false }
   })
+}
+
+async function openBindQrDialog(row) {
+  currentBind.member = null
+  currentBind.qr = ''
+  bindQrVisible.value = true
+  try {
+    const vo = await ensureMemberBindCode(row.id)
+    currentBind.member = vo
+    if (vo && vo.bindCode) {
+      const baseUrl = window.location.origin
+      const bindUrl = `${baseUrl}/family/member/bind?code=${encodeURIComponent(vo.bindCode)}`
+      currentBind.qr = await QRCode.toDataURL(bindUrl, { width: 320, margin: 1 })
+    }
+  } catch {
+    ElMessage.error('获取绑定码失败')
+    bindQrVisible.value = false
+  }
+}
+
+function downloadBindQR() {
+  if (!currentBind.qr || !currentBind.member) return
+  const link = document.createElement('a')
+  link.download = `成员绑定_${currentBind.member.name}.png`
+  link.href = currentBind.qr
+  link.click()
+}
+
+function handleUnbind(row) {
+  ElMessageBox.confirm(`确定解绑 "${row.name}" 与用户 "${row.userNickname || '已绑定用户'}" 的关联吗？解绑后可重新扫码绑定。`, '解绑确认', { type: 'warning' })
+    .then(async () => {
+      await unbindMember(row.id)
+      ElMessage.success('解绑成功')
+      loadData()
+    })
 }
 
 function handleRemove(row) {
@@ -320,7 +421,18 @@ function handleRemove(row) {
 <style scoped>
 .page-wrap { display: flex; gap: 14px; }
 .left-card { width: 280px; flex: 0 0 280px; }
-.right-card { flex: 1; }
+.right-card { flex: 1; min-width: 0; }
+
+.toolbar-left .search-input { width: 220px; }
+
+@media (max-width: 768px) {
+  .left-card { display: none; }
+  .right-card { flex: 1; min-width: 0; width: 100%; }
+  .toolbar-left .search-input { flex: 1; min-width: 80px; max-width: 160px; }
+  .family-title { font-size: 14px; max-width: 120px; overflow: hidden; text-overflow: ellipsis; }
+  .right-card { overflow-x: auto; }
+  .right-card :deep(.el-table) { font-size: 12px; min-width: 600px; }
+}
 
 .left-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
 .left-title { font-size: 14px; font-weight: 600; color: #303133; }
@@ -334,4 +446,13 @@ function handleRemove(row) {
 .apply-section-title { font-size: 14px; font-weight: 600; margin-bottom: 10px; color: #303133; }
 .apply-empty { color: #909399; font-size: 13px; padding: 12px 0; }
 .role-hint { font-size: 12px; color: #909399; margin-left: 8px; }
+
+.bind-qr-body { text-align: center; }
+.bind-qr-info { margin-bottom: 8px; }
+.bind-qr-name { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+.bind-qr-code { font-family: monospace; font-size: 18px; letter-spacing: 2px; }
+.bind-qr-wrap { margin: 10px 0; display: flex; justify-content: center; }
+.bind-qr-img { width: 260px; height: 260px; border-radius: 8px; box-shadow: 0 0 8px rgba(0,0,0,0.08); }
+.bind-qr-tip { font-size: 13px; color: #909399; }
+.text-muted { color: #c0c4cc; font-size: 13px; }
 </style>

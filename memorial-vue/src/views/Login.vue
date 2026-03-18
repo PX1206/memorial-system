@@ -441,6 +441,7 @@ const sendRegisterSms = async () => {
 
 const doRegister = async () => {
   if (registerLoading.value) return
+  if (!registerFormRef.value) return
   try {
     await registerFormRef.value.validate()
     registerLoading.value = true
@@ -454,6 +455,15 @@ const doRegister = async () => {
     })
     ElMessage.success('注册成功，请登录')
     registerDialogVisible.value = false
+    registerFormRef.value?.resetFields()
+  } catch (err: any) {
+    if (err?.response) return
+    const msg = err?.message?.trim()
+    if (msg) {
+      ElMessage.error(msg)
+    } else {
+      ElMessage.warning('请检查表单，图片验证码、短信验证码等必填项不能为空')
+    }
   } finally {
     registerLoading.value = false
   }

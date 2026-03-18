@@ -24,6 +24,9 @@ public class Family extends BaseEntity {
     @ApiModelProperty("上级家族ID，0表示顶级")
     private Long pid;
 
+    @ApiModelProperty("类型：家族/家庭/支族")
+    private String type;
+
     @ApiModelProperty("家族名称")
     private String name;
 
@@ -38,6 +41,12 @@ public class Family extends BaseEntity {
 
     @ApiModelProperty("创建人用户ID")
     private Long founderId;
+
+    @ApiModelProperty("族长用户ID（家庭/支族时 designated）")
+    private Long chiefId;
+
+    @ApiModelProperty("根家族ID（type=家族时等于id）")
+    private Long rootId;
 
     @ApiModelProperty("创建人姓名")
     private String founderName;

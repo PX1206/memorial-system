@@ -7,6 +7,7 @@ import com.memorial.common.log.Module;
 import com.memorial.common.log.OperationLog;
 import com.memorial.common.pagination.Paging;
 import com.memorial.system.param.ApplyJoinFamilyParam;
+import com.memorial.system.param.BindMemberParam;
 import com.memorial.system.param.FamilyMemberPageParam;
 import com.memorial.system.param.FamilyMemberParam;
 import com.memorial.system.param.JoinFamilyByCodeParam;
@@ -53,10 +54,34 @@ public class FamilyMemberController extends BaseController {
 
     @PostMapping("/add")
     @OperationLog(name = "添加家族成员", type = OperationLogType.ADD)
-    @ApiOperation(value = "添加成员", response = ApiResult.class)
-    public ApiResult<Boolean> add(@Validated @RequestBody FamilyMemberParam param) throws Exception {
-        boolean flag = familyMemberService.addMember(param);
+    @ApiOperation(value = "添加成员，返回含 bindCode 用于生成二维码", response = FamilyMemberVO.class)
+    public ApiResult<FamilyMemberVO> add(@Validated @RequestBody FamilyMemberParam param) throws Exception {
+        FamilyMemberVO vo = familyMemberService.addMember(param);
+        return ApiResult.ok(vo);
+    }
+
+    @PostMapping("/bindByCode")
+    @OperationLog(name = "扫码绑定成员", type = OperationLogType.UPDATE)
+    @ApiOperation(value = "扫码绑定：当前用户绑定到指定成员（一用户可绑定多成员）", response = ApiResult.class)
+    public ApiResult<Boolean> bindByCode(@Validated @RequestBody BindMemberParam param) throws Exception {
+        boolean flag = familyMemberService.bindUserToMember(param.getBindCode());
         return ApiResult.result(flag);
+    }
+
+    @PostMapping("/unbind/{id}")
+    @OperationLog(name = "解绑成员", type = OperationLogType.UPDATE)
+    @ApiOperation(value = "解绑成员：清除成员的关联用户", response = ApiResult.class)
+    public ApiResult<Boolean> unbind(@PathVariable("id") Long id) throws Exception {
+        boolean flag = familyMemberService.unbindMember(id);
+        return ApiResult.result(flag);
+    }
+
+    @PostMapping("/ensureBindCode/{id}")
+    @OperationLog(name = "生成成员绑定码", type = OperationLogType.UPDATE)
+    @ApiOperation(value = "为成员生成绑定码（无则生成）", response = FamilyMemberVO.class)
+    public ApiResult<FamilyMemberVO> ensureBindCode(@PathVariable("id") Long id) throws Exception {
+        FamilyMemberVO vo = familyMemberService.ensureBindCode(id);
+        return ApiResult.ok(vo);
     }
 
     @PostMapping("/update")
