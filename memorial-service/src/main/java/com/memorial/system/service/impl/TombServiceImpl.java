@@ -175,6 +175,7 @@ public class TombServiceImpl extends BaseServiceImpl<TombMapper, Tomb> implement
         ensureQrCodeKey(tomb);
         TombVO tombVO = tombMapper.getTombVO(id);
         tombVO.setStories(tombStoryService.listByTombId(id));
+        setFamilyMemberFlag(tombVO);
         tomb.setVisitCount(tomb.getVisitCount() + 1);
         tombMapper.updateById(tomb);
         return tombVO;
@@ -190,12 +191,28 @@ public class TombServiceImpl extends BaseServiceImpl<TombMapper, Tomb> implement
             throw new BusinessException(500, "墓碑信息不存在或链接已失效");
         }
         tombVO.setStories(tombStoryService.listByTombId(tombVO.getId()));
+        setFamilyMemberFlag(tombVO);
         Tomb tomb = tombMapper.selectById(tombVO.getId());
         if (tomb != null) {
             tomb.setVisitCount(tomb.getVisitCount() + 1);
             tombMapper.updateById(tomb);
         }
         return tombVO;
+    }
+
+    /** 纪念页：根据当前登录用户判断是否已是家族成员，用于前端控制「申请成为家族成员」提示显隐 */
+    private void setFamilyMemberFlag(TombVO tombVO) {
+        try {
+            Long userId = LoginUtil.getUserId();
+            if (userId != null && tombVO.getFamilyId() != null) {
+                int count = familyMapper.isUserInSameRootFamilyTree(userId, tombVO.getFamilyId());
+                tombVO.setIsFamilyMember(count > 0);
+            } else {
+                tombVO.setIsFamilyMember(false);
+            }
+        } catch (Exception e) {
+            tombVO.setIsFamilyMember(false);
+        }
     }
 
     /** 添加墓碑：仅能加到用户可操作范围内的家庭（所在节点及子孙），且仅限 type=家庭 */

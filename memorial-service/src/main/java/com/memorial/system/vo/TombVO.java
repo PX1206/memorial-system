@@ -54,4 +54,7 @@ public class TombVO implements Serializable {
 
     @ApiModelProperty("生平事迹列表")
     private List<TombStoryVO> stories;
+
+    @ApiModelProperty("当前登录用户是否已是该墓碑所属家族的成员（同根家族树内），用于纪念页隐藏「申请成为家族成员」提示")
+    private Boolean isFamilyMember;
 }

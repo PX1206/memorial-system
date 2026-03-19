@@ -33,7 +33,7 @@
             <el-button type="primary" link @click="openLoginDialog">登录</el-button>
           </div>
 
-          <div class="apply-family-tip" v-if="tomb.visitorActionOpen === false && tomb.familyId">
+          <div class="apply-family-tip" v-if="tomb.visitorActionOpen === false && tomb.familyId && !tomb.isFamilyMember">
             当前墓碑仅家族成员可互动，您可以申请成为家族成员。
             <el-button type="primary" link @click="openApplyDialog">申请成为家族成员</el-button>
           </div>
@@ -75,26 +75,24 @@
             </div>
           </div>
 
-          <el-table :data="messageTable" border stripe v-loading="messageLoading" class="records-table">
-            <el-table-column prop="visitorName" label="访客" width="120" />
-            <el-table-column label="状态" width="100">
-              <template #default="{ row }">
-                <el-tag v-if="row.status === 'approved'" type="success" size="small">已通过</el-tag>
-                <el-tag v-else-if="row.status === 'pending'" type="warning" size="small">待审核</el-tag>
-                <el-tag v-else-if="row.status === 'rejected'" type="danger" size="small">已拒绝</el-tag>
-                <span v-else class="muted">-</span>
-              </template>
-            </el-table-column>
-            <el-table-column prop="content" label="内容" show-overflow-tooltip />
-            <el-table-column prop="createTime" label="时间" width="170" />
-          </el-table>
+          <div v-loading="messageLoading" class="record-list">
+            <div v-for="row in messageTable" :key="row.id" class="record-card">
+              <div class="record-card__name">{{ row.visitorName || '匿名' }}</div>
+              <div class="record-card__meta">
+                {{ row.createTime }} · <span :class="'status-' + (row.status || '')">{{ row.status === 'approved' ? '已通过' : row.status === 'pending' ? '待审核' : row.status === 'rejected' ? '已拒绝' : '-' }}</span>
+              </div>
+              <div class="record-card__content">{{ row.content }}</div>
+            </div>
+            <el-empty v-if="!messageLoading && !messageTable?.length" description="暂无留言" :image-size="80" />
+          </div>
           <div class="pagination-wrap">
             <el-pagination
               v-model:current-page="messageQuery.pageIndex"
               v-model:page-size="messageQuery.pageSize"
               :total="messageTotal"
               :page-sizes="[10, 20, 50]"
-              layout="total, sizes, prev, pager, next, jumper"
+              :layout="paginationLayout"
+              small
               @current-change="loadMessages"
               @size-change="loadMessages"
             />
@@ -102,18 +100,28 @@
         </el-tab-pane>
 
         <el-tab-pane label="献花/打卡" name="checkins">
-          <el-table :data="checkinTable" border stripe v-loading="checkinLoading" class="records-table">
-            <el-table-column prop="visitorName" label="访客" width="120" />
-            <el-table-column prop="type" label="类型" width="120" />
-            <el-table-column prop="createTime" label="时间" width="170" />
-          </el-table>
+          <div v-loading="checkinLoading" class="record-list">
+            <div v-for="row in checkinTable" :key="row.id" class="record-card">
+              <div class="record-card__name">{{ row.visitorName || '匿名' }}</div>
+              <div class="record-card__meta">
+                <img
+                  :src="row.type === '点蜡烛' ? candleIcon : flowerIcon"
+                  :alt="row.type || '打卡'"
+                  class="checkin-type-icon"
+                />
+                {{ row.createTime }} · {{ row.type || '打卡' }}
+              </div>
+            </div>
+            <el-empty v-if="!checkinLoading && !checkinTable?.length" description="暂无献花/打卡记录" :image-size="80" />
+          </div>
           <div class="pagination-wrap">
             <el-pagination
               v-model:current-page="checkinQuery.pageIndex"
               v-model:page-size="checkinQuery.pageSize"
               :total="checkinTotal"
               :page-sizes="[10, 20, 50]"
-              layout="total, sizes, prev, pager, next, jumper"
+              :layout="paginationLayout"
+              small
               @current-change="loadCheckins"
               @size-change="loadCheckins"
             />
@@ -319,10 +327,12 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed, watch } from 'vue'
+import { ref, reactive, onMounted, onBeforeUnmount, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Close } from '@element-plus/icons-vue'
+import flowerIcon from '@/assets/icons/flower.svg'
+import candleIcon from '@/assets/icons/candle.svg'
 import { getMemorialDetail, getMemorialDetailByCode, getMemorialMessagePageList, getMemorialCheckinPageList, submitMessage, submitCheckin } from '@/api/tomb'
 import { passwordLoginAPI, smsLoginAPI, getCaptchaAPI, sendSmsCodeAPI, registerAPI } from '@/api/auth'
 import { applyJoinFamily } from '@/api/family'
@@ -344,6 +354,14 @@ const tabsRef = ref()
 // 使用 ref 而非 computed，因为 localStorage 非响应式，登录成功后需手动更新
 const isLoggedIn = ref(!!localStorage.getItem('token'))
 
+// 分页布局：窄屏（手机）使用简洁布局避免溢出，宽屏使用完整布局
+const paginationLayout = ref('total, prev, pager, next')
+function updatePaginationLayout() {
+  paginationLayout.value = window.innerWidth < 600
+    ? 'prev, pager, next'
+    : 'total, sizes, prev, pager, next, jumper'
+}
+
 async function loadTomb(idOrCode) {
   if (!idOrCode) return
   loading.value = true
@@ -364,7 +382,15 @@ async function loadTomb(idOrCode) {
   }
 }
 
-onMounted(() => loadTomb(route.params.id))
+onMounted(() => {
+  loadTomb(route.params.id)
+  updatePaginationLayout()
+  window.addEventListener('resize', updatePaginationLayout)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updatePaginationLayout)
+})
 
 watch(() => route.params.id, (newId) => {
   if (newId) loadTomb(newId)
@@ -549,13 +575,15 @@ async function handleDialogLogin() {
       localStorage.setItem('token', res.token)
       localStorage.setItem('currentUser', JSON.stringify(res))
       isLoggedIn.value = true
+      // 登录后重新加载墓碑详情，获取 isFamilyMember 等依赖登录态的数据（否则家族成员登录后仍会看到「申请成为家族成员」）
+      await loadTomb(route.params.id)
     }
     loginDialogVisible.value = false
     const action = pendingAction.value
     pendingAction.value = null
     if (action?.type === 'checkin') doCheckin(action.payload)
     else if (action?.type === 'message') submitMsg()
-    else if (action?.type === 'applyFamily') openApplyDialog()
+    else if (action?.type === 'applyFamily' && !tomb.value?.isFamilyMember) openApplyDialog()
   } catch {
     // 验证失败或登录失败，保持弹窗打开
   } finally {
@@ -846,10 +874,41 @@ function toPreview(html) {
 .pagination-wrap { display: flex; justify-content: flex-end; margin-top: 12px; }
 .records-table { width: 100%; }
 
+/* 留言/献花打卡卡片列表（手机端友好） */
+.record-list { display: flex; flex-direction: column; gap: 12px; }
+.record-card {
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #ebeef5;
+  background: #fafafa;
+}
+.record-card__name { font-weight: 600; font-size: 15px; color: #303133; margin-bottom: 4px; }
+.record-card__meta { font-size: 12px; color: #909399; margin-bottom: 8px; }
+.record-card__meta .status-approved { color: #67c23a; }
+.record-card__meta .status-pending { color: #e6a23c; }
+.record-card__meta .status-rejected { color: #f56c6c; }
+.record-card__content { font-size: 14px; color: #606266; line-height: 1.6; white-space: pre-wrap; word-break: break-word; }
+
+/* 献花/打卡类型图标 */
+.checkin-type-icon { width: 18px; height: 18px; margin-right: 6px; vertical-align: -3px; object-fit: contain; }
+.checkin-icon--flower { color: #e91e63; }
+.checkin-icon--candle { color: #ff9800; }
+.checkin-icon--default { color: #909399; }
+
 @media (max-width: 720px) {
   .hero { flex-direction: column; align-items: flex-start; }
   .photo { width: 100%; height: 220px; }
   .actions { width: 100%; }
+}
+@media (max-width: 600px) {
+  .memorial .pagination-wrap {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .memorial .pagination-wrap :deep(.el-pagination) {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
 }
 </style>
 
