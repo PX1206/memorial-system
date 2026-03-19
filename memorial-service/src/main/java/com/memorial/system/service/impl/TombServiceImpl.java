@@ -71,9 +71,20 @@ public class TombServiceImpl extends BaseServiceImpl<TombMapper, Tomb> implement
         return tombVO;
     }
 
+    /** 校验墓碑参数字段长度：个人简介纯文字不超过1000字 */
+    private void validateTombParam(TombParam param) {
+        if (param.getBiography() != null && !param.getBiography().isEmpty()) {
+            String plain = param.getBiography().replaceAll("<[^>]+>", "").trim();
+            if (plain.length() > 1000) {
+                throw new BusinessException(500, "个人简介纯文字不能超过1000字");
+            }
+        }
+    }
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean addTomb(TombParam param) throws Exception {
+        validateTombParam(param);
         Tomb tomb = new Tomb();
         tomb.setName(param.getName());
         tomb.setPhoto(param.getPhoto());
@@ -107,6 +118,7 @@ public class TombServiceImpl extends BaseServiceImpl<TombMapper, Tomb> implement
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean updateTomb(TombParam param) throws Exception {
+        validateTombParam(param);
         if (param.getId() == null) {
             throw new BusinessException(500, "墓碑ID不能为空");
         }

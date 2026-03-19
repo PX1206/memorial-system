@@ -7,6 +7,7 @@ import lombok.experimental.Accessors;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 
 @Data
@@ -23,12 +24,15 @@ public class FamilyMemberParam implements Serializable {
     private Long familyId;
 
     @NotBlank(message = "姓名不能为空")
+    @Size(max = 64, message = "成员姓名不能超过64字")
     @ApiModelProperty(value = "成员姓名", required = true)
     private String name;
 
+    @Size(max = 32, message = "与族长关系不能超过32字")
     @ApiModelProperty("与族长关系")
     private String relation;
 
+    @Size(max = 20, message = "联系电话不能超过20字")
     @ApiModelProperty("联系电话")
     private String phone;
 

@@ -76,12 +76,12 @@
       </el-card>
     </div>
 
-    <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑墓碑' : '新增墓碑'" width="600px" destroy-on-close>
+    <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑墓碑' : '新增墓碑'" width="720px" destroy-on-close>
       <el-form :model="form" :rules="rules" ref="formRef" label-width="90px">
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="逝者姓名" prop="name">
-              <el-input v-model="form.name" />
+              <el-input v-model="form.name" maxlength="64" show-word-limit placeholder="最多64字" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -110,14 +110,17 @@
             </el-form-item>
           </el-col>
         </el-row>
-        <el-form-item label="个人简介">
-          <el-input v-model="form.biography" type="textarea" :rows="3" placeholder="墓主人个人简介" />
+        <el-form-item label="个人简介" prop="biography">
+          <div class="quill-wrap">
+            <QuillEditor v-model:content="form.biography" contentType="html" theme="snow" placeholder="墓主人个人简介（最多1000字）" />
+          </div>
+          <div class="field-hint">纯文字不超过1000字</div>
         </el-form-item>
-        <el-form-item label="墓志铭">
-          <el-input v-model="form.epitaph" maxlength="255" show-word-limit placeholder="如：音容宛在，永垂不朽" />
+        <el-form-item label="墓志铭" prop="epitaph">
+          <el-input v-model="form.epitaph" maxlength="32" show-word-limit placeholder="如：音容宛在，永垂不朽（最多32字）" />
         </el-form-item>
-        <el-form-item label="所处位置">
-          <el-input v-model="form.address" placeholder="记录墓地所处位置（可选）" />
+        <el-form-item label="所处位置" prop="address">
+          <el-input v-model="form.address" maxlength="200" show-word-limit placeholder="记录墓地所处位置（可选，最多200字）" />
         </el-form-item>
         <el-form-item label="开放互动">
           <el-switch
@@ -177,16 +180,17 @@
 
       <el-dialog v-model="storyEditorVisible" :title="storyIsEdit ? '编辑事迹' : '新增事迹'" width="800px" destroy-on-close>
         <el-form :model="storyForm" ref="storyFormRef" label-width="80px">
-          <el-form-item label="标题" prop="title" :rules="[{ required: true, message: '请输入标题', trigger: 'blur' }]">
+          <el-form-item label="标题" prop="title" :rules="[{ required: true, message: '请输入标题', trigger: 'blur' }, { max: 100, message: '标题不能超过100字', trigger: 'blur' }]">
             <el-input v-model="storyForm.title" maxlength="100" show-word-limit />
           </el-form-item>
           <el-form-item label="排序">
             <el-input-number v-model="storyForm.sort" :min="0" :max="9999" />
           </el-form-item>
-          <el-form-item label="内容" prop="content" :rules="[{ required: true, message: '请输入内容', trigger: 'blur' }]">
+          <el-form-item label="内容" prop="content" :rules="storyContentRules">
             <div class="quill-wrap">
-              <QuillEditor v-model:content="storyForm.content" contentType="html" theme="snow" />
+              <QuillEditor v-model:content="storyForm.content" contentType="html" theme="snow" placeholder="事迹内容（纯文字最多2000字）" />
             </div>
+            <div class="field-hint">纯文字不超过2000字</div>
           </el-form-item>
         </el-form>
         <template #footer>
@@ -215,8 +219,14 @@
 
     <el-drawer v-model="detailVisible" :title="detailData.name + ' - 详细信息'" size="45%">
       <div class="detail-content">
-        <div class="detail-photo" v-if="detailData.photo">
-          <el-image :src="detailData.photo" fit="cover" style="width: 120px; height: 120px; border-radius: 8px" />
+        <div class="detail-photo-block">
+          <div class="detail-photo" v-if="detailData.photo">
+            <el-image :src="detailData.photo" fit="cover" style="width: 120px; height: 120px; border-radius: 8px" />
+          </div>
+          <div class="detail-photo" v-else>
+            <div class="detail-photo-placeholder"><el-icon :size="48" color="#c0c4cc"><Picture /></el-icon></div>
+          </div>
+          <div class="detail-epitaph-under-photo" v-if="detailData.epitaph">{{ detailData.epitaph }}</div>
         </div>
         <el-descriptions :column="2" border>
           <el-descriptions-item label="逝者姓名">{{ detailData.name }}</el-descriptions-item>
@@ -226,9 +236,16 @@
           <el-descriptions-item label="逝世日期">{{ detailData.deathday }}</el-descriptions-item>
           <el-descriptions-item label="访问量">{{ detailData.visitCount }}</el-descriptions-item>
           <el-descriptions-item label="留言数">{{ detailData.messageCount }}</el-descriptions-item>
-          <el-descriptions-item label="个人简介" :span="2">{{ detailData.biography || '暂无' }}</el-descriptions-item>
-          <el-descriptions-item label="墓志铭" :span="2">{{ detailData.epitaph || '暂无' }}</el-descriptions-item>
         </el-descriptions>
+
+        <div class="detail-block" v-if="detailData.biography">
+          <div class="detail-block-label">个人简介</div>
+          <div class="detail-block-content detail-biography" v-html="detailData.biography"></div>
+        </div>
+        <div class="detail-block" v-else>
+          <div class="detail-block-label">个人简介</div>
+          <div class="detail-block-content detail-block-empty">暂无</div>
+        </div>
 
         <div class="detail-stories" v-if="detailData.stories && detailData.stories.length">
           <h3 class="detail-stories-title">生平事迹</h3>
@@ -359,11 +376,42 @@ const form = reactive({
   familyId: null, photo: '', biography: '', story: '', epitaph: '', address: '', visitorActionOpen: true
 })
 
+// 剥离HTML获取纯文字长度
+function getTextLength(html) {
+  if (!html) return 0
+  const div = document.createElement('div')
+  div.innerHTML = html
+  return (div.textContent || div.innerText || '').trim().length
+}
+
 const rules = {
-  name: [{ required: true, message: '请输入逝者姓名', trigger: 'blur' }],
+  name: [
+    { required: true, message: '请输入逝者姓名', trigger: 'blur' },
+    { max: 64, message: '逝者姓名不能超过64字', trigger: 'blur' }
+  ],
+  epitaph: [{ max: 32, message: '墓志铭不能超过32字', trigger: 'blur' }],
+  address: [{ max: 200, message: '所处位置不能超过200字', trigger: 'blur' }],
+  biography: [{
+    validator: (_, val, cb) => {
+      if (getTextLength(val) > 1000) cb(new Error('个人简介纯文字不能超过1000字'))
+      else cb()
+    },
+    trigger: 'blur'
+  }],
   birthday: [{ required: true, message: '请选择出生日期', trigger: 'change' }],
   deathday: [{ required: true, message: '请选择逝世日期', trigger: 'change' }]
 }
+
+const storyContentRules = [
+  { required: true, message: '请输入内容', trigger: 'blur' },
+  {
+    validator: (_, val, cb) => {
+      if (getTextLength(val) > 2000) cb(new Error('事迹内容纯文字不能超过2000字'))
+      else cb()
+    },
+    trigger: 'blur'
+  }
+]
 
 async function loadData() {
   loading.value = true
@@ -680,8 +728,31 @@ function handleDeleteStory(row) {
 .current-family { margin-bottom: 10px; font-size: 13px; color: #909399; }
 .pagination-wrap { display: flex; justify-content: flex-end; margin-top: 16px; }
 .text-muted { color: #c0c4cc; font-size: 13px; }
-.detail-content { padding: 0 10px; }
-.detail-photo { text-align: center; margin-bottom: 20px; }
+.detail-content { padding: 0 10px; overflow-y: auto; max-height: calc(100vh - 60px); }
+.detail-photo-block { margin-bottom: 16px; }
+.detail-photo { text-align: center; margin-bottom: 8px; }
+.detail-photo-placeholder { width: 120px; height: 120px; margin: 0 auto; border: 1px dashed #d9d9d9; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: #fafafa; }
+.detail-epitaph-under-photo {
+  text-align: center;
+  color: #606266;
+  font-size: 14px;
+  font-weight: 600;
+  font-style: normal;
+  line-height: 1.6;
+  word-break: break-word;
+  max-width: 180px;
+  margin: 0 auto;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.detail-block { margin-top: 16px; }
+.detail-block-label { font-weight: 600; font-size: 14px; color: #303133; margin-bottom: 8px; padding: 8px 12px; background: #f5f7fa; border-radius: 6px; }
+.detail-block-content { padding: 10px 12px; border: 1px solid #ebeef5; border-radius: 6px; background: #fafafa; color: #606266; line-height: 1.8; }
+.detail-block-content.detail-biography { max-height: 200px; overflow-y: auto; }
+.detail-block-empty { color: #c0c4cc; }
 .photo-upload { display: flex; align-items: flex-start; }
 .photo-preview {
   position: relative;
@@ -722,6 +793,7 @@ function handleDeleteStory(row) {
 }
 .photo-placeholder:hover { border-color: #409eff; color: #409eff; }
 .story-tip { font-size: 13px; color: #909399; line-height: 1.6; }
+.field-hint { font-size: 12px; color: #909399; margin-top: 4px; }
 .story-toolbar { margin-bottom: 12px; display: flex; justify-content: flex-end; }
 .quill-wrap { width: 100%; }
 
@@ -732,6 +804,8 @@ function handleDeleteStory(row) {
 .detail-story-title { font-weight: 600; margin-bottom: 8px; color: #303133; }
 .detail-story-content :deep(p) { margin: 6px 0; line-height: 1.8; color: #606266; }
 .detail-story-content :deep(img) { max-width: 100%; border-radius: 6px; }
+.detail-biography :deep(p) { margin: 6px 0; line-height: 1.8; color: #606266; }
+.detail-biography :deep(img) { max-width: 100%; border-radius: 6px; }
 .msg-content { margin-right: 8px; }
 .msg-detail { white-space: pre-wrap; line-height: 1.8; color: #606266; }
 </style>

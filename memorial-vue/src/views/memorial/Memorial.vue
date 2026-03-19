@@ -4,10 +4,10 @@
       <div class="hero">
         <div class="hero-photo">
           <img :src="tomb.photo || defaultPhoto" class="photo" />
+          <div class="epitaph-under-photo" v-if="tomb.epitaph">{{ tomb.epitaph }}</div>
         </div>
         <div class="hero-info">
           <h2 class="name">{{ tomb.name || '加载中...' }}</h2>
-          <div class="epitaph-under-name" v-if="tomb.epitaph">{{ tomb.epitaph }}</div>
           <div class="dates" v-if="tomb.birthday">{{ tomb.birthday }} — {{ tomb.deathday }}</div>
           <div class="address" v-if="tomb.address">所处位置：{{ tomb.address }}</div>
           <div class="meta">
@@ -46,7 +46,7 @@
         <el-tab-pane label="简介" name="intro">
           <div class="section" v-if="tomb.biography">
             <div class="section-title">简介</div>
-            <div class="text">{{ tomb.biography }}</div>
+            <div class="text rich-text" v-html="tomb.biography"></div>
           </div>
           <div class="section empty" v-else>暂无简介</div>
         </el-tab-pane>
@@ -759,12 +759,28 @@ function toPreview(html) {
 .memorial { max-width: 980px; margin: 20px auto; padding: 0 12px; }
 .memorial-card { border-radius: 14px; overflow: hidden; }
 
-.hero { display: flex; gap: 16px; align-items: center; }
-.hero-photo { flex: 0 0 auto; }
+.hero { display: flex; gap: 20px; align-items: flex-start; }
+.hero-photo { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 8px; }
 .photo { width: 140px; height: 140px; border-radius: 14px; object-fit: cover; border: 1px solid #ebeef5; background: #f5f7fa; }
+.epitaph-under-photo {
+  color: #303133;
+  font-size: 14px;
+  font-weight: 600;
+  font-style: normal;
+  line-height: 1.6;
+  text-align: center;
+  max-width: 200px;
+  word-break: break-word;
+  padding: 4px 0;
+  /* 限制行数，避免长墓志铭挤压下方姓名和按钮 */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .hero-info { flex: 1; min-width: 0; }
 .name { margin: 0 0 6px; font-size: 22px; }
-.epitaph-under-name { color: #909399; font-size: 13px; line-height: 1.6; margin-bottom: 6px; font-style: italic; }
 .dates { color: #909399; font-size: 13px; margin-bottom: 10px; }
 .address { color: #909399; font-size: 13px; margin-bottom: 10px; }
 .meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
@@ -868,8 +884,11 @@ function toPreview(html) {
 .story-title { font-weight: 600; margin-bottom: 8px; color: #303133; }
 .story-preview { color: #606266; line-height: 1.8; }
 .story-more { margin-top: 6px; font-size: 12px; color: #409eff; }
-.story-dialog-content :deep(p) { margin: 6px 0; line-height: 1.8; color: #606266; }
-.story-dialog-content :deep(img) { max-width: 100%; border-radius: 8px; }
+/* 简介/生平事迹富文本展示 */
+.intro-biography :deep(p), .story-dialog-content :deep(p) { margin: 6px 0; line-height: 1.8; color: #606266; }
+.intro-biography :deep(img), .story-dialog-content :deep(img) { max-width: 100%; border-radius: 8px; }
+.intro-biography :deep(ul), .intro-biography :deep(ol) { margin: 8px 0; padding-left: 24px; }
+.intro-biography :deep(blockquote) { margin: 10px 0; padding-left: 16px; border-left: 4px solid #ddd; color: #666; }
 
 .pagination-wrap { display: flex; justify-content: flex-end; margin-top: 12px; }
 .records-table { width: 100%; }
@@ -898,6 +917,7 @@ function toPreview(html) {
 @media (max-width: 720px) {
   .hero { flex-direction: column; align-items: flex-start; }
   .photo { width: 100%; height: 220px; }
+  .epitaph-under-photo { max-width: 100%; -webkit-line-clamp: 2; }
   .actions { width: 100%; }
 }
 @media (max-width: 600px) {

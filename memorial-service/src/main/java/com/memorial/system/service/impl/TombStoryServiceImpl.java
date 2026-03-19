@@ -46,9 +46,19 @@ public class TombStoryServiceImpl extends BaseServiceImpl<TombStoryMapper, TombS
         }).collect(Collectors.toList());
     }
 
+    /** 事迹内容纯文字不超过2000字 */
+    private void validateContentLength(String content) {
+        if (content == null || content.isEmpty()) return;
+        String plain = content.replaceAll("<[^>]+>", "").trim();
+        if (plain.length() > 2000) {
+            throw new BusinessException(500, "事迹内容纯文字不能超过2000字");
+        }
+    }
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean addStory(TombStoryParam param) throws Exception {
+        validateContentLength(param.getContent());
         tombAccessChecker.checkAccess(param.getTombId());
         TombStory story = new TombStory();
         story.setTombId(param.getTombId());
@@ -64,6 +74,7 @@ public class TombStoryServiceImpl extends BaseServiceImpl<TombStoryMapper, TombS
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean updateStory(TombStoryParam param) throws Exception {
+        validateContentLength(param.getContent());
         if (param.getId() == null) {
             throw new BusinessException(500, "事迹ID不能为空");
         }
