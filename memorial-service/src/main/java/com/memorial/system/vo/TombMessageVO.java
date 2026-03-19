@@ -2,6 +2,7 @@ package com.memorial.system.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -23,6 +24,9 @@ public class TombMessageVO implements Serializable {
     private String content;
     private String status;
     private String rejectReason;
+
+    @ApiModelProperty("当前用户对该留言所属墓碑的操作权限：admin/chief/member 可操作，null 不可操作")
+    private String myRole;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")

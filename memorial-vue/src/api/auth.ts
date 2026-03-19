@@ -27,3 +27,12 @@ export const sendSmsCodeAPI = (data: { mobile: string; key: string; pictureCode:
 export const logoutAPI = () => request.post('/user/logOut')
 
 export const getUserInfoAPI = () => request.get('/user/userInfo')
+
+/** 用户注册（需手机验证码，密码 RSA 加密） */
+export const registerAPI = (data: {
+  username: string
+  password: string
+  mobile: string
+  smsCode: string
+  nickname?: string
+}) => request.post('/user/register', data)

@@ -48,9 +48,16 @@ const rules = {
 }
 
 onMounted(() => {
-  const codeFromQuery = route.query.code
-  if (typeof codeFromQuery === 'string' && codeFromQuery) {
-    form.inviteCode = codeFromQuery
+  let code = route.query.code
+  if (typeof code === 'string' && code) {
+    form.inviteCode = code
+    try { localStorage.removeItem('pendingInviteCode') } catch (_) {}
+    return
+  }
+  const pending = localStorage.getItem('pendingInviteCode')
+  if (pending) {
+    form.inviteCode = pending
+    try { localStorage.removeItem('pendingInviteCode') } catch (_) {}
   }
 })
 

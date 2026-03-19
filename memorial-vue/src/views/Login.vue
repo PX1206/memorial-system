@@ -325,6 +325,41 @@ const smsAutoLogin = () => {
 
 }
 
+/** 解析登录后重定向目标，支持邀请码/绑定码从 localStorage 恢复（注册后再登录时 redirect 可能丢失） */
+function resolveRedirectTarget(redirectRaw: string): string | { path: string; query: Record<string, string> } {
+  const raw = (redirectRaw || '').trim() || '/'
+  const hasQuery = raw.includes('?')
+  let path = raw
+  let query: Record<string, string> = {}
+  if (hasQuery) {
+    const [p, qs] = raw.split('?', 2)
+    path = p || '/'
+    if (qs) {
+      try {
+        const params = new URLSearchParams(qs)
+        params.forEach((v, k) => { query[k] = v })
+      } catch (_) {}
+    }
+  }
+  if (path === '/family/join' && !query.code) {
+    const code = localStorage.getItem('pendingInviteCode')
+    if (code) {
+      query.code = code
+      try { localStorage.removeItem('pendingInviteCode') } catch (_) {}
+    }
+  } else if (path === '/family/member/bind' && !query.code) {
+    const code = localStorage.getItem('pendingBindCode')
+    if (code) {
+      query.code = code
+      try { localStorage.removeItem('pendingBindCode') } catch (_) {}
+    }
+  }
+  if (Object.keys(query).length > 0) {
+    return { path, query }
+  }
+  return raw
+}
+
 // 登录成功后保存 token 和用户信息
 const login = async () => {
   if (loading.value) return
@@ -357,8 +392,9 @@ const login = async () => {
     // 保存完整用户信息
     localStorage.setItem('currentUser', JSON.stringify(res))
 
-    const redirect = (route.query.redirect as string) || '/'
-    router.replace(redirect)
+    const redirectRaw = (route.query.redirect as string) || '/'
+    const target = resolveRedirectTarget(redirectRaw)
+    router.replace(target)
 
   } finally {
     loading.value = false

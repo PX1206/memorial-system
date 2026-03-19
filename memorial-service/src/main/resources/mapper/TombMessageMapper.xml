@@ -4,9 +4,16 @@
 
     <select id="getMessageList" resultType="com.memorial.system.vo.TombMessageVO">
         SELECT m.id, m.tomb_id, t.name AS tomb_name, m.visitor_name, m.avatar,
-               m.content, m.status, m.reject_reason, m.create_time
+               m.content, m.status, m.reject_reason, m.create_time,
+               (CASE WHEN #{param.isAdmin} = true THEN 'admin'
+                     WHEN t.family_id IS NOT NULL AND EXISTS (SELECT 1 FROM family_admin fa WHERE fa.family_id = COALESCE(fam.root_id, fam.id) AND fa.user_id = #{param.currentUserId} AND fa.role IN ('super_admin','admin')) THEN 'admin'
+                     WHEN t.family_id IS NOT NULL AND fam.chief_id = #{param.currentUserId} THEN 'chief'
+                     WHEN t.family_id IS NOT NULL AND (fam.founder_id = #{param.currentUserId} OR EXISTS (SELECT 1 FROM family_member fm WHERE fm.family_id = fam.id AND fm.user_id = #{param.currentUserId} AND fm.del_flag = 0)) THEN 'member'
+                     WHEN t.family_id IS NULL AND (t.user_id = #{param.currentUserId} OR t.create_by = #{param.currentUserId}) THEN 'member'
+                     ELSE NULL END) AS myRole
         FROM tomb_message m
         LEFT JOIN tomb t ON m.tomb_id = t.id AND t.del_flag = 0
+        LEFT JOIN family fam ON t.family_id = fam.id AND fam.del_flag = 0
         <where>
             <if test="param.keyword != null and param.keyword != ''">
                 AND (m.content LIKE CONCAT('%', #{param.keyword, jdbcType=VARCHAR}, '%')
@@ -23,8 +30,18 @@
             <if test="param.tombId != null">
                 AND m.tomb_id = #{param.tombId}
             </if>
-            <!-- 角色2普通用户：同根家族下墓碑的留言均可查看 -->
-            <if test="param.isAdmin == false and param.currentUserId != null">
+            <if test="param.familyId != null">
+                AND t.family_id IN (
+                    WITH RECURSIVE fid AS (
+                        SELECT id FROM family WHERE id = #{param.familyId} AND del_flag = 0
+                        UNION ALL
+                        SELECT f.id FROM family f INNER JOIN fid ON f.pid = fid.id WHERE f.del_flag = 0
+                    )
+                    SELECT id FROM fid
+                )
+            </if>
+            <!-- 纪念页公开访问时跳过家族过滤；后台管理时角色2普通用户：同根家族下墓碑的留言均可查看 -->
+            <if test="param.forPublicMemorial != true and param.isAdmin == false and param.currentUserId != null">
                 AND ((t.family_id IS NOT NULL AND (SELECT COALESCE(f.root_id, f.id) FROM family f WHERE f.id = t.family_id AND f.del_flag = 0 LIMIT 1) IN (
                     SELECT DISTINCT COALESCE(f2.root_id, f2.id) FROM family f2 WHERE f2.del_flag = 0
                     AND (f2.founder_id = #{param.currentUserId}
@@ -43,6 +60,45 @@
         FROM tomb_message m
         LEFT JOIN tomb t ON m.tomb_id = t.id AND t.del_flag = 0
         WHERE m.del_flag = 0 AND m.status = 'approved'
+        ORDER BY m.create_time DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 按数据权限统计留言数：仅统计用户可访问墓碑下的留言（排除墓碑已删的） -->
+    <select id="countByPermission" resultType="long">
+        SELECT COUNT(*) FROM tomb_message m
+        INNER JOIN tomb t ON m.tomb_id = t.id AND t.del_flag = 0
+        LEFT JOIN family fam ON t.family_id = fam.id AND fam.del_flag = 0
+        <where>
+            <if test="isAdmin == false and currentUserId != null">
+                AND ((t.family_id IS NOT NULL AND (SELECT COALESCE(f.root_id, f.id) FROM family f WHERE f.id = t.family_id AND f.del_flag = 0 LIMIT 1) IN (
+                    SELECT DISTINCT COALESCE(f2.root_id, f2.id) FROM family f2 WHERE f2.del_flag = 0
+                    AND (f2.founder_id = #{currentUserId}
+                         OR f2.id IN (SELECT family_id FROM family_member WHERE user_id = #{currentUserId} AND del_flag = 0)
+                         OR COALESCE(f2.root_id, f2.id) IN (SELECT family_id FROM family_admin WHERE user_id = #{currentUserId}))
+                )) OR (t.family_id IS NULL AND (t.user_id = #{currentUserId} OR t.create_by = #{currentUserId})))
+            </if>
+            AND m.del_flag = 0
+        </where>
+    </select>
+
+    <!-- 按数据权限获取最新留言（仅有效墓碑下的已通过留言） -->
+    <select id="getRecentMessagesWithPermission" resultType="com.memorial.system.vo.TombMessageVO">
+        SELECT m.id, m.tomb_id, t.name AS tomb_name, m.visitor_name, m.avatar,
+               m.content, m.status, m.create_time
+        FROM tomb_message m
+        INNER JOIN tomb t ON m.tomb_id = t.id AND t.del_flag = 0
+        <where>
+            <if test="isAdmin == false and currentUserId != null">
+                AND ((t.family_id IS NOT NULL AND (SELECT COALESCE(f.root_id, f.id) FROM family f WHERE f.id = t.family_id AND f.del_flag = 0 LIMIT 1) IN (
+                    SELECT DISTINCT COALESCE(f2.root_id, f2.id) FROM family f2 WHERE f2.del_flag = 0
+                    AND (f2.founder_id = #{currentUserId}
+                         OR f2.id IN (SELECT family_id FROM family_member WHERE user_id = #{currentUserId} AND del_flag = 0)
+                         OR COALESCE(f2.root_id, f2.id) IN (SELECT family_id FROM family_admin WHERE user_id = #{currentUserId}))
+                )) OR (t.family_id IS NULL AND (t.user_id = #{currentUserId} OR t.create_by = #{currentUserId})))
+            </if>
+            AND m.del_flag = 0 AND m.status = 'approved'
+        </where>
         ORDER BY m.create_time DESC
         LIMIT #{limit}
     </select>

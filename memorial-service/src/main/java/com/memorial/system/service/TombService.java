@@ -25,4 +25,7 @@ public interface TombService extends BaseService<Tomb> {
      * 根据二维码标识获取墓碑详情（扫码访问，访问量+1）
      */
     TombVO getTombDetailByCode(String code) throws Exception;
+
+    /** 校验当前用户是否有权操作指定墓碑（与家族管理逻辑一致），无权限则抛异常 */
+    void checkTombAccess(Long tombId) throws Exception;
 }

@@ -49,6 +49,9 @@ public class TombVO implements Serializable {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
 
+    @ApiModelProperty("当前用户对该墓碑的权限：admin/chief/member，用于前端显隐操作按钮")
+    private String myRole;
+
     @ApiModelProperty("生平事迹列表")
     private List<TombStoryVO> stories;
 }

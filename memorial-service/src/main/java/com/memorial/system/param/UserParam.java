@@ -24,8 +24,7 @@ import java.util.Date;
 public class UserParam extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
-    @ApiModelProperty(value = "昵称", required = true)
-    @NotBlank(message = "昵称不能为空")
+    @ApiModelProperty("昵称")
     private String nickname;
 
     @ApiModelProperty("头像")

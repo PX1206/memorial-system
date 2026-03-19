@@ -6,7 +6,6 @@ import com.memorial.common.base.BaseServiceImpl;
 import com.memorial.common.exception.BusinessException;
 import com.memorial.common.tool.LoginUtil;
 import com.memorial.common.pagination.Paging;
-import com.memorial.system.entity.Family;
 import com.memorial.system.entity.FamilyMember;
 import com.memorial.system.entity.Tomb;
 import com.memorial.system.entity.TombMessage;
@@ -15,9 +14,9 @@ import com.memorial.system.mapper.FamilyMemberMapper;
 import com.memorial.system.mapper.TombMapper;
 import com.memorial.system.mapper.TombMessageMapper;
 import com.memorial.system.mapper.UserMapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.memorial.system.entity.User;
 import com.memorial.system.param.TombMessagePageParam;
+import com.memorial.system.service.TombAccessChecker;
 import com.memorial.system.service.TombMessageService;
 import com.memorial.system.vo.TombMessageVO;
 import com.memorial.common.redis.RedisUtil;
@@ -27,7 +26,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
-import java.util.Objects;
 
 @Slf4j
 @Service
@@ -40,10 +38,13 @@ public class TombMessageServiceImpl extends BaseServiceImpl<TombMessageMapper, T
     private TombMapper tombMapper;
 
     @Autowired
-    private FamilyMapper familyMapper;
+    private TombAccessChecker tombAccessChecker;
 
     @Autowired
     private FamilyMemberMapper familyMemberMapper;
+
+    @Autowired
+    private com.memorial.system.mapper.FamilyMapper familyMapper;
 
     @Autowired
     private UserMapper userMapper;
@@ -72,7 +73,7 @@ public class TombMessageServiceImpl extends BaseServiceImpl<TombMessageMapper, T
         if (message == null) {
             throw new BusinessException(500, "留言不存在");
         }
-        checkTombAccessForMessage(message.getTombId());
+        tombAccessChecker.checkAccess(message.getTombId());
         message.setStatus("approved");
         message.setUpdateTime(new Date());
         tombMessageMapper.updateById(message);
@@ -92,7 +93,7 @@ public class TombMessageServiceImpl extends BaseServiceImpl<TombMessageMapper, T
         if (message == null) {
             throw new BusinessException(500, "留言不存在");
         }
-        checkTombAccessForMessage(message.getTombId());
+        tombAccessChecker.checkAccess(message.getTombId());
         message.setStatus("rejected");
         message.setRejectReason(reason);
         message.setUpdateTime(new Date());
@@ -104,7 +105,7 @@ public class TombMessageServiceImpl extends BaseServiceImpl<TombMessageMapper, T
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteMessage(Long id) throws Exception {
         TombMessage message = tombMessageMapper.selectById(id);
-        if (message != null) checkTombAccessForMessage(message.getTombId());
+        if (message != null) tombAccessChecker.checkAccess(message.getTombId());
         return super.removeById(id);
     }
 
@@ -134,7 +135,15 @@ public class TombMessageServiceImpl extends BaseServiceImpl<TombMessageMapper, T
             throw new BusinessException(500, "墓碑不存在");
         }
 
-        // 限流：每个用户每个墓碑 1小时内最多 3 次留言
+        // 权限：如果未开放访客互动，则必须为同根家族成员（同一最顶级下的成员均可互动，如二伯家孩子给大伯家坟墓祭拜）
+        if (Boolean.FALSE.equals(tomb.getVisitorActionOpen()) && tomb.getFamilyId() != null) {
+            int count = familyMapper.isUserInSameRootFamilyTree(userId, tomb.getFamilyId());
+            if (count <= 0) {
+                throw new BusinessException(403, "当前墓碑未开放访客互动，仅同族成员可留言");
+            }
+        }
+
+        // 限流：每个用户每个墓碑 1小时内最多 3 次留言，仅成功通过权限校验的请求才计入
         String limitKey = "limit:tomb:msg:" + tombId + ":" + userId;
         long num = redisUtil.incr(limitKey, 1);
         if (num == 1) {
@@ -142,19 +151,6 @@ public class TombMessageServiceImpl extends BaseServiceImpl<TombMessageMapper, T
         }
         if (num > 3) {
             throw new BusinessException(429, "操作过于频繁：1小时内最多留言3次");
-        }
-
-        // 权限：如果未开放访客互动，则必须为家族成员
-        if (Boolean.FALSE.equals(tomb.getVisitorActionOpen()) && tomb.getFamilyId() != null) {
-            Integer count = familyMemberMapper.selectCount(
-                    com.baomidou.mybatisplus.core.toolkit.Wrappers.<FamilyMember>lambdaQuery()
-                            .eq(FamilyMember::getFamilyId, tomb.getFamilyId())
-                            .eq(FamilyMember::getUserId, userId)
-                            .eq(FamilyMember::getDelFlag, false)
-            );
-            if (count == null || count <= 0) {
-                throw new BusinessException(403, "当前墓碑未开放访客互动，仅家族成员可留言");
-            }
         }
 
         User user = userMapper.selectById(userId);
@@ -174,25 +170,4 @@ public class TombMessageServiceImpl extends BaseServiceImpl<TombMessageMapper, T
         return true;
     }
 
-    /** 角色2校验：只能操作自己家族下墓碑的留言 */
-    private void checkTombAccessForMessage(Long tombId) {
-        if (LoginUtil.isAdmin()) return;
-        Tomb tomb = tombMapper.selectById(tombId);
-        if (tomb == null) return;
-        Long userId = LoginUtil.getUserId();
-        if (tomb.getFamilyId() == null) {
-            if (Objects.equals(tomb.getUserId(), userId) || Objects.equals(tomb.getCreateBy(), userId)) return;
-            throw new BusinessException(403, "无权限操作该留言");
-        }
-        Family family = familyMapper.selectById(tomb.getFamilyId());
-        if (family == null) return;
-        if (Objects.equals(family.getFounderId(), userId)) return;
-        Integer count = familyMemberMapper.selectCount(Wrappers.<FamilyMember>lambdaQuery()
-                .eq(FamilyMember::getFamilyId, tomb.getFamilyId())
-                .eq(FamilyMember::getUserId, userId)
-                .eq(FamilyMember::getDelFlag, false));
-        if (count == null || count <= 0) {
-            throw new BusinessException(403, "无权限操作该留言");
-        }
-    }
 }

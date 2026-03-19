@@ -19,7 +19,12 @@
                 )
                 SELECT t.id, t.name, t.photo, t.birthday, t.deathday, t.biography, t.story, t.epitaph, t.visitor_action_open,
                        t.family_id, fam.name AS family_name, t.address, t.qr_code_key, t.visit_count, t.message_count,
-                       t.create_time
+                       t.create_time,
+                       (CASE WHEN t.family_id IS NULL AND (t.user_id = #{param.currentUserId} OR t.create_by = #{param.currentUserId}) THEN 'member'
+                             WHEN t.family_id IS NOT NULL AND EXISTS (SELECT 1 FROM family_admin fa WHERE fa.family_id = COALESCE(fam.root_id, fam.id) AND fa.user_id = #{param.currentUserId} AND fa.role IN ('super_admin','admin')) THEN 'admin'
+                             WHEN t.family_id IS NOT NULL AND fam.chief_id = #{param.currentUserId} THEN 'chief'
+                             WHEN t.family_id IS NOT NULL AND EXISTS (SELECT 1 FROM family_member m WHERE m.family_id = fam.id AND m.user_id = #{param.currentUserId} AND m.del_flag = 0) THEN 'member'
+                             ELSE NULL END) AS myRole
                 FROM tomb t
                 LEFT JOIN family fam ON t.family_id = fam.id AND fam.del_flag = 0
                 <where>
@@ -44,7 +49,15 @@
             <otherwise>
                 SELECT t.id, t.name, t.photo, t.birthday, t.deathday, t.biography, t.story, t.epitaph, t.visitor_action_open,
                        t.family_id, fam.name AS family_name, t.address, t.qr_code_key, t.visit_count, t.message_count,
-                       t.create_time
+                       t.create_time,
+                       (CASE WHEN t.family_id IS NULL AND (t.user_id = #{param.currentUserId} OR t.create_by = #{param.currentUserId})
+                             THEN 'member'
+                             WHEN t.family_id IS NOT NULL AND EXISTS (SELECT 1 FROM family_admin fa WHERE fa.family_id = COALESCE(fam.root_id, fam.id) AND fa.user_id = #{param.currentUserId} AND fa.role IN ('super_admin','admin'))
+                             THEN 'admin'
+                             WHEN t.family_id IS NOT NULL AND fam.chief_id = #{param.currentUserId} THEN 'chief'
+                             WHEN t.family_id IS NOT NULL AND EXISTS (SELECT 1 FROM family_member m WHERE m.family_id = fam.id AND m.user_id = #{param.currentUserId} AND m.del_flag = 0)
+                             THEN 'member'
+                             ELSE NULL END) AS myRole
                 FROM tomb t
                 LEFT JOIN family fam ON t.family_id = fam.id AND fam.del_flag = 0
                 <where>
@@ -82,6 +95,23 @@
         FROM tomb t
         LEFT JOIN family f ON t.family_id = f.id AND f.del_flag = 0
         WHERE t.qr_code_key = #{code} AND t.del_flag = 0
+    </select>
+
+    <!-- 按数据权限统计墓碑数量：管理员看全部，普通用户仅限同根家族及个人墓碑 -->
+    <select id="countByPermission" resultType="long">
+        SELECT COUNT(*) FROM tomb t
+        LEFT JOIN family fam ON t.family_id = fam.id AND fam.del_flag = 0
+        <where>
+            <if test="isAdmin == false and currentUserId != null">
+                AND ((t.family_id IS NOT NULL AND (SELECT COALESCE(f.root_id, f.id) FROM family f WHERE f.id = t.family_id AND f.del_flag = 0 LIMIT 1) IN (
+                    SELECT DISTINCT COALESCE(f2.root_id, f2.id) FROM family f2 WHERE f2.del_flag = 0
+                    AND (f2.founder_id = #{currentUserId}
+                         OR f2.id IN (SELECT family_id FROM family_member WHERE user_id = #{currentUserId} AND del_flag = 0)
+                         OR COALESCE(f2.root_id, f2.id) IN (SELECT family_id FROM family_admin WHERE user_id = #{currentUserId}))
+                )) OR (t.family_id IS NULL AND (t.user_id = #{currentUserId} OR t.create_by = #{currentUserId})))
+            </if>
+            AND t.del_flag = 0
+        </where>
     </select>
 
 </mapper>

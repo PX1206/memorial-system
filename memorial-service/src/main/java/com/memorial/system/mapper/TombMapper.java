@@ -17,4 +17,9 @@ public interface TombMapper extends BaseMapper<Tomb> {
     TombVO getTombVO(@Param("id") Long id);
 
     TombVO getTombVOByCode(@Param("code") String code);
+
+    /**
+     * 按数据权限统计墓碑数量（管理员见全部，普通用户仅限同根家族及个人墓碑）
+     */
+    long countByPermission(@Param("currentUserId") Long currentUserId, @Param("isAdmin") Boolean isAdmin);
 }

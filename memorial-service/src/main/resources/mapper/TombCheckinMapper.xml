@@ -18,8 +18,18 @@
             <if test="param.tombId != null">
                 AND c.tomb_id = #{param.tombId}
             </if>
-            <!-- 角色2普通用户：同根家族下墓碑的打卡记录均可查看 -->
-            <if test="param.isAdmin == false and param.currentUserId != null">
+            <if test="param.familyId != null">
+                AND t.family_id IN (
+                    WITH RECURSIVE fid AS (
+                        SELECT id FROM family WHERE id = #{param.familyId} AND del_flag = 0
+                        UNION ALL
+                        SELECT f.id FROM family f INNER JOIN fid ON f.pid = fid.id WHERE f.del_flag = 0
+                    )
+                    SELECT id FROM fid
+                )
+            </if>
+            <!-- 纪念页公开访问时跳过家族过滤；后台管理时角色2普通用户：同根家族下墓碑的打卡记录均可查看 -->
+            <if test="param.forPublicMemorial != true and param.isAdmin == false and param.currentUserId != null">
                 AND ((t.family_id IS NOT NULL AND (SELECT COALESCE(f.root_id, f.id) FROM family f WHERE f.id = t.family_id AND f.del_flag = 0 LIMIT 1) IN (
                     SELECT DISTINCT COALESCE(f2.root_id, f2.id) FROM family f2 WHERE f2.del_flag = 0
                     AND (f2.founder_id = #{param.currentUserId}
@@ -40,6 +50,34 @@
         WHERE c.del_flag = 0
         ORDER BY c.create_time DESC
         LIMIT #{limit}
+    </select>
+
+    <!-- 按数据权限获取最近打卡记录（仅有效墓碑下的打卡） -->
+    <select id="getRecentCheckinsWithPermission" resultType="com.memorial.system.vo.TombCheckinVO">
+        SELECT c.id, c.tomb_id, t.name AS tomb_name, c.visitor_name,
+               c.type, c.ip, c.location, c.create_time
+        FROM tomb_checkin c
+        INNER JOIN tomb t ON c.tomb_id = t.id AND t.del_flag = 0
+        <where>
+            <if test="isAdmin == false and currentUserId != null">
+                AND ((t.family_id IS NOT NULL AND (SELECT COALESCE(f.root_id, f.id) FROM family f WHERE f.id = t.family_id AND f.del_flag = 0 LIMIT 1) IN (
+                    SELECT DISTINCT COALESCE(f2.root_id, f2.id) FROM family f2 WHERE f2.del_flag = 0
+                    AND (f2.founder_id = #{currentUserId}
+                         OR f2.id IN (SELECT family_id FROM family_member WHERE user_id = #{currentUserId} AND del_flag = 0)
+                         OR COALESCE(f2.root_id, f2.id) IN (SELECT family_id FROM family_admin WHERE user_id = #{currentUserId}))
+                )) OR (t.family_id IS NULL AND (t.user_id = #{currentUserId} OR t.create_by = #{currentUserId})))
+            </if>
+            AND c.del_flag = 0 AND t.id IS NOT NULL
+        </where>
+        ORDER BY c.create_time DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="countTodayByTombAndUser" resultType="int">
+        SELECT COUNT(*) FROM tomb_checkin
+        WHERE tomb_id = #{tombId} AND user_id = #{userId}
+          AND (del_flag = 0 OR del_flag IS NULL)
+          AND DATE(create_time) = CURDATE()
     </select>
 
 </mapper>

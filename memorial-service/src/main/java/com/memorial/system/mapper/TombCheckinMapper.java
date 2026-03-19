@@ -17,4 +17,14 @@ public interface TombCheckinMapper extends BaseMapper<TombCheckin> {
     IPage<TombCheckinVO> getCheckinList(@Param("page") Page page, @Param("param") TombCheckinPageParam param);
 
     List<TombCheckinVO> getRecentCheckins(@Param("limit") int limit);
+
+    /**
+     * 统计某用户某墓碑当日打卡次数（用于限流：每天每用户每墓碑最多3次）
+     */
+    int countTodayByTombAndUser(@Param("tombId") Long tombId, @Param("userId") Long userId);
+
+    /**
+     * 按数据权限获取最近打卡记录（仅含用户有权限的墓碑）
+     */
+    List<TombCheckinVO> getRecentCheckinsWithPermission(@Param("limit") int limit, @Param("currentUserId") Long currentUserId, @Param("isAdmin") Boolean isAdmin);
 }

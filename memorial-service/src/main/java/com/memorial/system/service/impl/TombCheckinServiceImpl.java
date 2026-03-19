@@ -10,13 +10,13 @@ import com.memorial.common.tool.IpUtil;
 import com.memorial.system.entity.Tomb;
 import com.memorial.system.entity.TombCheckin;
 import com.memorial.system.entity.FamilyMember;
+import com.memorial.system.mapper.FamilyMapper;
 import com.memorial.system.mapper.FamilyMemberMapper;
 import com.memorial.system.mapper.TombCheckinMapper;
 import com.memorial.system.mapper.TombMapper;
 import com.memorial.system.param.TombCheckinPageParam;
 import com.memorial.system.service.TombCheckinService;
 import com.memorial.system.vo.TombCheckinVO;
-import com.memorial.common.redis.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,7 +39,7 @@ public class TombCheckinServiceImpl extends BaseServiceImpl<TombCheckinMapper, T
     private FamilyMemberMapper familyMemberMapper;
 
     @Autowired
-    private RedisUtil redisUtil;
+    private com.memorial.system.mapper.FamilyMapper familyMapper;
 
     @Override
     public Paging<TombCheckinVO> getCheckinPageList(TombCheckinPageParam param) throws Exception {
@@ -88,27 +88,18 @@ public class TombCheckinServiceImpl extends BaseServiceImpl<TombCheckinMapper, T
             throw new BusinessException(500, "墓碑不存在");
         }
 
-        // 限流：每个用户每个墓碑 1小时内最多 3 次互动（献花/点蜡烛等）
-        String limitKey = "limit:tomb:checkin:" + tombId + ":" + userId;
-        long num = redisUtil.incr(limitKey, 1);
-        if (num == 1) {
-            redisUtil.expire(limitKey, 3600);
-        }
-        if (num > 3) {
-            throw new BusinessException(429, "操作过于频繁：1小时内最多互动3次");
+        // 权限：如果未开放访客互动，则必须为同根家族成员（同一最顶级下的成员均可互动，如二伯家孩子给大伯家坟墓祭拜）
+        if (Boolean.FALSE.equals(tomb.getVisitorActionOpen()) && tomb.getFamilyId() != null) {
+            int count = familyMapper.isUserInSameRootFamilyTree(userId, tomb.getFamilyId());
+            if (count <= 0) {
+                throw new BusinessException(403, "当前墓碑未开放访客互动，仅同族成员可献花/打卡");
+            }
         }
 
-        // 权限：如果未开放访客互动，则必须为家族成员
-        if (Boolean.FALSE.equals(tomb.getVisitorActionOpen()) && tomb.getFamilyId() != null) {
-            Integer count = familyMemberMapper.selectCount(
-                    com.baomidou.mybatisplus.core.toolkit.Wrappers.<FamilyMember>lambdaQuery()
-                            .eq(FamilyMember::getFamilyId, tomb.getFamilyId())
-                            .eq(FamilyMember::getUserId, userId)
-                            .eq(FamilyMember::getDelFlag, false)
-            );
-            if (count == null || count <= 0) {
-                throw new BusinessException(403, "当前墓碑未开放访客互动，仅家族成员可献花/打卡");
-            }
+        // 限流：每天每用户每墓碑最多 3 次互动（基于 tomb_checkin 表统计，不受浏览器/缓存影响）
+        int todayCount = tombCheckinMapper.countTodayByTombAndUser(tombId, userId);
+        if (todayCount >= 3) {
+            throw new BusinessException(429, "操作过于频繁：每天最多互动3次");
         }
 
         TombCheckin checkin = new TombCheckin();

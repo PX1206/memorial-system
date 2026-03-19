@@ -1,11 +1,13 @@
 package com.memorial.system.service.impl;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.memorial.system.entity.Family;
-import com.memorial.system.entity.Tomb;
-import com.memorial.system.entity.TombMessage;
+import com.memorial.common.tool.LoginUtil;
 import com.memorial.system.entity.User;
-import com.memorial.system.mapper.*;
+import com.memorial.system.mapper.FamilyMapper;
+import com.memorial.system.mapper.TombCheckinMapper;
+import com.memorial.system.mapper.TombMapper;
+import com.memorial.system.mapper.TombMessageMapper;
+import com.memorial.system.mapper.UserMapper;
 import com.memorial.system.service.DashboardService;
 import com.memorial.system.vo.DashboardVO;
 import com.memorial.system.vo.TombCheckinVO;
@@ -33,21 +35,26 @@ public class DashboardServiceImpl implements DashboardService {
 
     @Override
     public DashboardVO getStats() throws Exception {
+        Long currentUserId = LoginUtil.getUserId();
+        boolean isAdmin = LoginUtil.isAdmin();
+
         DashboardVO vo = new DashboardVO();
 
-        vo.setTombCount((long) tombMapper.selectCount(
-                Wrappers.lambdaQuery(Tomb.class).eq(Tomb::getDelFlag, false)));
-        vo.setUserCount((long) userMapper.selectCount(
-                Wrappers.lambdaQuery(User.class).eq(User::getDelFlag, false)));
-        vo.setFamilyCount((long) familyMapper.selectCount(
-                Wrappers.lambdaQuery(Family.class).eq(Family::getDelFlag, false)));
-        vo.setMessageCount((long) tombMessageMapper.selectCount(
-                Wrappers.lambdaQuery(TombMessage.class).eq(TombMessage::getDelFlag, false)));
+        vo.setTombCount(tombMapper.countByPermission(currentUserId, isAdmin));
+        vo.setFamilyCount(familyMapper.countByPermission(currentUserId, isAdmin));
+        vo.setMessageCount(tombMessageMapper.countByPermission(currentUserId, isAdmin));
 
-        List<TombCheckinVO> recentCheckins = tombCheckinMapper.getRecentCheckins(5);
+        if (isAdmin) {
+            vo.setUserCount((long) userMapper.selectCount(
+                    Wrappers.lambdaQuery(User.class).eq(User::getDelFlag, false)));
+        } else {
+            vo.setUserCount(familyMapper.countDistinctUsersInAccessibleTree(currentUserId));
+        }
+
+        List<TombCheckinVO> recentCheckins = tombCheckinMapper.getRecentCheckinsWithPermission(5, currentUserId, isAdmin);
         vo.setRecentCheckins(recentCheckins);
 
-        List<TombMessageVO> recentMessages = tombMessageMapper.getRecentMessages(5);
+        List<TombMessageVO> recentMessages = tombMessageMapper.getRecentMessagesWithPermission(5, currentUserId, isAdmin);
         vo.setRecentMessages(recentMessages);
 
         return vo;

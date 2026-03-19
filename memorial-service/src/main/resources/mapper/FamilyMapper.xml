@@ -120,4 +120,92 @@
         </choose>
     </select>
 
+    <!-- 判断用户是否有权操作指定家庭：与家族管理一致。家族管理员可操作整棵根树；普通用户仅限所在节点（founder/chief/member） -->
+    <select id="canUserOperateFamily" resultType="int">
+        SELECT COUNT(*) FROM (
+            SELECT 1 FROM family f
+            WHERE f.id = #{familyId} AND f.del_flag = 0
+            AND (
+                EXISTS (
+                    SELECT 1 FROM family_admin fa
+                    WHERE fa.family_id = COALESCE(f.root_id, f.id)
+                    AND fa.user_id = #{userId}
+                    AND fa.role IN ('super_admin','admin')
+                )
+                OR f.founder_id = #{userId}
+                OR f.chief_id = #{userId}
+                OR EXISTS (SELECT 1 FROM family_member m WHERE m.family_id = f.id AND m.user_id = #{userId} AND m.del_flag = 0)
+            )
+            LIMIT 1
+        ) x
+    </select>
+
+    <!-- 判断用户是否属于墓碑所属家族根下的任意家庭（同根家族成员可互动，如二伯家孩子给大伯家坟墓祭拜） -->
+    <select id="isUserInSameRootFamilyTree" resultType="int">
+        SELECT COUNT(*) FROM (
+            SELECT 1 FROM family f
+            WHERE f.del_flag = 0
+            AND COALESCE(f.root_id, f.id) = (
+                SELECT COALESCE(root_id, id) FROM family WHERE id = #{tombFamilyId} AND del_flag = 0 LIMIT 1
+            )
+            AND (
+                f.founder_id = #{userId}
+                OR f.chief_id = #{userId}
+                OR EXISTS (SELECT 1 FROM family_member m WHERE m.family_id = f.id AND m.user_id = #{userId} AND m.del_flag = 0)
+                OR EXISTS (SELECT 1 FROM family_admin fa WHERE fa.family_id = COALESCE(f.root_id, f.id) AND fa.user_id = #{userId} AND fa.role IN ('super_admin','admin'))
+            )
+            LIMIT 1
+        ) x
+    </select>
+
+    <!-- 按数据权限统计家族数量：管理员看全部，普通用户仅限 founder/member/admin 的家族 -->
+    <select id="countByPermission" resultType="long">
+        SELECT COUNT(*) FROM family f
+        <where>
+            <if test="isAdmin == false and currentUserId != null">
+                AND COALESCE(f.root_id, f.id) IN (
+                    SELECT DISTINCT COALESCE(f2.root_id, f2.id) FROM family f2 WHERE f2.del_flag = 0
+                    AND (f2.founder_id = #{currentUserId}
+                         OR f2.id IN (SELECT family_id FROM family_member WHERE user_id = #{currentUserId} AND del_flag = 0)
+                         OR COALESCE(f2.root_id, f2.id) IN (SELECT family_id FROM family_admin WHERE user_id = #{currentUserId}))
+                )
+            </if>
+            AND f.del_flag = 0
+        </where>
+    </select>
+
+    <!-- 按数据权限统计同族用户数：普通用户可访问家族树下的去重用户数（founder + member + admin） -->
+    <select id="countDistinctUsersInAccessibleTree" resultType="long">
+        SELECT COUNT(DISTINCT u_id) FROM (
+                    SELECT f.founder_id AS u_id FROM family f
+                    WHERE f.del_flag = 0
+                    AND COALESCE(f.root_id, f.id) IN (
+                        SELECT DISTINCT COALESCE(f2.root_id, f2.id) FROM family f2 WHERE f2.del_flag = 0
+                        AND (f2.founder_id = #{currentUserId}
+                             OR f2.id IN (SELECT family_id FROM family_member WHERE user_id = #{currentUserId} AND del_flag = 0)
+                             OR COALESCE(f2.root_id, f2.id) IN (SELECT family_id FROM family_admin WHERE user_id = #{currentUserId}))
+                    )
+                    AND f.founder_id IS NOT NULL
+                    UNION
+                    SELECT fm.user_id AS u_id FROM family_member fm
+                    INNER JOIN family f ON fm.family_id = f.id AND f.del_flag = 0
+                    WHERE fm.del_flag = 0
+                    AND COALESCE(f.root_id, f.id) IN (
+                        SELECT DISTINCT COALESCE(f2.root_id, f2.id) FROM family f2 WHERE f2.del_flag = 0
+                        AND (f2.founder_id = #{currentUserId}
+                             OR f2.id IN (SELECT family_id FROM family_member WHERE user_id = #{currentUserId} AND del_flag = 0)
+                             OR COALESCE(f2.root_id, f2.id) IN (SELECT family_id FROM family_admin WHERE user_id = #{currentUserId}))
+                    )
+                    UNION
+                    SELECT fa.user_id AS u_id FROM family_admin fa
+                    INNER JOIN family f ON fa.family_id = COALESCE(f.root_id, f.id) AND f.del_flag = 0
+                    WHERE COALESCE(f.root_id, f.id) IN (
+                        SELECT DISTINCT COALESCE(f2.root_id, f2.id) FROM family f2 WHERE f2.del_flag = 0
+                        AND (f2.founder_id = #{currentUserId}
+                             OR f2.id IN (SELECT family_id FROM family_member WHERE user_id = #{currentUserId} AND del_flag = 0)
+                             OR COALESCE(f2.root_id, f2.id) IN (SELECT family_id FROM family_admin WHERE user_id = #{currentUserId}))
+                    )
+                ) u
+    </select>
+
 </mapper>

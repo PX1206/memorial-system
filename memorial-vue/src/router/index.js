@@ -112,6 +112,12 @@ router.beforeEach((to, from, next) => {
   }
 
   if (to.meta.requiresAuth && !token) {
+    // 邀请码/绑定码：存 localStorage 备用（注册后再登录时 redirect 可能丢失 code）
+    if (to.path === '/family/join' && to.query.code) {
+      try { localStorage.setItem('pendingInviteCode', String(to.query.code)) } catch (_) {}
+    } else if (to.path === '/family/member/bind' && to.query.code) {
+      try { localStorage.setItem('pendingBindCode', String(to.query.code)) } catch (_) {}
+    }
     return next({ path: '/login', query: { redirect: to.fullPath } })
   }
 

@@ -25,7 +25,8 @@ request.interceptors.response.use(
       msgWarning(res.message || '登录已过期')
       localStorage.removeItem('token')
       localStorage.removeItem('currentUser')
-      router.replace('/login')
+      const from = router.currentRoute.value?.fullPath
+      router.replace(from && from !== '/login' ? { path: '/login', query: { redirect: from } } : '/login')
       return Promise.reject(res)
     }
     // 429/403 等业务错误统一走后端 message
@@ -39,7 +40,8 @@ request.interceptors.response.use(
         msgWarning(res?.message || '登录已过期')
         localStorage.removeItem('token')
         localStorage.removeItem('currentUser')
-        router.replace('/login')
+        const from = router.currentRoute.value?.fullPath
+        router.replace(from && from !== '/login' ? { path: '/login', query: { redirect: from } } : '/login')
       } else if (error.response.status === 429) {
         msgWarning(res?.message || '操作过于频繁，请稍后再试')
       } else if (error.response.status === 403) {

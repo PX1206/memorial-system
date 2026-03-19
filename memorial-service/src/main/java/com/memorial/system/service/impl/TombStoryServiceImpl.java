@@ -7,6 +7,7 @@ import com.memorial.common.tool.LoginUtil;
 import com.memorial.system.entity.TombStory;
 import com.memorial.system.mapper.TombStoryMapper;
 import com.memorial.system.param.TombStoryParam;
+import com.memorial.system.service.TombAccessChecker;
 import com.memorial.system.service.TombStoryService;
 import com.memorial.system.vo.TombStoryVO;
 import org.springframework.beans.BeanUtils;
@@ -25,6 +26,9 @@ public class TombStoryServiceImpl extends BaseServiceImpl<TombStoryMapper, TombS
 
     @Autowired
     private TombStoryMapper tombStoryMapper;
+
+    @Autowired
+    private TombAccessChecker tombAccessChecker;
 
     @Override
     public List<TombStoryVO> listByTombId(Long tombId) throws Exception {
@@ -45,6 +49,7 @@ public class TombStoryServiceImpl extends BaseServiceImpl<TombStoryMapper, TombS
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean addStory(TombStoryParam param) throws Exception {
+        tombAccessChecker.checkAccess(param.getTombId());
         TombStory story = new TombStory();
         story.setTombId(param.getTombId());
         story.setTitle(param.getTitle());
@@ -66,6 +71,7 @@ public class TombStoryServiceImpl extends BaseServiceImpl<TombStoryMapper, TombS
         if (story == null || Boolean.TRUE.equals(story.getDelFlag())) {
             throw new BusinessException(500, "事迹信息不存在");
         }
+        tombAccessChecker.checkAccess(story.getTombId());
         story.setTitle(param.getTitle());
         story.setContent(param.getContent());
         if (param.getSort() != null) {
@@ -84,6 +90,7 @@ public class TombStoryServiceImpl extends BaseServiceImpl<TombStoryMapper, TombS
         if (story == null || Boolean.TRUE.equals(story.getDelFlag())) {
             throw new BusinessException(500, "事迹信息不存在");
         }
+        tombAccessChecker.checkAccess(story.getTombId());
         return super.removeById(id);
     }
 }

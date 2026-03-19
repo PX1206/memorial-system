@@ -9,15 +9,13 @@ import com.memorial.common.pagination.PageInfo;
 import com.memorial.common.pagination.Paging;
 import com.memorial.common.tool.LoginUtil;
 import com.memorial.system.entity.Family;
-import com.memorial.system.entity.FamilyMember;
 import com.memorial.system.entity.Tomb;
 import com.memorial.system.service.TombStoryService;
-import com.memorial.system.mapper.FamilyAdminMapper;
 import com.memorial.system.mapper.FamilyMapper;
-import com.memorial.system.mapper.FamilyMemberMapper;
 import com.memorial.system.mapper.TombMapper;
 import com.memorial.system.param.TombPageParam;
 import com.memorial.system.param.TombParam;
+import com.memorial.system.service.TombAccessChecker;
 import com.memorial.system.service.TombService;
 import com.memorial.system.vo.TombVO;
 import lombok.extern.slf4j.Slf4j;
@@ -42,13 +40,10 @@ public class TombServiceImpl extends BaseServiceImpl<TombMapper, Tomb> implement
     private FamilyMapper familyMapper;
 
     @Autowired
-    private FamilyMemberMapper familyMemberMapper;
-
-    @Autowired
-    private FamilyAdminMapper familyAdminMapper;
-
-    @Autowired
     private TombStoryService tombStoryService;
+
+    @Autowired
+    private TombAccessChecker tombAccessChecker;
 
     @Override
     public Paging<TombVO> getTombPageList(TombPageParam param) throws Exception {
@@ -56,7 +51,11 @@ public class TombServiceImpl extends BaseServiceImpl<TombMapper, Tomb> implement
         param.setIsAdmin(LoginUtil.isAdmin());
         Page<TombVO> page = new PageInfo<>(param);
         IPage<TombVO> iPage = tombMapper.getTombList(page, param);
-        return new Paging<>(iPage);
+        Paging<TombVO> paging = new Paging<>(iPage);
+        if (LoginUtil.isAdmin() && paging.getRecords() != null) {
+            paging.getRecords().forEach(vo -> vo.setMyRole("admin"));
+        }
+        return paging;
     }
 
     @Override
@@ -65,7 +64,7 @@ public class TombServiceImpl extends BaseServiceImpl<TombMapper, Tomb> implement
         if (tomb == null) {
             throw new BusinessException(500, "墓碑信息不存在");
         }
-        checkTombAccess(tomb);
+        tombAccessChecker.checkAccess(tomb);
         ensureQrCodeKey(tomb);
         TombVO tombVO = tombMapper.getTombVO(id);
         tombVO.setStories(tombStoryService.listByTombId(id));
@@ -115,7 +114,7 @@ public class TombServiceImpl extends BaseServiceImpl<TombMapper, Tomb> implement
         if (tomb == null) {
             throw new BusinessException(500, "墓碑信息不存在");
         }
-        checkTombAccess(tomb);
+        tombAccessChecker.checkAccess(tomb);
         tomb.setName(param.getName());
         tomb.setPhoto(param.getPhoto());
         tomb.setBiography(param.getBiography());
@@ -163,7 +162,7 @@ public class TombServiceImpl extends BaseServiceImpl<TombMapper, Tomb> implement
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteTomb(Long id) throws Exception {
         Tomb tomb = tombMapper.selectById(id);
-        if (tomb != null) checkTombAccess(tomb);
+        if (tomb != null) tombAccessChecker.checkAccess(tomb);
         return super.removeById(id);
     }
 
@@ -199,7 +198,7 @@ public class TombServiceImpl extends BaseServiceImpl<TombMapper, Tomb> implement
         return tombVO;
     }
 
-    /** 添加墓碑：仅 super_admin 可任意添加；普通用户只能给自己所在的家庭(type=家庭)添加 */
+    /** 添加墓碑：仅能加到用户可操作范围内的家庭（所在节点及子孙），且仅限 type=家庭 */
     private void checkCanAddTombToFamily(Long familyId) {
         if (LoginUtil.isAdmin()) return;
         Family family = familyMapper.selectById(familyId);
@@ -207,49 +206,20 @@ public class TombServiceImpl extends BaseServiceImpl<TombMapper, Tomb> implement
             throw new BusinessException(500, "所属家族不存在");
         }
         if (!"家庭".equals(family.getType())) {
-            throw new BusinessException(403, "只能给自己所在的家庭添加墓碑");
+            throw new BusinessException(403, "只能给家庭添加墓碑");
         }
-        Long userId = LoginUtil.getUserId();
-        if (Objects.equals(family.getFounderId(), userId)) return;
-        Integer count = familyMemberMapper.selectCount(Wrappers.<FamilyMember>lambdaQuery()
-                .eq(FamilyMember::getFamilyId, familyId)
-                .eq(FamilyMember::getUserId, userId)
-                .eq(FamilyMember::getDelFlag, false));
-        if (count == null || count <= 0) {
-            throw new BusinessException(403, "只能给自己所在的家庭添加墓碑");
+        if (familyMapper.canUserOperateFamily(LoginUtil.getUserId(), familyId) <= 0) {
+            throw new BusinessException(403, "只能在自己所在节点下的家庭添加墓碑");
         }
     }
 
-    /** 角色2校验：同根家族下墓碑均可操作（成员在任一分支即可） */
-    private void checkTombAccess(Tomb tomb) {
-        if (LoginUtil.isAdmin()) return;
-        Long userId = LoginUtil.getUserId();
-        if (tomb.getFamilyId() == null) {
-            if (Objects.equals(tomb.getUserId(), userId) || Objects.equals(tomb.getCreateBy(), userId)) return;
-            throw new BusinessException(403, "无权限操作该墓碑");
+    @Override
+    public void checkTombAccess(Long tombId) throws Exception {
+        Tomb tomb = tombMapper.selectById(tombId);
+        if (tomb == null) {
+            throw new BusinessException(500, "墓碑信息不存在");
         }
-        Family family = familyMapper.selectById(tomb.getFamilyId());
-        if (family == null) return;
-        Long rootId = family.getRootId() != null ? family.getRootId() : family.getId();
-        Integer founderCount = familyMapper.selectCount(Wrappers.<Family>lambdaQuery()
-                .eq(Family::getDelFlag, false)
-                .eq(Family::getFounderId, userId)
-                .apply("COALESCE(root_id, id) = {0}", rootId));
-        if (founderCount != null && founderCount > 0) return;
-        String adminRole = familyAdminMapper.getRoleInFamily(rootId, userId);
-        if ("super_admin".equals(adminRole) || "admin".equals(adminRole)) return;
-        Integer chiefCount = familyMapper.selectCount(Wrappers.<Family>lambdaQuery()
-                .eq(Family::getDelFlag, false)
-                .eq(Family::getChiefId, userId)
-                .apply("COALESCE(root_id, id) = {0}", rootId));
-        if (chiefCount != null && chiefCount > 0) return;
-        Integer memberCount = familyMemberMapper.selectCount(Wrappers.<FamilyMember>lambdaQuery()
-                .eq(FamilyMember::getUserId, userId)
-                .eq(FamilyMember::getDelFlag, false)
-                .inSql(FamilyMember::getFamilyId, "SELECT id FROM family WHERE (COALESCE(root_id, id) = " + rootId + ") AND del_flag = 0"));
-        if (memberCount == null || memberCount <= 0) {
-            throw new BusinessException(403, "无权限操作该墓碑");
-        }
+        tombAccessChecker.checkAccess(tomb);
     }
 
     /** 老数据无 qr_code_key 时懒填充并写回 */

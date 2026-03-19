@@ -23,8 +23,14 @@ public class TombCheckinPageParam extends BasePageOrderParam {
     @ApiModelProperty("墓碑ID")
     private Long tombId;
 
+    @ApiModelProperty("家族ID（筛选该家族及子家族下墓碑的打卡记录）")
+    private Long familyId;
+
     @ApiModelProperty(value = "当前用户ID（角色2时用于过滤）", hidden = true)
     private Long currentUserId;
     @ApiModelProperty(value = "是否超级管理员（角色1可看全部）", hidden = true)
     private Boolean isAdmin;
+
+    @ApiModelProperty(value = "纪念页公开访问（按 tombId 公开展示，跳过家族权限过滤）", hidden = true)
+    private Boolean forPublicMemorial;
 }

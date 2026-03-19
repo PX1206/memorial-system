@@ -366,7 +366,21 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapper, User> implement
     }
 
     private void updateUserInfo(User user, UserParam userParam) {
-        BeanUtils.copyProperties(userParam, user);
+        if (userParam.getNickname() != null && !userParam.getNickname().trim().isEmpty()) {
+            user.setNickname(userParam.getNickname().trim());
+        }
+        if (userParam.getHeadImg() != null) {
+            user.setHeadImg(userParam.getHeadImg());
+        }
+        if (userParam.getSex() != null) {
+            user.setSex(userParam.getSex());
+        }
+        if (userParam.getBirthday() != null) {
+            user.setBirthday(userParam.getBirthday());
+        }
+        if (userParam.getAddress() != null) {
+            user.setAddress(userParam.getAddress());
+        }
         user.setUpdateBy(LoginUtil.getUserId());
         user.setUpdateTime(new Date());
         userMapper.updateById(user);

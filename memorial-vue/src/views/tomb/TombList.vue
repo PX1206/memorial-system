@@ -22,7 +22,7 @@
             <el-input v-model="query.keyword" placeholder="搜索逝者姓名" clearable style="width: 220px" @clear="loadData" />
             <el-button type="primary" @click="loadData"><el-icon><Search /></el-icon>搜索</el-button>
           </div>
-          <el-button type="primary" @click="openDialog()"><el-icon><Plus /></el-icon>新增墓碑</el-button>
+          <el-button v-if="canAddTomb" type="primary" @click="openDialog()"><el-icon><Plus /></el-icon>新增墓碑</el-button>
         </div>
 
         <div class="current-family">{{ currentFamilyTitle }}</div>
@@ -54,10 +54,10 @@
           <el-table-column prop="messageCount" label="留言数" width="90" />
           <el-table-column label="操作" width="200" fixed="right">
             <template #default="{ row }">
-              <el-button size="small" type="primary" link @click="openDialog(row)">编辑</el-button>
-            <el-button size="small" type="warning" link @click="openStoryDrawer(row)">事迹</el-button>
+              <el-button v-if="canOperate(row)" size="small" type="primary" link @click="openDialog(row)">编辑</el-button>
+              <el-button v-if="canOperate(row)" size="small" type="warning" link @click="openStoryDrawer(row)">事迹</el-button>
               <el-button size="small" type="success" link @click="viewDetail(row)">详情</el-button>
-              <el-button size="small" type="danger" link @click="handleDelete(row)">删除</el-button>
+              <el-button v-if="canOperate(row)" size="small" type="danger" link @click="handleDelete(row)">删除</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -393,6 +393,8 @@ const tombFamilyOptions = computed(() => {
   return collectFamilies(raw)
 })
 
+const canAddTomb = computed(() => isSuperAdmin.value || (tombFamilyOptions.value?.length || 0) > 0)
+
 async function loadFamilyTree() {
   const u = JSON.parse(localStorage.getItem('currentUser') || '{}')
   isSuperAdmin.value = u.role === 'admin'
@@ -443,9 +445,9 @@ async function handleUpload(e) {
     return
   }
   try {
-    const res = await uploadFile(file)
-    if (res && res.url) {
-      form.photo = res.url
+    const url = await uploadFile(file)
+    if (url) {
+      form.photo = url
       ElMessage.success('上传成功')
     }
   } catch { ElMessage.error('上传失败') }
@@ -588,6 +590,10 @@ function downloadCurrentQr() {
   link.download = `墓碑二维码_${currentQr.tomb.name}.png`
   link.href = currentQr.qr
   link.click()
+}
+
+function canOperate(row) {
+  return row && ['admin', 'chief', 'member'].includes(row.myRole)
 }
 
 function handleDelete(row) {

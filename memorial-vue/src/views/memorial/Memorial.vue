@@ -143,13 +143,13 @@
           <el-icon class="login-dialog-box__close" @click="loginDialogVisible = false"><Close /></el-icon>
           <h2 class="login-dialog-box__title">系统登录</h2>
           <div class="login-dialog-box__tabs">
-            <span :class="{ active: loginMode === 'password' }" @click="loginMode = 'password'">账号登录</span>
-            <span :class="{ active: loginMode === 'sms' }" @click="loginMode = 'sms'">手机登录</span>
+            <span :class="{ active: loginState.mode === 'password' }" @click="loginState.mode = 'password'">账号登录</span>
+            <span :class="{ active: loginState.mode === 'sms' }" @click="loginState.mode = 'sms'">手机登录</span>
           </div>
 
           <el-form ref="loginFormRef" :model="loginForm" :rules="loginRules" class="login-dialog-box__form">
             <!-- 账号密码登录 -->
-            <template v-if="loginMode === 'password'">
+            <template v-if="loginState.mode === 'password'">
               <el-form-item prop="username">
                 <el-input v-model="loginForm.username" placeholder="账号" />
               </el-form-item>
@@ -177,10 +177,16 @@
                 <div class="login-dialog-box__row">
                   <el-input v-model="loginForm.pictureCode" placeholder="图片验证码" class="half" />
                   <img
+                    v-if="loginCaptchaImage"
                     :src="loginCaptchaImage"
                     class="login-dialog-box__captcha"
                     @click="getLoginCaptcha"
                   />
+                  <span
+                    v-else
+                    class="login-dialog-box__captcha-placeholder"
+                    @click="getLoginCaptcha"
+                  >{{ loginCaptchaLoading ? '加载中' : '点击加载' }}</span>
                 </div>
               </el-form-item>
               <el-form-item prop="smsCode">
@@ -324,7 +330,6 @@ import { encryptPassword } from '@/utils/rsa'
 
 const route = useRoute()
 const router = useRouter()
-const idOrCode = route.params.id
 const loading = ref(true)
 const submitting = ref(false)
 
@@ -336,9 +341,12 @@ const actionAnonymous = ref(false)
 const tab = ref('intro')
 const tabsRef = ref()
 
-const isLoggedIn = computed(() => !!localStorage.getItem('token'))
+// 使用 ref 而非 computed，因为 localStorage 非响应式，登录成功后需手动更新
+const isLoggedIn = ref(!!localStorage.getItem('token'))
 
-onMounted(async () => {
+async function loadTomb(idOrCode) {
+  if (!idOrCode) return
+  loading.value = true
   try {
     const isNumeric = /^\d+$/.test(String(idOrCode))
     const res = isNumeric ? await getMemorialDetail(idOrCode) : await getMemorialDetailByCode(idOrCode)
@@ -354,6 +362,12 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
+}
+
+onMounted(() => loadTomb(route.params.id))
+
+watch(() => route.params.id, (newId) => {
+  if (newId) loadTomb(newId)
 })
 
 watch(tab, (val) => {
@@ -364,7 +378,7 @@ watch(tab, (val) => {
 function openLoginDialog() {
   pendingAction.value = null
   loginDialogVisible.value = true
-  if (loginMode.value === 'sms' || loginMode.value === 'register') getLoginCaptcha()
+  if (loginState.mode === 'sms') getLoginCaptcha()
 }
 function onLoginDialogClosed() {
   pendingAction.value = null
@@ -416,7 +430,7 @@ async function doCheckin(type) {
   if (!isLoggedIn.value) {
     pendingAction.value = { type: 'checkin', payload: type }
     loginDialogVisible.value = true
-    if (loginMode.value === 'sms' || loginMode.value === 'register') getLoginCaptcha()
+    if (loginState.mode === 'sms') getLoginCaptcha()
     return
   }
   if (!tomb.value?.id) return
@@ -436,7 +450,7 @@ async function submitMsg() {
   if (!isLoggedIn.value) {
     pendingAction.value = { type: 'message' }
     loginDialogVisible.value = true
-    if (loginMode.value === 'sms' || loginMode.value === 'register') getLoginCaptcha()
+    if (loginState.mode === 'sms') getLoginCaptcha()
     return
   }
   if (!tomb.value?.id) return
@@ -464,7 +478,7 @@ function getActionName() {
 // =========================
 
 const loginDialogVisible = ref(false)
-const loginMode = ref<'password' | 'sms'>('password')
+const loginState = reactive({ mode: 'password' })
 const loginFormRef = ref()
 const loginForm = reactive({
   username: '',
@@ -489,7 +503,7 @@ const loginCountdown = ref(0)
 const loginSending = ref(false)
 const loginLoading = ref(false)
 
-watch(loginMode, (val) => { if (val === 'sms') getLoginCaptcha() })
+watch(() => loginState.mode, (val) => { if (val === 'sms') getLoginCaptcha() })
 
 async function getLoginCaptcha() {
   try {
@@ -521,17 +535,20 @@ async function handleDialogLogin() {
   try {
     loginLoading.value = true
     let res
-    if (loginMode.value === 'password') {
+    if (loginState.mode === 'password') {
       await loginFormRef.value.validateField(['username', 'password'])
       const plain = Date.now() + loginForm.password
       res = await passwordLoginAPI({ username: loginForm.username, password: encryptPassword(plain) })
     } else {
+      // 手机登录时确保验证码已加载
+      if (!loginCaptchaImage.value) getLoginCaptcha()
       await loginFormRef.value.validateField(['mobile', 'smsCode'])
       res = await smsLoginAPI({ mobile: loginForm.mobile, smsCode: loginForm.smsCode })
     }
     if (res?.token) {
       localStorage.setItem('token', res.token)
       localStorage.setItem('currentUser', JSON.stringify(res))
+      isLoggedIn.value = true
     }
     loginDialogVisible.value = false
     const action = pendingAction.value
@@ -655,7 +672,7 @@ function openApplyDialog() {
   if (!isLoggedIn.value) {
     pendingAction.value = { type: 'applyFamily' }
     loginDialogVisible.value = true
-    if (loginMode.value === 'sms' || loginMode.value === 'register') getLoginCaptcha()
+    if (loginState.mode === 'sms') getLoginCaptcha()
     return
   }
   if (!tomb.value?.familyId) {
@@ -739,7 +756,8 @@ function toPreview(html) {
 .login-dialog-box {
   position: relative;
   width: 300px;
-  height: 340px;
+  min-height: 340px;
+  max-height: 420px;
   padding: 25px;
   box-sizing: border-box;
   background: rgba(255, 255, 255, 0.98);

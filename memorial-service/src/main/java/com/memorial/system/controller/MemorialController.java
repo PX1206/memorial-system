@@ -45,12 +45,12 @@ public class MemorialController {
     @Autowired
     private RedisUtil redisUtil;
 
-//    @GetMapping("/detail/{id}")
-//    @ApiOperation(value = "获取墓碑详情（游客端，按ID）", response = TombVO.class)
-//    public ApiResult<TombVO> getDetail(@PathVariable("id") Long id) throws Exception {
-//        TombVO tombVO = tombService.getTombDetail(id);
-//        return ApiResult.ok(tombVO);
-//    }
+    @GetMapping("/detail/{id}")
+    @ApiOperation(value = "获取墓碑详情（游客端，按ID）", response = TombVO.class)
+    public ApiResult<TombVO> getDetail(@PathVariable("id") Long id) throws Exception {
+        TombVO tombVO = tombService.getTombDetail(id);
+        return ApiResult.ok(tombVO);
+    }
 
     @GetMapping("/detail/code/{code}")
     @ApiOperation(value = "获取墓碑详情（游客端，按二维码标识）", response = TombVO.class)
@@ -95,6 +95,7 @@ public class MemorialController {
     @ApiOperation(value = "留言分页列表（游客端：他人仅看已审核，本人可见自己的全部留言）", response = TombMessageVO.class)
     public ApiResult<Paging<TombMessageVO>> getMessagePageList(@RequestBody TombMessagePageParam param) throws Exception {
         param.setStatus("approved");
+        param.setForPublicMemorial(true); // 纪念页公开：按 tombId 展示，跳过家族权限过滤
         String token = TokenUtil.getToken();
         if (!StringUtil.isBlank(token) && redisUtil.hasKey(token)) {
             try {
@@ -112,6 +113,7 @@ public class MemorialController {
     @ApiOperation(value = "留言分页列表（游客端，仅已审核，GET，同上规则）", response = TombMessageVO.class)
     public ApiResult<Paging<TombMessageVO>> getMessagePageListGet(TombMessagePageParam param) throws Exception {
         param.setStatus("approved");
+        param.setForPublicMemorial(true);
         String token = TokenUtil.getToken();
         if (!StringUtil.isBlank(token) && redisUtil.hasKey(token)) {
             try {
@@ -128,6 +130,7 @@ public class MemorialController {
     @PostMapping("/checkin/getPageList")
     @ApiOperation(value = "打卡记录分页列表（游客端）", response = TombCheckinVO.class)
     public ApiResult<Paging<TombCheckinVO>> getCheckinPageList(@RequestBody TombCheckinPageParam param) throws Exception {
+        param.setForPublicMemorial(true); // 纪念页公开：按 tombId 展示，跳过家族权限过滤
         Paging<TombCheckinVO> paging = tombCheckinService.getCheckinPageList(param);
         return ApiResult.ok(paging);
     }
@@ -135,6 +138,7 @@ public class MemorialController {
     @GetMapping("/checkin/getPageList")
     @ApiOperation(value = "打卡记录分页列表（游客端，GET）", response = TombCheckinVO.class)
     public ApiResult<Paging<TombCheckinVO>> getCheckinPageListGet(TombCheckinPageParam param) throws Exception {
+        param.setForPublicMemorial(true);
         Paging<TombCheckinVO> paging = tombCheckinService.getCheckinPageList(param);
         return ApiResult.ok(paging);
     }
