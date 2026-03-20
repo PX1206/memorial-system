@@ -10,6 +10,7 @@
         <span v-show="!isCollapse" class="logo-text">念园系统</span>
       </div>
 
+      <div class="menu-scroll-wrap">
       <el-menu
         router
         :default-active="currentRoute"
@@ -38,6 +39,7 @@
           </el-menu-item>
         </template>
       </el-menu>
+      </div>
     </el-aside>
 
     <el-container>
@@ -130,6 +132,8 @@ const iconMap: Record<string, any> = {
 
 function getIcon(name: string) {
   if (!name) return Document
+  // Setting 图标在 el-sub-menu 中存在已知渲染问题（100% 缩放时不显示），用 Operation 替代
+  if (name === 'Setting') return Operation
   return iconMap[name] || Document
 }
 
@@ -216,6 +220,15 @@ const logout = async () => {
   background: #1d1e1f;
   transition: width .28s;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-scroll-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .layout-aside.aside-collapsed .logo-wrap {
@@ -224,6 +237,7 @@ const logout = async () => {
 
 .logo-wrap {
   height: 56px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -262,6 +276,13 @@ const logout = async () => {
 
 .layout-menu .el-menu-item.is-active {
   background: rgba(64,158,255,.15) !important;
+}
+
+/* 强制子菜单标题图标始终显示（修复 Setting 等图标在部分环境下不渲染的问题） */
+.layout-menu .el-sub-menu__title .el-icon {
+  flex-shrink: 0;
+  min-width: 1em;
+  min-height: 1em;
 }
 
 .layout-header {
