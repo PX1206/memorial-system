@@ -18,70 +18,109 @@
       </el-card>
 
       <el-card class="right-card">
-        <div class="toolbar">
-          <div class="toolbar-left">
-            <el-button v-if="isMobile" class="tree-toggle-btn" @click="treeDrawerVisible = true">
-              <el-icon><List /></el-icon>选择家族
-            </el-button>
-            <el-input v-model="query.keyword" placeholder="搜索家族" clearable class="search-input" @clear="loadData" />
-            <el-button type="primary" @click="loadData"><el-icon><Search /></el-icon>搜索</el-button>
-          </div>
-          <el-button type="primary" @click="openDialog()"><el-icon><Plus /></el-icon>新增家族</el-button>
-        </div>
-
-        <el-table :data="tableData" border stripe v-loading="loading">
-          <el-table-column prop="id" label="ID" width="70" />
-        <el-table-column prop="type" label="类型" width="80">
-          <template #default="{ row }">
-            <el-tag :type="row.type === '家族' ? 'danger' : row.type === '支族' ? 'warning' : 'info'" size="small">
-              {{ row.type || '家族' }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="name" label="名称" />
-        <el-table-column prop="parentName" label="上级家族" width="140">
-          <template #default="{ row }">
-            <el-tag v-if="row.parentName" type="warning">{{ row.parentName }}</el-tag>
-            <span v-else class="text-muted">顶级</span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="founderName" label="创建人" />
-        <el-table-column prop="memberCount" label="成员数" width="100">
-          <template #default="{ row }"><el-tag>{{ row.memberCount }} 人</el-tag></template>
-        </el-table-column>
-        <el-table-column prop="tombCount" label="墓碑数" width="100">
-          <template #default="{ row }"><el-tag type="success">{{ row.tombCount }} 座</el-tag></template>
-        </el-table-column>
-        <el-table-column label="邀请码" width="180">
-          <template #default="{ row }">
-            <div class="invite-cell">
-              <span class="invite-code">{{ row.inviteCode || '-' }}</span>
-              <el-button
-                v-if="canOperate(row) && row.inviteCode"
-                size="small"
-                type="primary"
-                link
-                @click="openInviteDialog(row)"
-              >
-                二维码
-              </el-button>
+        <div class="toolbar" :class="{ 'toolbar-mobile': isMobile }">
+          <template v-if="isMobile">
+            <div class="toolbar-row toolbar-row-1">
+              <el-button class="tree-toggle-btn" @click="treeDrawerVisible = true"><el-icon><List /></el-icon>选择家族</el-button>
+              <el-button type="primary" @click="openDialog()"><el-icon><Plus /></el-icon>新增家族</el-button>
+            </div>
+            <div class="toolbar-row toolbar-row-2">
+              <el-input v-model="query.keyword" placeholder="搜索家族" clearable class="search-input" @clear="loadData" />
+              <el-button type="primary" @click="loadData"><el-icon><Search /></el-icon>搜索</el-button>
             </div>
           </template>
-        </el-table-column>
-        <el-table-column prop="description" label="家族简介" show-overflow-tooltip />
-        <el-table-column prop="address" label="所在地区" width="140" show-overflow-tooltip />
-        <el-table-column prop="createTime" label="创建时间" width="170" />
-        <el-table-column label="操作" width="200" fixed="right">
-          <template #default="{ row }">
-            <el-button v-if="canOperate(row)" size="small" type="primary" link @click="openDialog(row)">编辑</el-button>
-            <el-button size="small" type="success" link @click="viewMembers(row)">成员</el-button>
-            <el-button v-if="canOperate(row)" size="small" type="danger" link @click="handleDelete(row)">删除</el-button>
+          <template v-else>
+            <div class="toolbar-left">
+              <el-input v-model="query.keyword" placeholder="搜索家族" clearable class="search-input" @clear="loadData" />
+              <el-button type="primary" @click="loadData"><el-icon><Search /></el-icon>搜索</el-button>
+            </div>
+            <el-button type="primary" @click="openDialog()"><el-icon><Plus /></el-icon>新增家族</el-button>
           </template>
-        </el-table-column>
-      </el-table>
+        </div>
+
+        <!-- 桌面端：表格 -->
+        <div class="family-desktop">
+          <el-table :data="tableData" border stripe v-loading="loading">
+            <el-table-column prop="id" label="ID" width="70" />
+            <el-table-column prop="type" label="类型" width="80">
+              <template #default="{ row }">
+                <el-tag :type="row.type === '家族' ? 'danger' : row.type === '支族' ? 'warning' : 'info'" size="small">
+                  {{ row.type || '家族' }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column prop="name" label="名称" />
+            <el-table-column prop="parentName" label="上级家族" width="140">
+              <template #default="{ row }">
+                <el-tag v-if="row.parentName" type="warning">{{ row.parentName }}</el-tag>
+                <span v-else class="text-muted">顶级</span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="founderName" label="创建人" />
+            <el-table-column prop="memberCount" label="成员数" width="100">
+              <template #default="{ row }"><el-tag>{{ row.memberCount }} 人</el-tag></template>
+            </el-table-column>
+            <el-table-column prop="tombCount" label="墓碑数" width="100">
+              <template #default="{ row }"><el-tag type="success">{{ row.tombCount }} 座</el-tag></template>
+            </el-table-column>
+            <el-table-column label="邀请码" width="180">
+              <template #default="{ row }">
+                <div class="invite-cell">
+                  <span class="invite-code">{{ row.inviteCode || '-' }}</span>
+                  <el-button
+                    v-if="canOperate(row) && row.inviteCode"
+                    size="small"
+                    type="primary"
+                    link
+                    @click="openInviteDialog(row)"
+                  >
+                    二维码
+                  </el-button>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column prop="createTime" label="创建时间" width="170" />
+            <el-table-column label="操作" width="240" fixed="right">
+              <template #default="{ row }">
+                <el-button size="small" type="info" link @click="openDetail(row)">详情</el-button>
+                <el-button v-if="canOperate(row)" size="small" type="primary" link @click="openDialog(row)">编辑</el-button>
+                <el-button size="small" type="success" link @click="viewMembers(row)">成员</el-button>
+                <el-button v-if="canOperate(row)" size="small" type="danger" link @click="handleDelete(row)">删除</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+
+        <!-- 手机端：卡片列表 -->
+        <div class="family-mobile">
+          <div v-loading="loading" class="family-card-list">
+            <div v-for="row in tableData" :key="row.id" class="family-card">
+              <div class="family-card__main">
+                <div class="family-card__name">{{ row.name }}</div>
+                <el-tag :type="row.type === '家族' ? 'danger' : row.type === '支族' ? 'warning' : 'info'" size="small">
+                  {{ row.type || '家族' }}
+                </el-tag>
+                <div class="family-card__meta">
+                  <span v-if="row.parentName">{{ row.parentName }}</span>
+                  <span v-else class="text-muted">顶级</span>
+                  · 成员 {{ row.memberCount ?? 0 }} · 墓碑 {{ row.tombCount ?? 0 }}
+                </div>
+              </div>
+              <div class="family-card__actions">
+                <el-button size="small" type="info" link @click="openDetail(row)">详情</el-button>
+                <el-button v-if="canOperate(row)" size="small" type="primary" link @click="openDialog(row)">编辑</el-button>
+                <el-button size="small" type="success" link @click="viewMembers(row)">成员</el-button>
+                <el-button v-if="canOperate(row) && row.inviteCode" size="small" type="primary" link @click="openInviteDialog(row)">二维码</el-button>
+                <el-button v-if="canOperate(row)" size="small" type="danger" link @click="handleDelete(row)">删除</el-button>
+              </div>
+            </div>
+            <el-empty v-if="!loading && !tableData?.length" description="暂无家族" :image-size="80" />
+          </div>
+        </div>
 
         <div class="pagination-wrap">
           <el-pagination
+            :small="isMobile"
             v-model:current-page="query.pageIndex"
             v-model:page-size="query.pageSize"
             :total="total"
@@ -106,7 +145,41 @@
       />
     </el-drawer>
 
-    <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑家族' : '新增家族'" width="500px" destroy-on-close>
+    <el-drawer v-model="detailDrawerVisible" :title="detailData.name + ' - 详情'" :size="isMobile ? '100%' : '420px'">
+      <div class="detail-content">
+        <el-descriptions :column="1" border>
+          <el-descriptions-item label="类型">
+            <el-tag :type="detailData.type === '家族' ? 'danger' : detailData.type === '支族' ? 'warning' : 'info'" size="small">
+              {{ detailData.type || '-' }}
+            </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="上级家族">{{ detailData.parentName || '顶级' }}</el-descriptions-item>
+          <el-descriptions-item label="创建人">{{ detailData.founderName || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="成员数">{{ detailData.memberCount ?? 0 }} 人</el-descriptions-item>
+          <el-descriptions-item label="墓碑数">{{ detailData.tombCount ?? 0 }} 座</el-descriptions-item>
+          <el-descriptions-item label="联系电话">{{ detailData.phone || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="邀请码">
+            <span class="invite-code">{{ detailData.inviteCode || '-' }}</span>
+          </el-descriptions-item>
+          <el-descriptions-item label="创建时间">{{ detailData.createTime || '-' }}</el-descriptions-item>
+        </el-descriptions>
+        <div class="detail-block">
+          <div class="detail-block-label">所在地区</div>
+          <div class="detail-block-content">{{ detailData.address || '暂无' }}</div>
+        </div>
+        <div class="detail-block">
+          <div class="detail-block-label">家族简介</div>
+          <div class="detail-block-content detail-desc" v-if="detailData.description">{{ detailData.description }}</div>
+          <div class="detail-block-content text-muted" v-else>暂无</div>
+        </div>
+        <div class="detail-actions" v-if="canOperate(detailData)">
+          <el-button type="primary" size="small" @click="detailDrawerVisible = false; openDialog({ ...detailData })">编辑</el-button>
+          <el-button type="success" size="small" @click="detailDrawerVisible = false; viewMembers({ ...detailData })">查看成员</el-button>
+        </div>
+      </div>
+    </el-drawer>
+
+    <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑家族' : '新增家族'" :width="isMobile ? '95%' : '500px'" destroy-on-close>
       <el-form :model="form" :rules="rules" ref="formRef" label-width="90px">
         <el-form-item label="类型">
           <el-select v-model="form.type" placeholder="选择类型" style="width: 100%" :disabled="isEdit">
@@ -183,7 +256,9 @@ const tableData = ref([])
 
 const inviteDialogVisible = ref(false)
 const treeDrawerVisible = ref(false)
-const isMobile = ref(false)
+const detailDrawerVisible = ref(false)
+const detailData = ref({})
+const isMobile = ref(window.innerWidth < 768)
 
 function checkMobile() {
   isMobile.value = window.innerWidth < 768
@@ -250,6 +325,11 @@ onMounted(async () => {
   loadData()
 })
 onUnmounted(() => window.removeEventListener('resize', checkMobile))
+
+function openDetail(row) {
+  detailData.value = { ...row }
+  detailDrawerVisible.value = true
+}
 
 function openDialog(row) {
   isEdit.value = !!row
@@ -324,23 +404,45 @@ function handleDelete(row) {
 .left-card { width: 280px; flex: 0 0 280px; }
 .right-card { flex: 1; min-width: 0; }
 
+/* 家族列表：桌面表格 / 手机卡片切换 */
+.family-desktop { display: block; }
+.family-mobile { display: none; }
+.family-card-list { display: flex; flex-direction: column; gap: 12px; }
+.family-card {
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid #ebeef5;
+  background: #fafafa;
+}
+.family-card__main { margin-bottom: 12px; }
+.family-card__name { font-weight: 600; font-size: 16px; color: #303133; margin-bottom: 6px; }
+.family-card__meta { font-size: 13px; color: #606266; margin-top: 6px; }
+.family-card__actions { display: flex; flex-wrap: wrap; gap: 4px; padding-top: 10px; border-top: 1px solid #ebeef5; }
+
 @media (max-width: 768px) {
   .page-wrap { flex-direction: column; }
   .left-card { display: none; }
-  .right-card { flex: 1; min-width: 0; width: 100%; }
+  .right-card { flex: 1; min-width: 0; width: 100%; overflow-x: visible; }
   .toolbar-left .search-input { flex: 1; min-width: 80px; max-width: 160px; }
   .toolbar { flex-wrap: wrap; gap: 8px; }
-  .right-card { overflow-x: auto; }
-  .right-card :deep(.el-table) { font-size: 12px; min-width: 600px; }
-  .right-card :deep(.el-table .el-button) { padding: 2px 4px; }
+  .family-desktop { display: none; }
+  .family-mobile { display: block; }
+  .pagination-wrap { overflow-x: auto; }
+  .pagination-wrap :deep(.el-pagination) { flex-wrap: wrap; }
 }
 
 .left-toolbar { display: flex; align-items: center; margin-bottom: 12px; }
 .left-title { font-size: 14px; font-weight: 600; color: #303133; }
 
-.toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
+.toolbar-mobile { flex-direction: column; align-items: stretch; }
+.toolbar-mobile .toolbar-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.toolbar-mobile .toolbar-row-1 { justify-content: space-between; }
+.toolbar-mobile .toolbar-row-2 .search-input { flex: 1; min-width: 0; }
 .toolbar-left { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
 .search-input { width: 220px; }
+.current-family { margin-bottom: 10px; font-size: 13px; color: #909399; display: flex; align-items: center; gap: 8px; }
+.table-scroll-wrap { overflow-x: auto; }
 .pagination-wrap { display: flex; justify-content: flex-end; margin-top: 16px; }
 .text-muted { color: #c0c4cc; font-size: 13px; }
 .invite-cell { display: flex; align-items: center; gap: 6px; }
@@ -352,4 +454,12 @@ function handleDelete(row) {
 .invite-qr-wrap { margin: 10px 0; display: flex; justify-content: center; }
 .invite-qr-img { width: 260px; height: 260px; border-radius: 8px; box-shadow: 0 0 8px rgba(0,0,0,0.08); }
 .invite-tip { font-size: 13px; color: #909399; }
+
+/* 详情抽屉 */
+.detail-content { padding: 0 8px; }
+.detail-block { margin-top: 16px; }
+.detail-block-label { font-weight: 600; font-size: 14px; color: #303133; margin-bottom: 8px; padding: 8px 12px; background: #f5f7fa; border-radius: 6px; }
+.detail-block-content { padding: 10px 12px; border: 1px solid #ebeef5; border-radius: 6px; background: #fafafa; color: #606266; line-height: 1.8; }
+.detail-block-content.detail-desc { white-space: pre-wrap; word-break: break-word; max-height: 200px; overflow-y: auto; }
+.detail-actions { margin-top: 20px; display: flex; gap: 10px; }
 </style>

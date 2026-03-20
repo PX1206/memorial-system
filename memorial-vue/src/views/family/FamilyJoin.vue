@@ -106,5 +106,10 @@ function handleJoin() {
   justify-content: flex-end;
   gap: 10px;
 }
+@media (max-width: 768px) {
+  .join-wrap { padding: 16px; }
+  .join-card { width: 100%; max-width: 480px; }
+  .join-title { font-size: 18px; }
+}
 </style>
 

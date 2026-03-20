@@ -127,7 +127,7 @@
     <el-dialog
       v-model="registerDialogVisible"
       title="用户注册"
-      width="380px"
+      :width="isMobile ? '95%' : '380px'"
       destroy-on-close
     >
       <el-form
@@ -198,7 +198,7 @@
 
 <script setup lang="ts">
 
-import {ref, reactive, onMounted, nextTick, watch} from 'vue'
+import {ref, reactive, onMounted, onUnmounted, nextTick, watch} from 'vue'
 import {passwordLoginAPI, smsLoginAPI, getCaptchaAPI, sendSmsCodeAPI, registerAPI} from '@/api/auth'
 import {encryptPassword} from '@/utils/rsa'
 import {useRouter, useRoute} from 'vue-router'
@@ -208,6 +208,8 @@ const router = useRouter()
 const route = useRoute()
 
 const mode = ref<'password' | 'sms'>('password')
+const isMobile = ref(window.innerWidth < 768)
+function checkMobile() { isMobile.value = window.innerWidth < 768 }
 
 const formRef = ref()
 const usernameRef = ref()
@@ -514,12 +516,13 @@ watch(mode, (val) => {
 })
 
 onMounted(() => {
-
+  checkMobile()
+  window.addEventListener('resize', checkMobile)
   nextTick(() => {
     usernameRef.value?.focus()
   })
-
 })
+onUnmounted(() => window.removeEventListener('resize', checkMobile))
 
 </script>
 
@@ -539,11 +542,24 @@ onMounted(() => {
   top: 50%;
   transform: translateY(-50%);
   width: 300px;
-  height: 340px;
+  min-height: 340px;
   padding: 25px;
   background: rgba(255, 255, 255, 0.95);
   border-radius: 10px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+@media (max-width: 768px) {
+  .login-container {
+    left: 12px;
+    right: 12px;
+    width: auto;
+    min-height: auto;
+    padding: 20px 16px;
+  }
+  .form .el-form-item {
+    width: 100%;
+  }
 }
 
 .title {

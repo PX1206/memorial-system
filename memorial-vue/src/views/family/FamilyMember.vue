@@ -20,41 +20,62 @@
       </el-card>
 
       <el-card class="right-card">
-        <div class="toolbar">
-          <div class="toolbar-left">
-            <el-button v-if="isMobile" class="tree-toggle-btn" @click="treeDrawerVisible = true">
-              <el-icon><List /></el-icon>选择家族
-            </el-button>
-            <span class="family-title">{{ currentFamilyTitle }}</span>
-            <el-input
-              v-model="query.keyword"
-              placeholder="搜索"
-              clearable
-              class="search-input"
-              @clear="handleSearch"
-            />
-            <el-button type="primary" @click="handleSearch">搜索</el-button>
-          </div>
-          <el-button v-if="canOperate" type="primary" @click="openDialog()"><el-icon><Plus /></el-icon>添加成员</el-button>
+        <div class="toolbar" :class="{ 'toolbar-mobile': isMobile }">
+          <template v-if="isMobile">
+            <div class="toolbar-row toolbar-row-1">
+              <span class="family-title family-title-mobile">{{ currentFamilyTitle }}</span>
+              <el-button class="tree-toggle-btn" @click="treeDrawerVisible = true"><el-icon><List /></el-icon>选择家族</el-button>
+              <el-button v-if="canOperate" type="primary" @click="openDialog()"><el-icon><Plus /></el-icon>添加成员</el-button>
+            </div>
+            <div class="toolbar-row toolbar-row-2">
+              <el-input v-model="query.keyword" placeholder="搜索" clearable class="search-input" @clear="handleSearch" />
+              <el-button type="primary" @click="handleSearch">搜索</el-button>
+            </div>
+          </template>
+          <template v-else>
+            <div class="toolbar-left">
+              <span class="family-title">{{ currentFamilyTitle }}</span>
+              <el-input v-model="query.keyword" placeholder="搜索" clearable class="search-input" @clear="handleSearch" />
+              <el-button type="primary" @click="handleSearch">搜索</el-button>
+            </div>
+            <el-button v-if="canOperate" type="primary" @click="openDialog()"><el-icon><Plus /></el-icon>添加成员</el-button>
+          </template>
         </div>
 
         <div v-if="familyId && canOperate" class="apply-section">
           <div class="apply-section-title">待审核申请</div>
-          <el-table :data="applyList" border stripe v-loading="applyLoading" size="small">
-            <el-table-column prop="userName" label="申请人" width="120" />
-            <el-table-column prop="relation" label="关系" width="100" />
-            <el-table-column prop="reason" label="申请理由" show-overflow-tooltip />
-            <el-table-column prop="createTime" label="申请时间" width="170" />
-            <el-table-column label="操作" width="160" fixed="right">
-              <template #default="{ row }">
-                <el-button size="small" type="success" link @click="handleApproveApply(row)">通过</el-button>
-                <el-button size="small" type="danger" link @click="handleRejectApply(row)">拒绝</el-button>
-              </template>
-            </el-table-column>
-          </el-table>
-          <div v-if="applyList.length === 0 && !applyLoading" class="apply-empty">暂无待审核申请</div>
+          <div class="apply-desktop">
+            <el-table :data="applyList" border stripe v-loading="applyLoading" size="small">
+              <el-table-column prop="userName" label="申请人" width="120" />
+              <el-table-column prop="relation" label="关系" width="100" />
+              <el-table-column prop="reason" label="申请理由" show-overflow-tooltip />
+              <el-table-column prop="createTime" label="申请时间" width="170" />
+              <el-table-column label="操作" width="160" fixed="right">
+                <template #default="{ row }">
+                  <el-button size="small" type="success" link @click="handleApproveApply(row)">通过</el-button>
+                  <el-button size="small" type="danger" link @click="handleRejectApply(row)">拒绝</el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+          </div>
+          <div class="apply-mobile">
+            <div v-loading="applyLoading" class="apply-card-list">
+              <div v-for="row in applyList" :key="row.id" class="apply-card">
+                <div class="apply-card__name">{{ row.userName }}</div>
+                <div class="apply-card__meta">{{ row.relation }} · {{ row.createTime }}</div>
+                <div class="apply-card__reason" v-if="row.reason">{{ row.reason }}</div>
+                <div class="apply-card__actions">
+                  <el-button size="small" type="success" link @click="handleApproveApply(row)">通过</el-button>
+                  <el-button size="small" type="danger" link @click="handleRejectApply(row)">拒绝</el-button>
+                </div>
+              </div>
+              <div v-if="applyList.length === 0 && !applyLoading" class="apply-empty">暂无待审核申请</div>
+            </div>
+          </div>
         </div>
 
+        <!-- 桌面端：成员表格 -->
+        <div class="member-desktop">
         <el-table :data="tableData" border stripe v-loading="loading">
           <el-table-column prop="id" label="ID" width="70" />
           <el-table-column prop="name" label="姓名" width="100" />
@@ -88,9 +109,35 @@
             </template>
           </el-table-column>
         </el-table>
+        </div>
+
+        <!-- 手机端：成员卡片列表 -->
+        <div class="member-mobile">
+          <div v-loading="loading" class="member-card-list">
+            <div v-for="row in tableData" :key="row.id" class="member-card">
+              <div class="member-card__main">
+                <div class="member-card__name">{{ row.name }}</div>
+                <div class="member-card__meta">
+                  <span v-if="row.userNickname">{{ row.userNickname }}</span>
+                  <span v-else class="text-muted">未绑定</span>
+                  · {{ row.relation }} · {{ row.role }}
+                </div>
+                <div class="member-card__phone" v-if="row.phone">{{ row.phone }}</div>
+              </div>
+              <div class="member-card__actions" v-if="canOperate">
+                <el-button size="small" type="primary" link @click="openDialog(row)">编辑</el-button>
+                <el-button v-if="!row.userId && !row.userNickname" size="small" type="success" link @click="openBindQrDialog(row)">绑定二维码</el-button>
+                <el-button v-else-if="row.userId || row.userNickname" size="small" type="warning" link @click="handleUnbind(row)">解绑</el-button>
+                <el-button size="small" type="danger" link @click="handleRemove(row)">移除</el-button>
+              </div>
+            </div>
+            <el-empty v-if="!loading && !tableData?.length" description="暂无成员" :image-size="80" />
+          </div>
+        </div>
 
         <div class="pagination-wrap">
           <el-pagination
+            :small="isMobile"
             v-model:current-page="query.pageIndex"
             v-model:page-size="query.pageSize"
             :total="total"
@@ -114,7 +161,7 @@
       />
     </el-drawer>
 
-    <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑成员' : '添加成员'" width="500px" destroy-on-close>
+    <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑成员' : '添加成员'" :width="isMobile ? '95%' : '500px'" destroy-on-close>
       <el-form :model="form" :rules="rules" ref="formRef" label-width="90px">
         <el-form-item label="所属家族" prop="familyId">
           <el-tree-select
@@ -147,7 +194,7 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="bindQrVisible" title="成员绑定二维码" width="360px" destroy-on-close>
+    <el-dialog v-model="bindQrVisible" title="成员绑定二维码" :width="isMobile ? '95%' : '360px'" destroy-on-close>
       <div class="bind-qr-body" v-if="currentBind.member">
         <div class="bind-qr-info">
           <div class="bind-qr-name">{{ currentBind.member.name }}（{{ currentBind.member.familyName }}）</div>
@@ -190,7 +237,7 @@ const treeLoading = ref(false)
 const familyTreeData = ref([])
 const treeRef = ref()
 const treeDrawerVisible = ref(false)
-const isMobile = ref(false)
+const isMobile = ref(window.innerWidth < 768)
 
 function checkMobile() {
   isMobile.value = window.innerWidth < 768
@@ -425,13 +472,46 @@ function handleRemove(row) {
 
 .toolbar-left .search-input { width: 220px; }
 
+/* 待审核：桌面表格 / 手机卡片 */
+.apply-desktop { display: block; }
+.apply-mobile { display: none; }
+/* 成员：桌面表格 / 手机卡片 */
+.member-desktop { display: block; }
+.member-mobile { display: none; }
+
+.apply-card-list { display: flex; flex-direction: column; gap: 10px; }
+.apply-card { padding: 12px; border-radius: 8px; border: 1px solid #ebeef5; background: #fff; }
+.apply-card__name { font-weight: 600; font-size: 15px; color: #303133; margin-bottom: 4px; }
+.apply-card__meta { font-size: 13px; color: #606266; margin-bottom: 6px; }
+.apply-card__reason { font-size: 13px; color: #909399; margin-bottom: 8px; word-break: break-word; }
+.apply-card__actions { display: flex; gap: 8px; padding-top: 8px; border-top: 1px solid #ebeef5; }
+
+.member-card-list { display: flex; flex-direction: column; gap: 12px; }
+.member-card { padding: 14px; border-radius: 10px; border: 1px solid #ebeef5; background: #fafafa; }
+.member-card__main { margin-bottom: 12px; }
+.member-card__name { font-weight: 600; font-size: 16px; color: #303133; margin-bottom: 6px; }
+.member-card__meta { font-size: 13px; color: #606266; margin-bottom: 4px; }
+.member-card__phone { font-size: 13px; color: #909399; }
+.member-card__actions { display: flex; flex-wrap: wrap; gap: 4px; padding-top: 10px; border-top: 1px solid #ebeef5; }
+
 @media (max-width: 768px) {
+  .page-wrap { flex-direction: column; }
   .left-card { display: none; }
-  .right-card { flex: 1; min-width: 0; width: 100%; }
+  .right-card { flex: 1; min-width: 0; width: 100%; overflow-x: visible; }
   .toolbar-left .search-input { flex: 1; min-width: 80px; max-width: 160px; }
   .family-title { font-size: 14px; max-width: 120px; overflow: hidden; text-overflow: ellipsis; }
-  .right-card { overflow-x: auto; }
-  .right-card :deep(.el-table) { font-size: 12px; min-width: 600px; }
+  .apply-desktop { display: none; }
+  .apply-mobile { display: block; }
+  .member-desktop { display: none; }
+  .member-mobile { display: block; }
+  .pagination-wrap { overflow-x: auto; }
+  .pagination-wrap :deep(.el-pagination) { flex-wrap: wrap; }
+  /* 手机端 toolbar：第一行选择家族，第二行搜索框+搜索按钮 */
+  .toolbar-mobile { flex-direction: column; align-items: stretch; gap: 12px; }
+  .toolbar-mobile .toolbar-row-1 { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: space-between; }
+  .toolbar-mobile .toolbar-row-2 { display: flex; align-items: center; gap: 10px; }
+  .toolbar-mobile .toolbar-row-2 .search-input { flex: 1; min-width: 0; }
+  .toolbar-mobile .family-title-mobile { flex: 1; min-width: 0; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 }
 
 .left-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }

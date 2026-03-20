@@ -17,53 +17,106 @@
       </el-card>
 
       <el-card class="right-card">
-        <div class="toolbar">
-          <div class="toolbar-left">
-            <el-input v-model="query.keyword" placeholder="搜索逝者姓名" clearable style="width: 220px" @clear="loadData" />
-            <el-button type="primary" @click="loadData"><el-icon><Search /></el-icon>搜索</el-button>
-          </div>
-          <el-button v-if="canAddTomb" type="primary" @click="openDialog()"><el-icon><Plus /></el-icon>新增墓碑</el-button>
+        <div class="toolbar" :class="{ 'toolbar-mobile': isMobile }">
+          <!-- 手机端：第一行 选择家族+新增墓碑，第二行 搜索框+搜索 -->
+          <template v-if="isMobile">
+            <div class="toolbar-row toolbar-row-1">
+              <el-button class="tree-toggle-btn" @click="treeDrawerVisible = true">
+                <el-icon><List /></el-icon>选择家族
+              </el-button>
+              <el-button v-if="canAddTomb" type="primary" @click="openDialog()"><el-icon><Plus /></el-icon>新增墓碑</el-button>
+            </div>
+            <div class="toolbar-row toolbar-row-2">
+              <el-input v-model="query.keyword" placeholder="搜索逝者姓名" clearable class="search-input" @clear="loadData" />
+              <el-button type="primary" @click="loadData"><el-icon><Search /></el-icon>搜索</el-button>
+            </div>
+          </template>
+          <!-- 桌面端：原有布局 -->
+          <template v-else>
+            <div class="toolbar-left">
+              <el-input v-model="query.keyword" placeholder="搜索逝者姓名" clearable class="search-input" @clear="loadData" />
+              <el-button type="primary" @click="loadData"><el-icon><Search /></el-icon>搜索</el-button>
+            </div>
+            <el-button v-if="canAddTomb" type="primary" @click="openDialog()"><el-icon><Plus /></el-icon>新增墓碑</el-button>
+          </template>
         </div>
 
-        <div class="current-family">{{ currentFamilyTitle }}</div>
+        <div class="current-family">
+          {{ currentFamilyTitle }}
+          <el-button type="primary" link size="small" @click="treeDrawerVisible = true" class="change-family-link">切换</el-button>
+        </div>
 
-        <el-table :data="tableData" border stripe v-loading="loading">
-          <el-table-column prop="id" label="ID" width="70" />
-          <el-table-column label="照片" width="80">
-            <template #default="{ row }">
-              <el-avatar :size="48" :src="row.photo" shape="square" v-if="row.photo" />
-              <el-avatar :size="48" shape="square" v-else><el-icon><Picture /></el-icon></el-avatar>
-            </template>
-          </el-table-column>
-          <el-table-column prop="name" label="逝者姓名" />
-          <el-table-column prop="birthday" label="出生日期" width="120" />
-          <el-table-column prop="deathday" label="逝世日期" width="120" />
-          <el-table-column prop="familyName" label="所属家族" width="120">
-            <template #default="{ row }">
-              <el-tag v-if="row.familyName" type="success">{{ row.familyName }}</el-tag>
-              <span v-else class="text-muted">未关联</span>
-            </template>
-          </el-table-column>
-          <el-table-column prop="address" label="所处位置" width="140" show-overflow-tooltip />
-        <el-table-column label="二维码" width="100" align="center">
-          <template #default="{ row }">
-            <el-button size="small" type="primary" link @click="openQrDialog(row)">查看</el-button>
-          </template>
-        </el-table-column>
-          <el-table-column prop="visitCount" label="访问量" width="90" />
-          <el-table-column prop="messageCount" label="留言数" width="90" />
-          <el-table-column label="操作" width="200" fixed="right">
-            <template #default="{ row }">
-              <el-button v-if="canOperate(row)" size="small" type="primary" link @click="openDialog(row)">编辑</el-button>
-              <el-button v-if="canOperate(row)" size="small" type="warning" link @click="openStoryDrawer(row)">事迹</el-button>
-              <el-button size="small" type="success" link @click="viewDetail(row)">详情</el-button>
-              <el-button v-if="canOperate(row)" size="small" type="danger" link @click="handleDelete(row)">删除</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
+        <!-- 桌面端：表格 -->
+        <div class="tomb-desktop">
+          <el-table :data="tableData" border stripe v-loading="loading">
+            <el-table-column prop="id" label="ID" width="70" />
+            <el-table-column label="照片" width="80">
+              <template #default="{ row }">
+                <el-avatar :size="48" :src="row.photo" shape="square" v-if="row.photo" />
+                <el-avatar :size="48" shape="square" v-else><el-icon><Picture /></el-icon></el-avatar>
+              </template>
+            </el-table-column>
+            <el-table-column prop="name" label="逝者姓名" />
+            <el-table-column prop="birthday" label="出生日期" width="120" />
+            <el-table-column prop="deathday" label="逝世日期" width="120" />
+            <el-table-column prop="familyName" label="所属家族" width="120">
+              <template #default="{ row }">
+                <el-tag v-if="row.familyName" type="success">{{ row.familyName }}</el-tag>
+                <span v-else class="text-muted">未关联</span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="address" label="所处位置" width="140" show-overflow-tooltip />
+            <el-table-column label="二维码" width="100" align="center">
+              <template #default="{ row }">
+                <el-button size="small" type="primary" link @click="openQrDialog(row)">查看</el-button>
+              </template>
+            </el-table-column>
+            <el-table-column prop="visitCount" label="访问量" width="90" />
+            <el-table-column prop="messageCount" label="留言数" width="90" />
+            <el-table-column label="操作" width="200" fixed="right">
+              <template #default="{ row }">
+                <el-button v-if="canOperate(row)" size="small" type="primary" link @click="openDialog(row)">编辑</el-button>
+                <el-button v-if="canOperate(row)" size="small" type="warning" link @click="openStoryDrawer(row)">事迹</el-button>
+                <el-button size="small" type="success" link @click="viewDetail(row)">详情</el-button>
+                <el-button v-if="canOperate(row)" size="small" type="danger" link @click="handleDelete(row)">删除</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+
+        <!-- 手机端：卡片列表 -->
+        <div class="tomb-mobile">
+          <div v-loading="loading" class="tomb-card-list">
+            <div v-for="row in tableData" :key="row.id" class="tomb-card">
+              <div class="tomb-card__main">
+                <el-avatar :size="56" :src="row.photo" shape="square" class="tomb-card__photo">
+                  <el-icon :size="28"><Picture /></el-icon>
+                </el-avatar>
+                <div class="tomb-card__info">
+                  <div class="tomb-card__name">{{ row.name }}</div>
+                  <div class="tomb-card__meta">{{ row.birthday }} — {{ row.deathday }}</div>
+                  <div class="tomb-card__family">
+                    <el-tag v-if="row.familyName" type="success" size="small">{{ row.familyName }}</el-tag>
+                    <span v-else class="text-muted">未关联</span>
+                  </div>
+                  <div class="tomb-card__stats">访问 {{ row.visitCount ?? 0 }} · 留言 {{ row.messageCount ?? 0 }}</div>
+                </div>
+              </div>
+              <div class="tomb-card__actions">
+                <el-button v-if="canOperate(row)" size="small" type="primary" link @click="openDialog(row)">编辑</el-button>
+                <el-button v-if="canOperate(row)" size="small" type="warning" link @click="openStoryDrawer(row)">事迹</el-button>
+                <el-button size="small" type="success" link @click="viewDetail(row)">详情</el-button>
+                <el-button size="small" type="info" link @click="openQrDialog(row)">二维码</el-button>
+                <el-button v-if="canOperate(row)" size="small" type="danger" link @click="handleDelete(row)">删除</el-button>
+              </div>
+            </div>
+            <el-empty v-if="!loading && !tableData?.length" description="暂无墓碑" :image-size="80" />
+          </div>
+        </div>
 
         <div class="pagination-wrap">
           <el-pagination
+            :small="isMobile"
             v-model:current-page="query.pageIndex"
             v-model:page-size="query.pageSize"
             :total="total"
@@ -76,15 +129,27 @@
       </el-card>
     </div>
 
-    <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑墓碑' : '新增墓碑'" width="720px" destroy-on-close>
+    <el-drawer v-model="treeDrawerVisible" title="选择家族" direction="ltr" size="280px">
+      <el-tree
+        v-loading="treeLoading"
+        :data="familyTreeData"
+        :props="{ label: 'name', children: 'children' }"
+        node-key="id"
+        highlight-current
+        default-expand-all
+        @node-click="(node) => { handleTreeNodeClick(node); treeDrawerVisible = false }"
+      />
+    </el-drawer>
+
+    <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑墓碑' : '新增墓碑'" :width="isMobile ? '95%' : '720px'" destroy-on-close class="form-dialog">
       <el-form :model="form" :rules="rules" ref="formRef" label-width="90px">
         <el-row :gutter="20">
-          <el-col :span="12">
+          <el-col :xs="24" :sm="24" :md="12" :lg="12">
             <el-form-item label="逝者姓名" prop="name">
               <el-input v-model="form.name" maxlength="64" show-word-limit placeholder="最多64字" />
             </el-form-item>
           </el-col>
-          <el-col :span="12">
+          <el-col :xs="24" :sm="24" :md="12" :lg="12">
             <el-form-item label="所属家庭">
               <el-tree-select
                 v-model="form.familyId"
@@ -99,12 +164,12 @@
           </el-col>
         </el-row>
         <el-row :gutter="20">
-          <el-col :span="12">
+          <el-col :xs="24" :sm="24" :md="12" :lg="12">
             <el-form-item label="出生日期" prop="birthday">
               <el-date-picker v-model="form.birthday" type="date" value-format="YYYY-MM-DD" placeholder="选择日期" style="width: 100%" />
             </el-form-item>
           </el-col>
-          <el-col :span="12">
+          <el-col :xs="24" :sm="24" :md="12" :lg="12">
             <el-form-item label="逝世日期" prop="deathday">
               <el-date-picker v-model="form.deathday" type="date" value-format="YYYY-MM-DD" placeholder="选择日期" style="width: 100%" />
             </el-form-item>
@@ -161,7 +226,7 @@
     </el-dialog>
 
     <!-- 事迹管理抽屉 -->
-    <el-drawer v-model="storyVisible" :title="storyTomb.name + ' - 生平事迹'" size="55%">
+    <el-drawer v-model="storyVisible" :title="storyTomb.name + ' - 生平事迹'" :size="isMobile ? '100%' : '55%'">
       <div class="story-toolbar">
         <el-button type="primary" @click="openStoryEditor()"><el-icon><Plus /></el-icon>新增事迹</el-button>
       </div>
@@ -178,7 +243,7 @@
         </el-table-column>
       </el-table>
 
-      <el-dialog v-model="storyEditorVisible" :title="storyIsEdit ? '编辑事迹' : '新增事迹'" width="800px" destroy-on-close>
+      <el-dialog v-model="storyEditorVisible" :title="storyIsEdit ? '编辑事迹' : '新增事迹'" :width="isMobile ? '95%' : '800px'" destroy-on-close>
         <el-form :model="storyForm" ref="storyFormRef" label-width="80px">
           <el-form-item label="标题" prop="title" :rules="[{ required: true, message: '请输入标题', trigger: 'blur' }, { max: 100, message: '标题不能超过100字', trigger: 'blur' }]">
             <el-input v-model="storyForm.title" maxlength="100" show-word-limit />
@@ -217,7 +282,7 @@
       </template>
     </el-dialog>
 
-    <el-drawer v-model="detailVisible" :title="detailData.name + ' - 详细信息'" size="45%">
+    <el-drawer v-model="detailVisible" :title="detailData.name + ' - 详细信息'" :size="isMobile ? '100%' : '45%'">
       <div class="detail-content">
         <div class="detail-photo-block">
           <div class="detail-photo" v-if="detailData.photo">
@@ -342,8 +407,8 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue'
-import { Search, Plus, Picture, Close } from '@element-plus/icons-vue'
+import { ref, reactive, onMounted, onUnmounted, computed } from 'vue'
+import { Search, Plus, Picture, Close, List } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import QRCode from 'qrcode'
 import { QuillEditor } from '@vueup/vue-quill'
@@ -367,6 +432,9 @@ const isSuperAdmin = ref(false)
 const familyTreeData = ref([])
 const selectedFamilyId = ref(null)
 const selectedFamilyName = ref('')
+const treeDrawerVisible = ref(false)
+const isMobile = ref(window.innerWidth < 768)
+function checkMobile() { isMobile.value = window.innerWidth < 768 }
 
 const query = reactive({ keyword: '', familyId: null, pageIndex: 1, pageSize: 10 })
 const tableData = ref([])
@@ -459,7 +527,13 @@ async function loadFamilyTree() {
   }
 }
 
-onMounted(() => { loadData(); loadFamilyTree() })
+onMounted(() => {
+  checkMobile()
+  window.addEventListener('resize', checkMobile)
+  loadData()
+  loadFamilyTree()
+})
+onUnmounted(() => { window.removeEventListener('resize', checkMobile) })
 
 const currentFamilyTitle = computed(() => {
   if (selectedFamilyId.value === null) return '当前筛选：全部家族'
@@ -723,11 +797,50 @@ function handleDeleteStory(row) {
 .left-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
 .left-title { font-size: 14px; font-weight: 600; color: #303133; }
 
-.toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-.toolbar-left { display: flex; gap: 10px; }
-.current-family { margin-bottom: 10px; font-size: 13px; color: #909399; }
+.toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px; }
+.toolbar-mobile { flex-direction: column; align-items: stretch; }
+.toolbar-mobile .toolbar-row { display: flex; gap: 10px; align-items: center; }
+.toolbar-mobile .toolbar-row-1 { justify-content: space-between; }
+.toolbar-mobile .toolbar-row-2 .search-input { flex: 1; min-width: 0; }
+.toolbar-left { display: flex; gap: 10px; flex-wrap: wrap; }
+.search-input { min-width: 140px; max-width: 220px; }
+.current-family { margin-bottom: 10px; font-size: 13px; color: #909399; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.change-family-link { flex-shrink: 0; }
+.tree-toggle-btn { flex-shrink: 0; }
 .pagination-wrap { display: flex; justify-content: flex-end; margin-top: 16px; }
 .text-muted { color: #c0c4cc; font-size: 13px; }
+
+/* 墓碑列表：桌面表格 / 手机卡片切换 */
+.tomb-desktop { display: block; }
+.tomb-mobile { display: none; }
+.tomb-card-list { display: flex; flex-direction: column; gap: 12px; }
+.tomb-card {
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid #ebeef5;
+  background: #fafafa;
+}
+.tomb-card__main { display: flex; gap: 14px; margin-bottom: 12px; }
+.tomb-card__photo { flex-shrink: 0; border-radius: 8px; }
+.tomb-card__info { flex: 1; min-width: 0; }
+.tomb-card__name { font-weight: 600; font-size: 16px; color: #303133; margin-bottom: 4px; }
+.tomb-card__meta { font-size: 13px; color: #606266; margin-bottom: 6px; }
+.tomb-card__family { margin-bottom: 4px; }
+.tomb-card__stats { font-size: 12px; color: #909399; }
+.tomb-card__actions { display: flex; flex-wrap: wrap; gap: 4px; padding-top: 10px; border-top: 1px solid #ebeef5; }
+
+@media (max-width: 768px) {
+  .page-wrap { flex-direction: column; }
+  .left-card { display: none; }
+  .right-card { flex: 1; min-width: 0; width: 100%; overflow-x: visible; }
+  .tomb-desktop { display: none; }
+  .tomb-mobile { display: block; }
+  .toolbar-left { flex-wrap: wrap; }
+  .search-input { flex: 1; min-width: 100px; max-width: none; }
+  .pagination-wrap { overflow-x: auto; }
+  .pagination-wrap :deep(.el-pagination) { flex-wrap: wrap; }
+}
+
 .detail-content { padding: 0 10px; overflow-y: auto; max-height: calc(100vh - 60px); }
 .detail-photo-block { margin-bottom: 16px; }
 .detail-photo { text-align: center; margin-bottom: 8px; }

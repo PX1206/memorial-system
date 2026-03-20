@@ -1,7 +1,27 @@
 <template>
   <div>
     <el-card>
-      <div class="toolbar">
+      <div class="toolbar" :class="{ 'toolbar-mobile': isMobile }">
+        <template v-if="isMobile">
+          <div class="toolbar-row toolbar-row-1">
+            <el-input v-model="query.keyword" placeholder="搜索文件名" clearable class="search-input" @clear="loadData" />
+            <el-button type="primary" @click="loadData"><el-icon><Search /></el-icon>搜索</el-button>
+          </div>
+          <div class="toolbar-row toolbar-row-2">
+            <el-select v-model="query.type" placeholder="文件类型" clearable class="type-select" @change="loadData">
+              <el-option label="图片" :value="1" />
+              <el-option label="文档" :value="2" />
+              <el-option label="视频" :value="3" />
+              <el-option label="音频" :value="4" />
+              <el-option label="其它" :value="5" />
+            </el-select>
+            <el-radio-group v-model="viewMode" size="small">
+              <el-radio-button label="table"><el-icon><List /></el-icon></el-radio-button>
+              <el-radio-button label="grid"><el-icon><Grid /></el-icon></el-radio-button>
+            </el-radio-group>
+          </div>
+        </template>
+        <template v-else>
         <div class="toolbar-left">
           <el-input v-model="query.keyword" placeholder="搜索文件名" clearable style="width: 220px" @clear="loadData" />
           <el-select v-model="query.type" placeholder="文件类型" clearable style="width: 140px" @change="loadData">
@@ -19,6 +39,7 @@
             <el-radio-button label="grid"><el-icon><Grid /></el-icon></el-radio-button>
           </el-radio-group>
         </div>
+        </template>
       </div>
 
       <!-- 表格视图 -->
@@ -56,6 +77,7 @@
           </div>
           <div class="grid-info">
             <span class="grid-name" :title="item.name + item.suffix">{{ item.name }}{{ item.suffix }}</span>
+            <span class="grid-user">{{ item.createBy || '-' }}</span>
             <div class="grid-actions">
               <el-button size="small" type="success" link @click.stop="handleDownload(item)">下载</el-button>
               <el-button size="small" type="danger" link @click.stop="handleDelete(item)" v-permission="'sys:file:delete'">删除</el-button>
@@ -67,6 +89,7 @@
 
       <div class="pagination-wrap">
         <el-pagination
+          :small="isMobile"
           v-model:current-page="query.pageIndex"
           v-model:page-size="query.pageSize"
           :total="total"
@@ -82,7 +105,7 @@
     <el-dialog
       v-model="previewVisible"
       :title="previewFile.name ? (previewFile.name + previewFile.suffix) : '文件预览'"
-      width="800px"
+      :width="isMobile ? '95%' : '800px'"
       destroy-on-close
       class="preview-dialog"
     >
@@ -127,14 +150,16 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { Search, List, Grid, Document, Download, Delete } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getFilePageList, deleteFile } from '@/api/system'
 
 const loading = ref(false)
 const total = ref(0)
-const viewMode = ref('table')
+const viewMode = ref('grid')
+const isMobile = ref(window.innerWidth < 768)
+function checkMobile() { isMobile.value = window.innerWidth < 768 }
 const previewVisible = ref(false)
 const previewFile = ref({})
 
@@ -171,7 +196,12 @@ async function loadData() {
   finally { loading.value = false }
 }
 
-onMounted(() => loadData())
+onMounted(() => {
+  checkMobile()
+  window.addEventListener('resize', checkMobile)
+  loadData()
+})
+onUnmounted(() => window.removeEventListener('resize', checkMobile))
 
 function openPreview(item) {
   previewFile.value = { ...item }
@@ -209,7 +239,13 @@ async function handleDeleteFromPreview() {
 <style scoped>
 .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
 .toolbar-left { display: flex; gap: 10px; }
-.pagination-wrap { display: flex; justify-content: flex-end; margin-top: 16px; }
+.toolbar-mobile { flex-direction: column; align-items: stretch; gap: 12px; }
+.toolbar-mobile .toolbar-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.toolbar-mobile .toolbar-row-1 { display: flex; gap: 10px; }
+.toolbar-mobile .toolbar-row-1 .search-input { flex: 1; min-width: 0; }
+.toolbar-mobile .toolbar-row-2 { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.toolbar-mobile .toolbar-row-2 .type-select { flex: 1; min-width: 120px; }
+.pagination-wrap { display: flex; justify-content: flex-end; margin-top: 16px; overflow-x: auto; }
 .grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; min-height: 200px; }
 .grid-item { border: 1px solid #ebeef5; border-radius: 6px; overflow: hidden; cursor: pointer; transition: box-shadow .2s; }
 .grid-item:hover { box-shadow: 0 2px 12px rgba(0,0,0,.1); }
@@ -218,10 +254,21 @@ async function handleDeleteFromPreview() {
 .grid-icon { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
 .grid-info { padding: 8px 10px; }
 .grid-name { font-size: 13px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.grid-actions { display: flex; gap: 4px; margin-top: 4px; }
+.grid-user { font-size: 12px; color: #909399; display: block; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.grid-actions { display: flex; gap: 4px; margin-top: 6px; }
 .preview-body { text-align: center; margin-bottom: 16px; }
 .preview-image { max-height: 450px; max-width: 100%; }
 .preview-file-placeholder { padding: 60px 0; text-align: center; }
 .preview-file-placeholder p { margin: 12px 0 16px; color: #909399; }
 .preview-info { margin-top: 12px; }
+@media (max-width: 768px) {
+  .grid-view { grid-template-columns: repeat(2, 1fr); gap: 12px; min-height: 150px; }
+  .grid-thumb { height: 100px; }
+  .grid-info { padding: 6px 8px; }
+  .grid-name { font-size: 12px; }
+  .grid-user { font-size: 11px; margin-top: 2px; }
+  .grid-actions { margin-top: 4px; }
+  .pagination-wrap { margin-top: 12px; }
+  .pagination-wrap :deep(.el-pagination) { flex-wrap: wrap; }
+}
 </style>

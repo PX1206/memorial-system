@@ -1,43 +1,72 @@
 <template>
   <div>
     <el-card>
-      <div class="toolbar">
-        <span class="page-title">菜单管理</span>
-        <el-button type="primary" @click="openDialog()" v-permission="'sys:menu:add'">
-          <el-icon><Plus /></el-icon>新增菜单
-        </el-button>
+      <div class="toolbar" :class="{ 'toolbar-mobile': isMobile }">
+        <template v-if="isMobile">
+          <div class="toolbar-row toolbar-row-1">
+            <span class="page-title">菜单管理</span>
+            <el-button type="primary" @click="openDialog()" v-permission="'sys:menu:add'">
+              <el-icon><Plus /></el-icon>新增
+            </el-button>
+          </div>
+        </template>
+        <template v-else>
+          <span class="page-title">菜单管理</span>
+          <el-button type="primary" @click="openDialog()" v-permission="'sys:menu:add'">
+            <el-icon><Plus /></el-icon>新增菜单
+          </el-button>
+        </template>
       </div>
 
-      <el-table :data="menuTree" row-key="id" border default-expand-all v-loading="loading"
-        :tree-props="{ children: 'children', hasChildren: 'hasChildren' }">
-        <el-table-column prop="title" label="菜单标题" min-width="180" />
-        <el-table-column prop="type" label="类型" width="80">
-          <template #default="{ row }">
-            <el-tag v-if="row.type === 'dir'" type="warning">目录</el-tag>
-            <el-tag v-else-if="row.type === 'menu'" type="success">菜单</el-tag>
-            <el-tag v-else type="info">按钮</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="icon" label="图标" width="80">
-          <template #default="{ row }">
-            <el-icon v-if="row.icon"><component :is="getIcon(row.icon)" /></el-icon>
-            <span v-else class="text-muted">-</span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="path" label="路由路径" show-overflow-tooltip />
-        <el-table-column prop="permission" label="权限标识" show-overflow-tooltip />
-        <el-table-column prop="sort" label="排序" width="70" />
-        <el-table-column label="操作" width="200" fixed="right">
-          <template #default="{ row }">
-            <el-button size="small" type="primary" link @click="openDialog(row)" v-permission="'sys:menu:edit'">编辑</el-button>
-            <el-button size="small" type="success" link @click="addChild(row)" v-permission="'sys:menu:add'">添加子级</el-button>
-            <el-button size="small" type="danger" link @click="handleDelete(row)" v-permission="'sys:menu:delete'">删除</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+      <!-- 桌面端：表格 -->
+      <div class="menu-desktop">
+        <el-table :data="menuTree" row-key="id" border default-expand-all v-loading="loading"
+          :tree-props="{ children: 'children', hasChildren: 'hasChildren' }">
+          <el-table-column prop="title" label="菜单标题" min-width="180" />
+          <el-table-column prop="type" label="类型" width="80">
+            <template #default="{ row }">
+              <el-tag v-if="row.type === 'dir'" type="warning">目录</el-tag>
+              <el-tag v-else-if="row.type === 'menu'" type="success">菜单</el-tag>
+              <el-tag v-else type="info">按钮</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="icon" label="图标" width="80">
+            <template #default="{ row }">
+              <el-icon v-if="row.icon"><component :is="getIcon(row.icon)" /></el-icon>
+              <span v-else class="text-muted">-</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="path" label="路由路径" show-overflow-tooltip />
+          <el-table-column prop="permission" label="权限标识" show-overflow-tooltip />
+          <el-table-column prop="sort" label="排序" width="70" />
+          <el-table-column label="操作" width="200" fixed="right">
+            <template #default="{ row }">
+              <el-button size="small" type="primary" link @click="openDialog(row)" v-permission="'sys:menu:edit'">编辑</el-button>
+              <el-button size="small" type="success" link @click="addChild(row)" v-permission="'sys:menu:add'">添加子级</el-button>
+              <el-button size="small" type="danger" link @click="handleDelete(row)" v-permission="'sys:menu:delete'">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+
+      <!-- 手机端：树形卡片列表 -->
+      <div class="menu-mobile">
+        <div v-loading="loading" class="menu-card-list">
+          <MenuTreeCard
+            v-for="item in menuTree"
+            :key="item.id"
+            :item="item"
+            :get-icon="getIcon"
+            @edit="openDialog"
+            @add-child="addChild"
+            @delete="handleDelete"
+          />
+          <el-empty v-if="!loading && !menuTree?.length" description="暂无菜单" :image-size="80" />
+        </div>
+      </div>
     </el-card>
 
-    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="580px" destroy-on-close>
+    <el-dialog v-model="dialogVisible" :title="dialogTitle" :width="isMobile ? '95%' : '580px'" destroy-on-close>
       <el-form :model="form" :rules="rules" ref="formRef" label-width="100px">
         <el-form-item label="上级菜单">
           <el-tree-select
@@ -51,12 +80,12 @@
           />
         </el-form-item>
         <el-row :gutter="20">
-          <el-col :span="12">
+          <el-col :xs="24" :sm="12">
             <el-form-item label="菜单标题" prop="title">
               <el-input v-model="form.title" />
             </el-form-item>
           </el-col>
-          <el-col :span="12">
+          <el-col :xs="24" :sm="12">
             <el-form-item label="菜单类型" prop="type">
               <el-select v-model="form.type" style="width: 100%">
                 <el-option label="目录" value="dir" />
@@ -67,12 +96,12 @@
           </el-col>
         </el-row>
         <el-row :gutter="20">
-          <el-col :span="12">
+          <el-col :xs="24" :sm="12">
             <el-form-item label="图标">
               <el-input v-model="form.icon" placeholder="如: Setting, User" />
             </el-form-item>
           </el-col>
-          <el-col :span="12">
+          <el-col :xs="24" :sm="12">
             <el-form-item label="排序">
               <el-input-number v-model="form.sort" :min="0" style="width: 100%" />
             </el-form-item>
@@ -88,12 +117,12 @@
           <el-input v-model="form.component" placeholder="views/xxx/XxxList" />
         </el-form-item>
         <el-row :gutter="20">
-          <el-col :span="12">
+          <el-col :xs="24" :sm="12">
             <el-form-item label="是否隐藏">
               <el-switch v-model="form.hidden" />
             </el-form-item>
           </el-col>
-          <el-col :span="12">
+          <el-col :xs="24" :sm="12">
             <el-form-item label="缓存页面">
               <el-switch v-model="form.keepAlive" />
             </el-form-item>
@@ -109,14 +138,17 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { Plus, Document, Setting, User, DataAnalysis, Place, Connection, Grid, List, Monitor, Operation, Compass } from '@element-plus/icons-vue'
+import MenuTreeCard from './MenuTreeCard.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getMenuTree, addMenu, updateMenu, deleteMenu } from '@/api/menu'
 
 const loading = ref(false)
 const saving = ref(false)
 const dialogVisible = ref(false)
+const isMobile = ref(window.innerWidth < 768)
+function checkMobile() { isMobile.value = window.innerWidth < 768 }
 const isEdit = ref(false)
 const formRef = ref()
 const menuTree = ref([])
@@ -159,7 +191,12 @@ async function loadData() {
   finally { loading.value = false }
 }
 
-onMounted(() => loadData())
+onMounted(() => {
+  checkMobile()
+  window.addEventListener('resize', checkMobile)
+  loadData()
+})
+onUnmounted(() => window.removeEventListener('resize', checkMobile))
 
 function openDialog(row) {
   isEdit.value = !!row
@@ -219,6 +256,18 @@ function handleDelete(row) {
 
 <style scoped>
 .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.toolbar-mobile { flex-direction: column; align-items: stretch; }
+.toolbar-mobile .toolbar-row-1 { display: flex; justify-content: space-between; align-items: center; }
 .page-title { font-size: 16px; font-weight: 600; color: #303133; }
 .text-muted { color: #c0c4cc; }
+
+/* 桌面端表格 / 手机端卡片 */
+.menu-desktop { display: block; }
+.menu-mobile { display: none; }
+.menu-card-list { display: flex; flex-direction: column; gap: 0; }
+
+@media (max-width: 768px) {
+  .menu-desktop { display: none; }
+  .menu-mobile { display: block; }
+}
 </style>

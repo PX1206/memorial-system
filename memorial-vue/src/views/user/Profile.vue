@@ -1,7 +1,7 @@
 <template>
   <div class="profile-page">
     <el-row :gutter="20">
-      <el-col :span="8">
+      <el-col :xs="24" :sm="24" :md="8" :lg="8">
         <el-card>
           <div class="avatar-section">
             <div class="avatar-wrapper" @click="triggerAvatarUpload">
@@ -16,7 +16,7 @@
           </div>
         </el-card>
       </el-col>
-      <el-col :span="16">
+      <el-col :xs="24" :sm="24" :md="16" :lg="16">
         <el-card>
           <template #header>
             <div class="card-header">
@@ -28,7 +28,7 @@
           </template>
 
           <!-- 展示模式 -->
-          <el-descriptions v-if="!editing" :column="2" border>
+          <el-descriptions v-if="!editing" :column="isMobile ? 1 : 2" border>
             <el-descriptions-item label="账号">{{ user.username }}</el-descriptions-item>
             <el-descriptions-item label="昵称">{{ user.nickname }}</el-descriptions-item>
             <el-descriptions-item label="手机号">{{ user.mobile }}</el-descriptions-item>
@@ -42,12 +42,12 @@
           <!-- 编辑模式 -->
           <el-form v-else :model="editForm" ref="formRef" label-width="80px">
             <el-row :gutter="20">
-              <el-col :span="12">
+              <el-col :xs="24" :sm="24" :md="12" :lg="12">
                 <el-form-item label="昵称">
                   <el-input v-model="editForm.nickname" />
                 </el-form-item>
               </el-col>
-              <el-col :span="12">
+              <el-col :xs="24" :sm="24" :md="12" :lg="12">
                 <el-form-item label="性别">
                   <el-select v-model="editForm.sex" style="width: 100%">
                     <el-option label="男" :value="1" />
@@ -58,7 +58,7 @@
               </el-col>
             </el-row>
             <el-row :gutter="20">
-              <el-col :span="12">
+              <el-col :xs="24" :sm="24" :md="12" :lg="12">
                 <el-form-item label="生日">
                   <el-date-picker v-model="editForm.birthday" type="date" value-format="YYYY-MM-DD" placeholder="选择日期" style="width: 100%" />
                 </el-form-item>
@@ -81,7 +81,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { Camera, Edit } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { getUserInfoAPI } from '@/api/auth'
@@ -89,6 +89,8 @@ import { updateCurrentUser, uploadFile } from '@/api/user'
 
 const defaultAvatar = 'https://i.pravatar.cc/150?img=3'
 const avatarInput = ref()
+const isMobile = ref(window.innerWidth < 768)
+function checkMobile() { isMobile.value = window.innerWidth < 768 }
 const formRef = ref()
 const editing = ref(false)
 const saving = ref(false)
@@ -102,6 +104,8 @@ const user = reactive({
 const editForm = reactive({ nickname: '', sex: 0, birthday: '', address: '' })
 
 onMounted(async () => {
+  checkMobile()
+  window.addEventListener('resize', checkMobile)
   const currentUser = localStorage.getItem('currentUser')
   if (currentUser) {
     Object.assign(user, JSON.parse(currentUser))
@@ -111,6 +115,7 @@ onMounted(async () => {
     if (res) Object.assign(user, res)
   } catch { /* 使用本地缓存 */ }
 })
+onUnmounted(() => window.removeEventListener('resize', checkMobile))
 
 function triggerAvatarUpload() { avatarInput.value?.click() }
 
@@ -195,4 +200,8 @@ function syncLocalStorage() {
 .avatar-wrapper:hover .avatar-overlay { opacity: 1; }
 .card-header { display: flex; justify-content: space-between; align-items: center; }
 .card-title { font-weight: 600; }
+@media (max-width: 768px) {
+  .profile-page { padding: 8px 0; }
+  .avatar-section { padding: 16px 0; }
+}
 </style>

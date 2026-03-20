@@ -1,48 +1,90 @@
 <template>
   <div>
     <el-card>
-      <div class="toolbar">
-        <div class="toolbar-left">
-          <el-input v-model="query.keyword" placeholder="搜索用户名/手机号" clearable style="width: 220px" @clear="loadData" />
-          <el-button type="primary" @click="loadData"><el-icon><Search /></el-icon>搜索</el-button>
-        </div>
-        <el-button type="primary" @click="openDialog()" v-permission="'sys:user:add'"><el-icon><Plus /></el-icon>新增用户</el-button>
+      <div class="toolbar" :class="{ 'toolbar-mobile': isMobile }">
+        <template v-if="isMobile">
+          <div class="toolbar-row toolbar-row-1">
+            <el-button type="primary" @click="openDialog()" v-permission="'sys:user:add'"><el-icon><Plus /></el-icon>新增用户</el-button>
+          </div>
+          <div class="toolbar-row toolbar-row-2">
+            <el-input v-model="query.keyword" placeholder="搜索用户名/手机号" clearable class="search-input" @clear="loadData" />
+            <el-button type="primary" @click="loadData"><el-icon><Search /></el-icon>搜索</el-button>
+          </div>
+        </template>
+        <template v-else>
+          <div class="toolbar-left">
+            <el-input v-model="query.keyword" placeholder="搜索用户名/手机号" clearable class="search-input" @clear="loadData" />
+            <el-button type="primary" @click="loadData"><el-icon><Search /></el-icon>搜索</el-button>
+          </div>
+          <el-button type="primary" @click="openDialog()" v-permission="'sys:user:add'"><el-icon><Plus /></el-icon>新增用户</el-button>
+        </template>
       </div>
 
-      <el-table :data="tableData" border stripe v-loading="loading">
-        <el-table-column prop="id" label="ID" width="70" />
-        <el-table-column label="头像" width="80">
-          <template #default="{ row }">
-            <el-avatar :size="36" :src="row.headImg || ''" />
-          </template>
-        </el-table-column>
-        <el-table-column prop="username" label="用户名" />
-        <el-table-column prop="nickname" label="昵称" />
-        <el-table-column prop="mobile" label="手机号" />
-        <el-table-column prop="sex" label="性别" width="80">
-          <template #default="{ row }">{{ row.sex === 1 ? '男' : row.sex === 2 ? '女' : '未知' }}</template>
-        </el-table-column>
-        <el-table-column prop="status" label="状态" width="100">
-          <template #default="{ row }">
-            <el-tag :type="statusType(row.status)">{{ statusText(row.status) }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="loginTime" label="最后登录" width="170" />
-        <el-table-column prop="createTime" label="注册时间" width="170" />
-        <el-table-column label="操作" width="300" fixed="right">
-          <template #default="{ row }">
-            <el-button size="small" type="primary" link @click="openDialog(row)" v-permission="'sys:user:edit'">编辑</el-button>
-            <el-button size="small" type="warning" link @click="resetPwd(row)" v-permission="'sys:user:resetPwd'">重置密码</el-button>
-            <el-button size="small" type="success" link @click="openRoleDialog(row)" v-permission="'sys:user:role'">角色</el-button>
-            <el-button v-if="row.status === 1" size="small" type="info" link @click="handleDisable(row)" v-permission="'sys:user:disable'">禁用</el-button>
-            <el-button v-if="row.status === 2 || row.status === 3 || row.status === 4" size="small" type="success" link @click="handleRestore(row)" v-permission="'sys:user:restore'">恢复</el-button>
-            <el-button size="small" type="danger" link @click="handleDelete(row)" v-permission="'sys:user:delete'">删除</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+      <!-- 桌面端：表格 -->
+      <div class="user-desktop">
+        <div class="table-scroll-wrap">
+          <el-table :data="tableData" border stripe v-loading="loading" style="min-width: 800px">
+            <el-table-column prop="id" label="ID" width="70" />
+            <el-table-column label="头像" width="80">
+              <template #default="{ row }">
+                <el-avatar :size="36" :src="row.headImg || ''" />
+              </template>
+            </el-table-column>
+            <el-table-column prop="username" label="用户名" />
+            <el-table-column prop="nickname" label="昵称" />
+            <el-table-column prop="mobile" label="手机号" />
+            <el-table-column prop="sex" label="性别" width="80">
+              <template #default="{ row }">{{ row.sex === 1 ? '男' : row.sex === 2 ? '女' : '未知' }}</template>
+            </el-table-column>
+            <el-table-column prop="status" label="状态" width="100">
+              <template #default="{ row }">
+                <el-tag :type="statusType(row.status)">{{ statusText(row.status) }}</el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column prop="loginTime" label="最后登录" width="170" />
+            <el-table-column prop="createTime" label="注册时间" width="170" />
+            <el-table-column label="操作" width="300" fixed="right">
+              <template #default="{ row }">
+                <el-button size="small" type="primary" link @click="openDialog(row)" v-permission="'sys:user:edit'">编辑</el-button>
+                <el-button size="small" type="warning" link @click="resetPwd(row)" v-permission="'sys:user:resetPwd'">重置密码</el-button>
+                <el-button size="small" type="success" link @click="openRoleDialog(row)" v-permission="'sys:user:role'">角色</el-button>
+                <el-button v-if="row.status === 1" size="small" type="info" link @click="handleDisable(row)" v-permission="'sys:user:disable'">禁用</el-button>
+                <el-button v-if="row.status === 2 || row.status === 3 || row.status === 4" size="small" type="success" link @click="handleRestore(row)" v-permission="'sys:user:restore'">恢复</el-button>
+                <el-button size="small" type="danger" link @click="handleDelete(row)" v-permission="'sys:user:delete'">删除</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+      </div>
+
+      <!-- 手机端：卡片列表 -->
+      <div class="user-mobile">
+        <div v-loading="loading" class="user-card-list">
+          <div v-for="row in tableData" :key="row.id" class="user-card">
+            <div class="user-card__main">
+              <el-avatar :size="48" :src="row.headImg || ''" class="user-card__photo" />
+              <div class="user-card__info">
+                <div class="user-card__name">{{ row.nickname || row.username }}</div>
+                <div class="user-card__meta">{{ row.username }} · {{ row.mobile }}</div>
+                <el-tag :type="statusType(row.status)" size="small">{{ statusText(row.status) }}</el-tag>
+              </div>
+            </div>
+            <div class="user-card__actions">
+              <el-button size="small" type="primary" link @click="openDialog(row)" v-permission="'sys:user:edit'">编辑</el-button>
+              <el-button size="small" type="warning" link @click="resetPwd(row)" v-permission="'sys:user:resetPwd'">重置</el-button>
+              <el-button size="small" type="success" link @click="openRoleDialog(row)" v-permission="'sys:user:role'">角色</el-button>
+              <el-button v-if="row.status === 1" size="small" type="info" link @click="handleDisable(row)" v-permission="'sys:user:disable'">禁用</el-button>
+              <el-button v-if="row.status === 2 || row.status === 3 || row.status === 4" size="small" type="success" link @click="handleRestore(row)" v-permission="'sys:user:restore'">恢复</el-button>
+              <el-button size="small" type="danger" link @click="handleDelete(row)" v-permission="'sys:user:delete'">删除</el-button>
+            </div>
+          </div>
+          <el-empty v-if="!loading && !tableData?.length" description="暂无用户" :image-size="80" />
+        </div>
+      </div>
 
       <div class="pagination-wrap">
         <el-pagination
+          :small="isMobile"
           v-model:current-page="query.pageIndex"
           v-model:page-size="query.pageSize"
           :total="total"
@@ -54,7 +96,7 @@
       </div>
     </el-card>
 
-    <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑用户' : '新增用户'" width="500px" destroy-on-close>
+    <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑用户' : '新增用户'" :width="isMobile ? '95%' : '500px'" destroy-on-close>
       <el-form :model="form" :rules="rules" ref="formRef" label-width="80px">
         <el-form-item label="用户名" prop="username">
           <el-input v-model="form.username" :disabled="isEdit" />
@@ -77,7 +119,7 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="roleDialogVisible" title="分配角色" width="400px" destroy-on-close>
+    <el-dialog v-model="roleDialogVisible" title="分配角色" :width="isMobile ? '95%' : '400px'" destroy-on-close>
       <div class="role-title">用户：{{ roleUser.username }}</div>
       <el-checkbox-group v-model="selectedRoleIds">
         <el-checkbox v-for="role in allRoles" :key="role.id" :value="role.id" :label="role.name" />
@@ -91,7 +133,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { Search, Plus } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getUserPageList, addUser, updateUser, deleteUser, disableUser, restoreUser, resetPassword } from '@/api/user'
@@ -109,6 +151,8 @@ const allRoles = ref([])
 const isEdit = ref(false)
 const formRef = ref()
 const total = ref(0)
+const isMobile = ref(window.innerWidth < 768)
+function checkMobile() { isMobile.value = window.innerWidth < 768 }
 
 const query = reactive({ keyword: '', pageIndex: 1, pageSize: 10 })
 const tableData = ref([])
@@ -140,7 +184,12 @@ async function loadData() {
   finally { loading.value = false }
 }
 
-onMounted(() => loadData())
+onMounted(() => {
+  checkMobile()
+  window.addEventListener('resize', checkMobile)
+  loadData()
+})
+onUnmounted(() => window.removeEventListener('resize', checkMobile))
 
 function openDialog(row) {
   isEdit.value = !!row
@@ -216,8 +265,22 @@ async function saveUserRole() {
 </script>
 
 <style scoped>
-.toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-.toolbar-left { display: flex; gap: 10px; }
-.pagination-wrap { display: flex; justify-content: flex-end; margin-top: 16px; }
+.toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
+.toolbar-left { display: flex; gap: 10px; flex-wrap: wrap; }
+.search-input { min-width: 140px; max-width: 220px; }
+.table-scroll-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.pagination-wrap { display: flex; justify-content: flex-end; margin-top: 16px; overflow-x: auto; }
 .role-title { font-size: 14px; font-weight: 600; margin-bottom: 12px; color: #303133; }
+
+.toolbar-mobile { flex-direction: column; align-items: stretch; }
+.toolbar-mobile .toolbar-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.toolbar-mobile .toolbar-row-1 { justify-content: space-between; }
+.toolbar-mobile .toolbar-row-2 .search-input { flex: 1; min-width: 0; }
+
+@media (max-width: 768px) {
+  .toolbar { flex-direction: column; align-items: stretch; }
+  .toolbar-left { width: 100%; }
+  .search-input { flex: 1; max-width: none; }
+  .pagination-wrap :deep(.el-pagination) { flex-wrap: wrap; }
+}
 </style>
