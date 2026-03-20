@@ -62,7 +62,9 @@
               </template>
             </el-table-column>
             <el-table-column prop="ip" label="IP地址" width="140" />
-            <el-table-column prop="location" label="位置" />
+            <el-table-column prop="location" label="位置" min-width="120">
+              <template #default="{ row }">{{ row.location || '-' }}</template>
+            </el-table-column>
             <el-table-column prop="createTime" label="打卡时间" width="170" />
           </el-table>
         </div>
@@ -200,13 +202,31 @@ onUnmounted(() => window.removeEventListener('resize', checkMobile))
 .toolbar-left { display: flex; gap: 10px; flex-wrap: wrap; }
 .tree-toggle-btn { flex-shrink: 0; }
 .current-family { margin-bottom: 10px; font-size: 13px; color: #909399; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+/* 打卡记录：桌面表格 / 手机卡片切换 */
+.checkin-desktop { display: block; }
+.checkin-mobile { display: none; }
+.checkin-card-list { display: flex; flex-direction: column; gap: 12px; }
+.checkin-card {
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #ebeef5;
+  background: #fafafa;
+}
+.checkin-card__name { font-weight: 600; font-size: 15px; color: #303133; margin-bottom: 4px; }
+.checkin-card__tomb { font-size: 13px; color: #606266; margin-bottom: 8px; }
+.checkin-card__meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12px; color: #909399; }
+.checkin-card__time { flex-shrink: 0; }
+.checkin-card__location { font-size: 12px; color: #909399; margin-top: 6px; }
+
 .pagination-wrap { display: flex; justify-content: flex-end; margin-top: 16px; }
 
 @media (max-width: 768px) {
   .page-wrap { flex-direction: column; }
   .left-card { display: none; }
   .right-card { flex: 1; min-width: 0; width: 100%; overflow-x: auto; }
-  .right-card :deep(.el-table) { font-size: 12px; min-width: 600px; }
+  .checkin-desktop { display: none; }
+  .checkin-mobile { display: block; }
   .pagination-wrap { overflow-x: auto; }
   .pagination-wrap :deep(.el-pagination) { flex-wrap: wrap; }
 }

@@ -24,9 +24,9 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { joinFamilyByInviteCode } from '@/api/family'
 
 const router = useRouter()
@@ -52,14 +52,28 @@ onMounted(() => {
   if (typeof code === 'string' && code) {
     form.inviteCode = code
     try { localStorage.removeItem('pendingInviteCode') } catch (_) {}
+    showJoinConfirmDialog()
     return
   }
   const pending = localStorage.getItem('pendingInviteCode')
   if (pending) {
     form.inviteCode = pending
     try { localStorage.removeItem('pendingInviteCode') } catch (_) {}
+    showJoinConfirmDialog()
   }
 })
+
+/** 扫码/链接进入且有邀请码时，弹出加入确认提示 */
+function showJoinConfirmDialog() {
+  nextTick(() => {
+    if (!form.inviteCode) return
+    ElMessageBox.alert(
+      `检测到邀请码「${form.inviteCode}」，请选择与族长关系后点击「确认加入」完成加入。`,
+      '加入家族确认',
+      { type: 'info', confirmButtonText: '知道了' }
+    )
+  })
+}
 
 function goBack() {
   router.push('/family')

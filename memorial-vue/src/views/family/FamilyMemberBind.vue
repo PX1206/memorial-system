@@ -19,9 +19,9 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { bindMemberByCode } from '@/api/family'
 
 const router = useRouter()
@@ -40,14 +40,28 @@ onMounted(() => {
   if (typeof code === 'string' && code) {
     form.bindCode = code
     try { localStorage.removeItem('pendingBindCode') } catch (_) {}
+    showBindConfirmDialog()
     return
   }
   const pending = localStorage.getItem('pendingBindCode')
   if (pending) {
     form.bindCode = pending
     try { localStorage.removeItem('pendingBindCode') } catch (_) {}
+    showBindConfirmDialog()
   }
 })
+
+/** 扫码/链接进入且有绑定码时，弹出绑定确认提示 */
+function showBindConfirmDialog() {
+  nextTick(() => {
+    if (!form.bindCode) return
+    ElMessageBox.alert(
+      `检测到绑定码「${form.bindCode}」，确认无误后点击下方「确认绑定」按钮完成绑定。`,
+      '绑定确认',
+      { type: 'info', confirmButtonText: '知道了' }
+    )
+  })
+}
 
 function goBack() {
   router.push('/family')

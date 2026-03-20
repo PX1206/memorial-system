@@ -327,7 +327,7 @@ const smsAutoLogin = () => {
 
 }
 
-/** 解析登录后重定向目标，支持邀请码/绑定码从 localStorage 恢复（注册后再登录时 redirect 可能丢失） */
+/** 解析登录后重定向目标，支持邀请码/绑定码从 localStorage 或 route.query 恢复（redirect 含 ? 时 code 可能被拆到 route.query） */
 function resolveRedirectTarget(redirectRaw: string): string | { path: string; query: Record<string, string> } {
   const raw = (redirectRaw || '').trim() || '/'
   const hasQuery = raw.includes('?')
@@ -342,6 +342,11 @@ function resolveRedirectTarget(redirectRaw: string): string | { path: string; qu
         params.forEach((v, k) => { query[k] = v })
       } catch (_) {}
     }
+  }
+  // redirect 含 ? 时，code 可能被解析到 route.query.code，需合并
+  const routeCode = route.query.code
+  if (typeof routeCode === 'string' && routeCode) {
+    if (path === '/family/join' || path === '/family/member/bind') query.code = routeCode
   }
   if (path === '/family/join' && !query.code) {
     const code = localStorage.getItem('pendingInviteCode')

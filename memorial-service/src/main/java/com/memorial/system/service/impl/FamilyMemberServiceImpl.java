@@ -275,7 +275,7 @@ public class FamilyMemberServiceImpl extends BaseServiceImpl<FamilyMemberMapper,
         FamilyMember member = new FamilyMember();
         member.setFamilyId(family.getId());
         member.setUserId(userId);
-        member.setName(LoginUtil.getUserName());
+        member.setName(LoginUtil.getNickname());
         member.setRelation(param.getRelation());
         member.setRole("成员");
         member.setCreateBy(userId);

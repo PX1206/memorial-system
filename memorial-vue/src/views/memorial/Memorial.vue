@@ -33,8 +33,13 @@
             <el-button type="primary" link @click="openLoginDialog">登录</el-button>
           </div>
 
-          <div class="apply-family-tip" v-if="tomb.visitorActionOpen === false && tomb.familyId && !tomb.isFamilyMember">
-            当前墓碑仅家族成员可互动，您可以申请成为家族成员。
+          <div class="apply-family-tip" v-if="tomb.familyId && !tomb.isFamilyMember">
+            <template v-if="tomb.visitorActionOpen === false">
+              当前墓碑仅家族成员可互动，您可以申请成为家族成员。
+            </template>
+            <template v-else>
+              您还不是该家族成员，可申请加入以参与家族相关功能。
+            </template>
             <el-button type="primary" link @click="openApplyDialog">申请成为家族成员</el-button>
           </div>
         </div>
@@ -129,7 +134,13 @@
         </el-tab-pane>
       </el-tabs>
 
-      <el-dialog v-model="storyDialogVisible" :title="currentStory.title" width="720px" destroy-on-close>
+      <el-dialog
+        v-model="storyDialogVisible"
+        :title="currentStory.title"
+        :width="isMobile ? '95%' : '720px'"
+        destroy-on-close
+        class="story-dialog"
+      >
         <div class="story-dialog-content" v-html="currentStory.content"></div>
         <template #footer>
           <el-button type="primary" @click="storyDialogVisible = false">关闭</el-button>
@@ -354,9 +365,12 @@ const tabsRef = ref()
 // 使用 ref 而非 computed，因为 localStorage 非响应式，登录成功后需手动更新
 const isLoggedIn = ref(!!localStorage.getItem('token'))
 
+const isMobile = ref(window.innerWidth < 768)
+
 // 分页布局：窄屏（手机）使用简洁布局避免溢出，宽屏使用完整布局
 const paginationLayout = ref('total, prev, pager, next')
 function updatePaginationLayout() {
+  isMobile.value = window.innerWidth < 768
   paginationLayout.value = window.innerWidth < 600
     ? 'prev, pager, next'
     : 'total, sizes, prev, pager, next, jumper'
@@ -688,7 +702,7 @@ async function handleDialogRegister() {
 }
 
 // =========================
-// 申请成为家族成员（仅当「仅家族成员可互动」时显示）
+// 申请成为家族成员（墓碑有关联家族且当前用户非家族成员时显示）
 // =========================
 
 const relations = ['父亲', '母亲', '儿子', '女儿', '兄弟', '姐妹', '爷爷', '奶奶', '外公', '外婆', '叔伯', '姑姨', '其他']
@@ -918,6 +932,7 @@ function toPreview(html) {
 
 @media (max-width: 720px) {
   .hero { flex-direction: column; align-items: flex-start; }
+  .hero-photo { width: 100%; }
   .photo { width: 100%; height: 220px; }
   .epitaph-under-photo { max-width: 100%; -webkit-line-clamp: 2; }
   .actions { width: 100%; }
@@ -934,8 +949,20 @@ function toPreview(html) {
 }
 </style>
 
-<!-- 弹窗被 teleport 到 body，必须用全局样式才能去掉外层 el-dialog 白框并居中 -->
+<!-- 弹窗被 teleport 到 body，需全局样式 -->
 <style>
+/* 生平事迹详情弹窗：手机端适配（弹窗在 body 下，scoped 不生效） */
+.story-dialog .story-dialog-content {
+  max-height: 60vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+@media (max-width: 768px) {
+  .story-dialog.el-dialog { width: 95% !important; max-width: 95vw; }
+  .story-dialog .el-dialog__body { padding: 12px 16px; }
+  .story-dialog .story-dialog-content { max-height: 65vh; padding: 0 2px; }
+}
+
 .el-dialog.memorial-login-dialog {
   position: fixed !important;
   left: 50% !important;

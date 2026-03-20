@@ -17,8 +17,9 @@
                     INNER JOIN family_ids fi ON f.pid = fi.id
                     WHERE f.del_flag = 0
                 )
-                SELECT m.id, m.family_id, m.user_id, m.name, m.bind_code, m.relation, m.phone, m.role,
-                       m.avatar, m.create_time,
+                SELECT m.id, m.family_id, m.user_id, m.name, m.bind_code, m.relation,
+                       COALESCE(u.mobile, m.phone) AS phone,
+                       m.role, m.avatar, m.create_time,
                        f.name AS family_name,
                        u.nickname AS user_nickname
                 FROM family_member m
@@ -42,13 +43,14 @@
                     </if>
                     AND m.del_flag = 0
                 </where>
-                ORDER BY m.id ASC
+                ORDER BY m.id DESC
             </when>
 
             <!-- familyId 为空：查询全部家族成员 -->
             <otherwise>
-                SELECT m.id, m.family_id, m.user_id, m.name, m.bind_code, m.relation, m.phone, m.role,
-                       m.avatar, m.create_time,
+                SELECT m.id, m.family_id, m.user_id, m.name, m.bind_code, m.relation,
+                       COALESCE(u.mobile, m.phone) AS phone,
+                       m.role, m.avatar, m.create_time,
                        f.name AS family_name,
                        u.nickname AS user_nickname
                 FROM family_member m
@@ -71,7 +73,7 @@
                     </if>
                     AND m.del_flag = 0
                 </where>
-                ORDER BY m.id ASC
+                ORDER BY m.id DESC
             </otherwise>
         </choose>
     </select>

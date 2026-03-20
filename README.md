@@ -70,7 +70,7 @@ npm install
 npm run dev
 ```
 
-默认端口：5173。修改 `.env.development` 中的 `VITE_BASE_URL` 指向后端地址。
+默认端口：1267。修改 `.env.development` 中的 `VITE_BASE_URL` 指向后端地址。
 
 ## 部署说明
 
