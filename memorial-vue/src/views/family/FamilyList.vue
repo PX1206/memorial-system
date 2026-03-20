@@ -42,15 +42,8 @@
         <div class="family-desktop">
           <el-table :data="tableData" border stripe v-loading="loading">
             <el-table-column prop="id" label="ID" width="70" />
-            <el-table-column prop="type" label="类型" width="80">
-              <template #default="{ row }">
-                <el-tag :type="row.type === '家族' ? 'danger' : row.type === '支族' ? 'warning' : 'info'" size="small">
-                  {{ row.type || '家族' }}
-                </el-tag>
-              </template>
-            </el-table-column>
             <el-table-column prop="name" label="名称" />
-            <el-table-column prop="parentName" label="上级家族" width="140">
+            <el-table-column prop="parentName" label="上级" width="140">
               <template #default="{ row }">
                 <el-tag v-if="row.parentName" type="warning">{{ row.parentName }}</el-tag>
                 <span v-else class="text-muted">顶级</span>
@@ -97,9 +90,6 @@
             <div v-for="row in tableData" :key="row.id" class="family-card">
               <div class="family-card__main">
                 <div class="family-card__name">{{ row.name }}</div>
-                <el-tag :type="row.type === '家族' ? 'danger' : row.type === '支族' ? 'warning' : 'info'" size="small">
-                  {{ row.type || '家族' }}
-                </el-tag>
                 <div class="family-card__meta">
                   <span v-if="row.parentName">{{ row.parentName }}</span>
                   <span v-else class="text-muted">顶级</span>
@@ -148,12 +138,7 @@
     <el-drawer v-model="detailDrawerVisible" :title="detailData.name + ' - 详情'" :size="isMobile ? '100%' : '420px'">
       <div class="detail-content">
         <el-descriptions :column="1" border>
-          <el-descriptions-item label="类型">
-            <el-tag :type="detailData.type === '家族' ? 'danger' : detailData.type === '支族' ? 'warning' : 'info'" size="small">
-              {{ detailData.type || '-' }}
-            </el-tag>
-          </el-descriptions-item>
-          <el-descriptions-item label="上级家族">{{ detailData.parentName || '顶级' }}</el-descriptions-item>
+          <el-descriptions-item label="上级">{{ detailData.parentName || '顶级' }}</el-descriptions-item>
           <el-descriptions-item label="创建人">{{ detailData.founderName || '-' }}</el-descriptions-item>
           <el-descriptions-item label="成员数">{{ detailData.memberCount ?? 0 }} 人</el-descriptions-item>
           <el-descriptions-item label="墓碑数">{{ detailData.tombCount ?? 0 }} 座</el-descriptions-item>
@@ -181,20 +166,13 @@
 
     <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑家族' : '新增家族'" :width="isMobile ? '95%' : '500px'" destroy-on-close>
       <el-form :model="form" :rules="rules" ref="formRef" label-width="90px">
-        <el-form-item label="类型">
-          <el-select v-model="form.type" placeholder="选择类型" style="width: 100%" :disabled="isEdit">
-            <el-option label="家族" value="家族" />
-            <el-option label="家庭" value="家庭" />
-            <el-option label="支族" value="支族" />
-          </el-select>
-        </el-form-item>
-        <el-form-item v-if="form.type && form.type !== '家族'" label="上级" prop="pid">
+        <el-form-item label="上级" prop="pid">
           <el-tree-select
             v-model="form.pid"
             :data="parentTreeOptions"
             :props="{ value: 'id', label: 'name', children: 'children' }"
             check-strictly
-            placeholder="选择上级家族/家庭/支族"
+            placeholder="不选则为顶级家族"
             clearable
             style="width: 100%"
           />
@@ -265,7 +243,7 @@ function checkMobile() {
 }
 const currentInvite = reactive({ family: null, qr: '' })
 
-const form = reactive({ id: null, pid: 0, type: '家族', name: '', description: '', phone: '', address: '' })
+const form = reactive({ id: null, pid: 0, name: '', description: '', phone: '', address: '' })
 const rules = { name: [{ required: true, message: '请输入家族名称', trigger: 'blur' }] }
 
 async function loadData() {
@@ -306,7 +284,7 @@ function handleTreeNodeClick(node) {
 }
 function filterToParentNodes(nodes) {
   if (!nodes || !nodes.length) return []
-  return nodes.filter(n => !n.type || n.type === '家族' || n.type === '家庭' || n.type === '支族').map(n => ({
+  return (nodes || []).map(n => ({
     ...n,
     children: n.children ? filterToParentNodes(n.children) : []
   }))
@@ -333,8 +311,8 @@ function openDetail(row) {
 
 function openDialog(row) {
   isEdit.value = !!row
-  if (row) Object.assign(form, { id: row.id, pid: row.pid || 0, type: row.type || '家族', name: row.name, description: row.description, phone: row.phone, address: row.address })
-  else Object.assign(form, { id: null, pid: 0, type: '家族', name: '', description: '', phone: '', address: '' })
+  if (row) Object.assign(form, { id: row.id, pid: row.pid || 0, name: row.name, description: row.description, phone: row.phone, address: row.address })
+  else Object.assign(form, { id: null, pid: 0, name: '', description: '', phone: '', address: '' })
   loadFamilyTree()
   dialogVisible.value = true
 }

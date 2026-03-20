@@ -227,18 +227,15 @@ public class TombServiceImpl extends BaseServiceImpl<TombMapper, Tomb> implement
         }
     }
 
-    /** 添加墓碑：仅能加到用户可操作范围内的家庭（所在节点及子孙），且仅限 type=家庭 */
+    /** 添加墓碑：仅能加到用户可操作范围内的家族节点（家族/家庭/支族均可） */
     private void checkCanAddTombToFamily(Long familyId) {
         if (LoginUtil.isAdmin()) return;
         Family family = familyMapper.selectById(familyId);
         if (family == null) {
             throw new BusinessException(500, "所属家族不存在");
         }
-        if (!"家庭".equals(family.getType())) {
-            throw new BusinessException(403, "只能给家庭添加墓碑");
-        }
         if (familyMapper.canUserOperateFamily(LoginUtil.getUserId(), familyId) <= 0) {
-            throw new BusinessException(403, "只能在自己所在节点下的家庭添加墓碑");
+            throw new BusinessException(403, "只能在自己有权限的家族节点下添加墓碑");
         }
     }
 

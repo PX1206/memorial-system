@@ -370,6 +370,7 @@ async function loadTomb(idOrCode) {
     const res = isNumeric ? await getMemorialDetail(idOrCode) : await getMemorialDetailByCode(idOrCode)
     if (res) {
       tomb.value = res
+      document.title = `${res.name || '纪念'}·纪念碑`
       messageQuery.tombId = res.id
       checkinQuery.tombId = res.id
       loadMessages()
@@ -390,6 +391,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updatePaginationLayout)
+  document.title = '念园系统'
 })
 
 watch(() => route.params.id, (newId) => {

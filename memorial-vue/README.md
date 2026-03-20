@@ -1,50 +1,75 @@
-# sweep-grave-admin
+# memorial-vue（sweep-grave-admin）
 
-该系统目前处在构思当中，主要就是想在墓碑上刻制一个二维码，然后扫码进入到墓主人页面，里面有墓主人照片，生前事迹，扫码的人可以留言，可以打卡，
-当然这些都需要用户先配置好墓主人信息和权限这些，包括是否允许游客留言，留言自动审核加人工审核等问题，有了游客就会有家庭宗族一类的组织体系，
-目前只想到这些，由于只会写后端，前端需要在AI的帮助下进行，项目不知道什么时候能完成，希望有个前端能帮忙一起
+念园系统前端管理后台，与 `memorial-system` 后端配套使用。墓碑刻制二维码后，扫码可进入公开纪念页查看逝者信息、留言、打卡等。
 
-后端项目地址：https://github.com/PX1206/memorial-system
+## 功能模块
 
-This template should help get you started developing with Vue 3 in Vite.
+| 路径 | 功能 |
+|------|------|
+| `/login` | 登录 |
+| `/dashboard` | 仪表盘 |
+| `/tomb` | 墓碑管理 |
+| `/tomb/message` | 墓碑留言管理 |
+| `/tomb/checkin` | 墓碑打卡管理 |
+| `/family` | 家族管理 |
+| `/family/member` | 家族成员 |
+| `/family/join` | 加入家族 |
+| `/family/member/bind` | 成员绑定 |
+| `/user` | 用户列表 |
+| `/profile` | 个人资料 |
+| `/system/role` | 角色管理 |
+| `/system/menu` | 菜单管理 |
+| `/system/file` | 文件管理 |
+| `/system/log` | 操作日志 |
+| `/memorial/:id` | 公开纪念页（扫码访问，无需登录） |
 
-## Recommended IDE Setup
+## 技术栈
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+- Vue 3
+- Vite 7
+- Element Plus
+- Pinia（状态管理）
+- Vue Router 5
+- Axios
+- Quill（富文本）、qrcode、jsencrypt
 
-## Recommended Browser Setup
+## 环境变量
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+通过 `VITE_BASE_URL` 配置后端 API 地址：
 
-## Customize configuration
+- 开发环境：`.env.development`，默认 `http://192.168.31.73:2168/`
+- 生产环境：`.env.production`，如 `https://sn.px-apricot.cn/`
 
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
+## 开发
 
 ```sh
 npm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
 npm run dev
 ```
 
-### Compile and Minify for Production
+开发服务器默认端口：5173
+
+## 构建
 
 ```sh
 npm run build
 ```
 
-### Lint with [ESLint](https://eslint.org/)
+## 其他命令
 
 ```sh
-npm run lint
+npm run lint      # ESLint 检查
+npm run format    # Prettier 格式化
+npm run preview   # 预览构建结果
 ```
+
+## 与后端的关系
+
+- 前端通过 `VITE_BASE_URL` 请求后端 API
+- 后端项目：https://github.com/PX1206/memorial-system
+- 本前端与 `memorial-system` 配套使用，需先启动后端服务
+
+## IDE 推荐
+
+- [VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar)（禁用 Vetur）
+- 浏览器安装 [Vue.js devtools](https://devtools.vuejs.org/)

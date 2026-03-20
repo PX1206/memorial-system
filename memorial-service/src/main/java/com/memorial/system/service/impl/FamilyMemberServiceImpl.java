@@ -59,7 +59,7 @@ public class FamilyMemberServiceImpl extends BaseServiceImpl<FamilyMemberMapper,
 
         String roleToSet = param.getRole() != null && !param.getRole().trim().isEmpty() ? param.getRole() : "成员";
         if ("族长".equals(roleToSet)) {
-            throw new BusinessException(403, "族长需在家庭设置中指定");
+            throw new BusinessException(403, "族长需在家族设置中指定");
         }
         if ("管理员".equals(roleToSet)) {
             String myRole = getMyRoleInFamily(param.getFamilyId());
@@ -120,7 +120,7 @@ public class FamilyMemberServiceImpl extends BaseServiceImpl<FamilyMemberMapper,
         // 角色：仅族长可设为管理员；族长不可转让
         if (param.getRole() != null && !param.getRole().trim().isEmpty()) {
         if ("族长".equals(param.getRole())) {
-            throw new BusinessException(403, "族长需在家庭设置中指定");
+            throw new BusinessException(403, "族长需在家族设置中指定");
         }
         if ("管理员".equals(param.getRole())) {
             String myRole = getMyRoleInFamily(member.getFamilyId());

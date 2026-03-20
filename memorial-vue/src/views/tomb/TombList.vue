@@ -150,14 +150,14 @@
             </el-form-item>
           </el-col>
           <el-col :xs="24" :sm="24" :md="12" :lg="12">
-            <el-form-item label="所属家庭">
+            <el-form-item label="所属家族">
               <el-tree-select
                 v-model="form.familyId"
                 :data="tombFamilyOptions"
                 :props="{ value: 'id', label: 'name', children: 'children' }"
                 check-strictly
                 clearable
-                :placeholder="isSuperAdmin ? '选择所属家族/家庭' : '只能选择家庭'"
+                placeholder="选择所属家族（可选）"
                 style="width: 100%"
               />
             </el-form-item>
@@ -494,22 +494,11 @@ async function loadData() {
   finally { loading.value = false }
 }
 
-function collectFamilies(nodes, acc = []) {
-  if (!nodes || !nodes.length) return acc
-  for (const n of nodes) {
-    if (n.type === '家庭') acc.push({ ...n, children: undefined })
-    collectFamilies(n.children, acc)
-  }
-  return acc
-}
+// 所属家族：可选择任意节点
+const tombFamilyOptions = computed(() => familyTreeOptions.value || [])
 
-const tombFamilyOptions = computed(() => {
-  const raw = familyTreeOptions.value || []
-  if (isSuperAdmin.value) return raw
-  return collectFamilies(raw)
-})
-
-const canAddTomb = computed(() => isSuperAdmin.value || (tombFamilyOptions.value?.length || 0) > 0)
+// 所有登录用户均可新增墓碑（可不选家族，添加个人墓碑）
+const canAddTomb = computed(() => true)
 
 async function loadFamilyTree() {
   const u = JSON.parse(localStorage.getItem('currentUser') || '{}')

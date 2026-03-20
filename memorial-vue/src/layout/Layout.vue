@@ -3,11 +3,11 @@
     <div v-if="isMobile && !isCollapse" class="layout-mask" @click="isCollapse = true" />
     <el-aside
       :width="isCollapse ? '64px' : '210px'"
-      :class="['layout-aside', { 'aside-mobile': isMobile, 'aside-mobile-open': isMobile && !isCollapse }]"
+      :class="['layout-aside', { 'aside-collapsed': isCollapse, 'aside-mobile': isMobile, 'aside-mobile-open': isMobile && !isCollapse }]"
     >
       <div class="logo-wrap">
-        <el-icon :size="24"><Compass /></el-icon>
-        <span v-show="!isCollapse" class="logo-text">管理系统</span>
+        <img src="/xianhua.png" class="logo-icon" />
+        <span v-show="!isCollapse" class="logo-text">念园系统</span>
       </div>
 
       <el-menu
@@ -218,22 +218,38 @@ const logout = async () => {
   overflow: hidden;
 }
 
+.layout-aside.aside-collapsed .logo-wrap {
+  padding: 0 14px;
+}
+
 .logo-wrap {
   height: 56px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
+  padding: 0 16px;
   color: #fff;
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 600;
   border-bottom: 1px solid rgba(255,255,255,.08);
   white-space: nowrap;
   overflow: hidden;
+  transition: padding .28s;
+}
+
+.logo-icon {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.15));
 }
 
 .logo-text {
-  letter-spacing: 1px;
+  letter-spacing: 2px;
+  transition: opacity .2s;
+  overflow: hidden;
 }
 
 .layout-menu {

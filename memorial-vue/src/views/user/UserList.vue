@@ -21,7 +21,7 @@
       </div>
 
       <!-- 桌面端：表格 -->
-      <div class="user-desktop">
+      <div v-show="!isMobile" class="user-desktop">
         <div class="table-scroll-wrap">
           <el-table :data="tableData" border stripe v-loading="loading" style="min-width: 800px">
             <el-table-column prop="id" label="ID" width="70" />
@@ -58,7 +58,7 @@
       </div>
 
       <!-- 手机端：卡片列表 -->
-      <div class="user-mobile">
+      <div v-show="isMobile" class="user-mobile">
         <div v-loading="loading" class="user-card-list">
           <div v-for="row in tableData" :key="row.id" class="user-card">
             <div class="user-card__main">
@@ -109,6 +109,11 @@
             <el-radio :value="2">女</el-radio>
           </el-radio-group>
         </el-form-item>
+        <el-form-item v-if="!isEdit" label="角色">
+          <el-checkbox-group v-model="form.roleIds">
+            <el-checkbox v-for="r in allRoles" :key="r.id" :label="r.id">{{ r.name }}</el-checkbox>
+          </el-checkbox-group>
+        </el-form-item>
         <el-form-item v-if="!isEdit" label="密码" prop="password">
           <el-input v-model="form.password" type="password" show-password />
         </el-form-item>
@@ -157,7 +162,7 @@ function checkMobile() { isMobile.value = window.innerWidth < 768 }
 const query = reactive({ keyword: '', pageIndex: 1, pageSize: 10 })
 const tableData = ref([])
 
-const form = reactive({ id: null, username: '', nickname: '', mobile: '', sex: 1, password: '' })
+const form = reactive({ id: null, username: '', nickname: '', mobile: '', sex: 1, password: '', roleIds: [] })
 
 const statusType = (s) => ({ 1: 'success', 2: 'danger', 3: 'warning', 4: 'warning' })[s] || 'info'
 const statusText = (s) => ({ 1: '正常', 2: '禁用', 3: '冻结', 4: '临时冻结', 0: '注销' })[s] || '未知'
@@ -191,10 +196,19 @@ onMounted(() => {
 })
 onUnmounted(() => window.removeEventListener('resize', checkMobile))
 
-function openDialog(row) {
+async function openDialog(row) {
   isEdit.value = !!row
-  if (row) Object.assign(form, { ...row, password: '' })
-  else Object.assign(form, { id: null, username: '', nickname: '', mobile: '', sex: 1, password: '' })
+  if (row) {
+    Object.assign(form, { ...row, password: '', roleIds: [] })
+  } else {
+    Object.assign(form, { id: null, username: '', nickname: '', mobile: '', sex: 1, password: '', roleIds: [] })
+    try {
+      const roles = await getAllRoles()
+      allRoles.value = roles || []
+      const userRole = allRoles.value.find(r => r.code === 'user' || r.name === '普通用户')
+      form.roleIds = userRole ? [userRole.id] : (allRoles.value[0] ? [allRoles.value[0].id] : [])
+    } catch { allRoles.value = []; form.roleIds = [] }
+  }
   dialogVisible.value = true
 }
 
@@ -208,7 +222,7 @@ function saveUser() {
         ElMessage.success('修改成功')
       } else {
         const encrypted = encryptPassword(form.password)
-        await addUser({ username: form.username, nickname: form.nickname, mobile: form.mobile, sex: form.sex, password: encrypted })
+        await addUser({ username: form.username, nickname: form.nickname, mobile: form.mobile, sex: form.sex, password: encrypted, roleIds: form.roleIds })
         ElMessage.success('新增成功')
       }
       dialogVisible.value = false
@@ -266,8 +280,8 @@ async function saveUserRole() {
 
 <style scoped>
 .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
-.toolbar-left { display: flex; gap: 10px; flex-wrap: wrap; }
-.search-input { min-width: 140px; max-width: 220px; }
+.toolbar-left { display: flex; align-items: center; gap: 10px; flex-wrap: nowrap; flex-shrink: 0; }
+.search-input { width: 220px; flex-shrink: 0; }
 .table-scroll-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .pagination-wrap { display: flex; justify-content: flex-end; margin-top: 16px; overflow-x: auto; }
 .role-title { font-size: 14px; font-weight: 600; margin-bottom: 12px; color: #303133; }

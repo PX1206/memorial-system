@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 
 @Data
@@ -22,5 +23,6 @@ public class ApplyJoinFamilyParam implements Serializable {
     private String relation;
 
     @ApiModelProperty("申请理由")
+    @Size(max = 500, message = "申请理由不能超过200字")
     private String reason;
 }

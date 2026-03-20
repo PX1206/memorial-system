@@ -12,7 +12,7 @@
                     INNER JOIN family_ids fi ON f.pid = fi.id
                     WHERE f.del_flag = 0
                 )
-                SELECT f.id, f.pid, f.type, f.name, f.description, f.phone, f.address,
+                SELECT f.id, f.pid, f.name, f.description, f.phone, f.address,
                        f.founder_name, f.chief_id, f.root_id, f.member_count, f.tomb_count, f.invite_code, f.create_time,
                        pf.name AS parent_name,
                        (CASE WHEN EXISTS (SELECT 1 FROM family_admin fa WHERE fa.family_id = COALESCE(f.root_id, f.id) AND fa.user_id = #{param.currentUserId} AND fa.role IN ('super_admin','admin'))
@@ -41,7 +41,7 @@
                 ORDER BY f.id DESC
             </when>
             <otherwise>
-                SELECT f.id, f.pid, f.type, f.name, f.description, f.phone, f.address,
+                SELECT f.id, f.pid, f.name, f.description, f.phone, f.address,
                        f.founder_name, f.chief_id, f.root_id, f.member_count, f.tomb_count, f.invite_code, f.create_time,
                        pf.name AS parent_name,
                        (CASE WHEN EXISTS (SELECT 1 FROM family_admin fa WHERE fa.family_id = COALESCE(f.root_id, f.id) AND fa.user_id = #{param.currentUserId} AND fa.role IN ('super_admin','admin'))
@@ -72,7 +72,7 @@
     </select>
 
     <select id="getAllFamilyList" resultType="com.memorial.system.vo.FamilyVO">
-        SELECT f.id, f.pid, f.type, f.name, f.description, f.member_count, f.tomb_count, f.invite_code
+        SELECT f.id, f.pid, f.name, f.description, f.member_count, f.tomb_count, f.invite_code
         FROM family f
         <where>
             <if test="isAdmin == false and currentUserId != null">
@@ -88,7 +88,7 @@
     <select id="getFamilyTreeForMember" resultType="com.memorial.system.vo.FamilyVO">
         <choose>
             <when test="isAdmin != null and isAdmin == true">
-                SELECT f.id, f.pid, f.type, f.name, f.description, f.member_count, f.tomb_count, f.invite_code
+                SELECT f.id, f.pid, f.name, f.description, f.member_count, f.tomb_count, f.invite_code
                 FROM family f WHERE f.del_flag = 0 ORDER BY f.id ASC
             </when>
             <otherwise>
@@ -113,7 +113,7 @@
                 UNION ALL
                 SELECT f.id, f.pid FROM family f INNER JOIN walk_down w ON f.pid = w.id WHERE f.del_flag = 0
             )
-            SELECT DISTINCT f.id, f.pid, f.type, f.name, f.description, f.member_count, f.tomb_count, f.invite_code
+            SELECT DISTINCT f.id, f.pid, f.name, f.description, f.member_count, f.tomb_count, f.invite_code
             FROM family f WHERE f.id IN (SELECT id FROM walk_down) AND f.del_flag = 0
             ORDER BY f.id ASC
             </otherwise>

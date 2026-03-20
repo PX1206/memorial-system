@@ -56,14 +56,10 @@ public class FamilyServiceImpl extends BaseServiceImpl<FamilyMapper, Family> imp
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean addFamily(FamilyParam param) throws Exception {
-        String type = param.getType() != null ? param.getType().trim() : "家族";
-        Long pid = param.getPid() != null ? param.getPid() : 0L;
+        Long pid = param.getPid() != null && param.getPid() > 0 ? param.getPid() : 0L;
         Long rootId = null;
 
-        if ("家庭".equals(type) || "支族".equals(type)) {
-            if (pid == null || pid <= 0) {
-                throw new BusinessException(500, "创建家庭或支族时必须选择上级");
-            }
+        if (pid > 0) {
             Family parent = familyMapper.selectById(pid);
             if (parent == null) throw new BusinessException(500, "上级不存在");
             checkCanCreateSubFamily(parent);
@@ -72,7 +68,6 @@ public class FamilyServiceImpl extends BaseServiceImpl<FamilyMapper, Family> imp
 
         Family family = new Family();
         family.setPid(pid);
-        family.setType(type);
         family.setName(param.getName());
         family.setDescription(param.getDescription());
         family.setPhone(param.getPhone());
@@ -96,7 +91,7 @@ public class FamilyServiceImpl extends BaseServiceImpl<FamilyMapper, Family> imp
         family.setCreateTime(new Date());
         familyMapper.insert(family);
 
-        if ("家族".equals(type)) {
+        if (pid <= 0) {
             family.setRootId(family.getId());
             familyMapper.updateById(family);
             FamilyAdmin admin = new FamilyAdmin();
@@ -124,8 +119,7 @@ public class FamilyServiceImpl extends BaseServiceImpl<FamilyMapper, Family> imp
             throw new BusinessException(500, "家族信息不存在");
         }
         checkFamilyAdminAccess(family);
-        family.setPid(param.getPid() != null ? param.getPid() : 0L);
-        family.setType(param.getType());
+        family.setPid(param.getPid() != null && param.getPid() > 0 ? param.getPid() : 0L);
         family.setChiefId(param.getChiefId());
         family.setName(param.getName());
         family.setDescription(param.getDescription());
@@ -222,7 +216,7 @@ public class FamilyServiceImpl extends BaseServiceImpl<FamilyMapper, Family> imp
         if (family == null) throw new BusinessException(500, "家族不存在");
         Long rootId = family.getRootId() != null ? family.getRootId() : family.getId();
         Family rootFamily = familyMapper.selectById(rootId);
-        if (rootFamily == null || !"家族".equals(rootFamily.getType())) {
+        if (rootFamily == null) {
             throw new BusinessException(500, "根家族不存在");
         }
         String myRole = familyAdminMapper.getRoleInFamily(rootId, LoginUtil.getUserId());

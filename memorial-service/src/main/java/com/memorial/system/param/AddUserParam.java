@@ -7,10 +7,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 用户
@@ -52,5 +51,8 @@ public class AddUserParam extends BaseEntity {
     @ApiModelProperty(value = "密码（密码长度不能小于8位必须由数字和字母组成且不能出现连续四位相同字符），通过rsa2加密传输", required = true)
     @NotBlank(message = "密码不能为空")
     private String password;
+
+    @ApiModelProperty("角色ID列表，不传则默认普通用户")
+    private List<Long> roleIds;
 
 }

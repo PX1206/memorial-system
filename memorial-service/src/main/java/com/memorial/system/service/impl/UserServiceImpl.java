@@ -12,6 +12,7 @@ import com.memorial.system.entity.UserRole;
 import com.memorial.system.mapper.*;
 import com.memorial.system.param.*;
 import com.memorial.system.service.MenuService;
+import com.memorial.system.service.RoleService;
 import com.memorial.system.service.UserService;
 import com.memorial.common.base.BaseServiceImpl;
 import com.memorial.common.pagination.Paging;
@@ -26,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -54,6 +56,8 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapper, User> implement
     private RedisUtil redisUtil;
     @Autowired
     private MenuService menuService;
+    @Autowired
+    private RoleService roleService;
     @Autowired
     private UserRoleMapper userRoleMapper;
 
@@ -361,6 +365,13 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapper, User> implement
         user.setStatus(1); // 状态为正常
         user.setCreateBy(LoginUtil.getUserId());
         userMapper.insert(user);
+
+        // 保存用户角色，未传则默认普通用户（roleId=2）
+        List<Long> roleIds = addUserParam.getRoleIds();
+        if (roleIds == null || roleIds.isEmpty()) {
+            roleIds = Collections.singletonList(2L); // 普通用户
+        }
+        roleService.saveUserRoles(new UserRoleParam().setUserId(user.getId()).setRoleIds(roleIds));
 
         return true;
     }

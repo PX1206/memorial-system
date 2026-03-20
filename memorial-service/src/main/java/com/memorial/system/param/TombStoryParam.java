@@ -29,7 +29,7 @@ public class TombStoryParam implements Serializable {
     private String title;
 
     @NotBlank(message = "事迹内容不能为空")
-    @Size(max = 2000, message = "事迹内容HTML不能超过2000字符")
+    @Size(max = 5000, message = "事迹内容HTML不能超过2000字符")
     @ApiModelProperty(value = "事迹内容（富文本HTML，纯文字不超过2000字）", required = true)
     private String content;
 

@@ -21,9 +21,6 @@ public class FamilyParam implements Serializable {
     @ApiModelProperty("上级家族ID，0表示顶级（创建家庭/支族时必填）")
     private Long pid;
 
-    @ApiModelProperty("类型：家族/家庭/支族，创建时必选")
-    private String type;
-
     @ApiModelProperty("族长用户ID（家庭/支族时可指定）")
     private Long chiefId;
 
@@ -32,7 +29,7 @@ public class FamilyParam implements Serializable {
     @ApiModelProperty(value = "家族名称", required = true)
     private String name;
 
-    @Size(max = 500, message = "家族简介不能超过500字")
+    @Size(max = 1000, message = "家族简介不能超过500字")
     @ApiModelProperty("家族简介")
     private String description;
 

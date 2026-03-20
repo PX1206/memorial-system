@@ -33,7 +33,7 @@ public class TombParam implements Serializable {
     @ApiModelProperty("逝世日期")
     private String deathday;
 
-    @Size(max = 1000, message = "个人简介HTML内容不能超过1000字符")
+    @Size(max = 2000, message = "个人简介HTML内容不能超过1000字符")
     @ApiModelProperty("个人简介")
     private String biography;
 
