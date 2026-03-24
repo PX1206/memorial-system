@@ -2,6 +2,31 @@
 
 念园系统。在墓碑上刻制二维码，扫码进入墓主人纪念页面，可查看照片、生平事迹，游客可留言、打卡。需用户先配置墓主人信息和权限（如是否允许游客留言、留言审核等），支持家族宗族组织体系。
 
+## 墓碑二维码
+<img width="320" height="320" alt="墓碑二维码_张三丰" src="https://github.com/user-attachments/assets/7f6097eb-ffb9-4faa-87f0-3147d6d2dd3a" />
+
+## 扫码后的页面
+![86ddf28cf236b03b5d477a4d70564e63](https://github.com/user-attachments/assets/ac6662e3-46ee-47a4-b0a1-6c2048d01bef)
+
+## 个人简介
+![1626a637e3ac14491cd658bc457be821](https://github.com/user-attachments/assets/b5ad1d8d-d84f-48ae-8ac8-01c43c284d1a)
+
+## 生平事迹
+![c510e5ff4be52171b3c49c55a70f6891](https://github.com/user-attachments/assets/a1b546f2-c62c-4707-9581-578f4f0eaeb4)
+
+## 留言
+![26f5bc94e36399bf8b25dc9579064130](https://github.com/user-attachments/assets/c7bcadca-a0d5-402f-bba3-0392568b783e)
+
+## 打卡
+![658402234607d53b42f9eb07ca6e7132](https://github.com/user-attachments/assets/dfb67911-be18-48bf-9e35-66d0de424194)
+
+## 后台地址
+https://ny.px-apricot.cn/
+
+## 后台管理界面
+<img width="1920" height="929" alt="image" src="https://github.com/user-attachments/assets/ac010751-082a-4202-8ed0-fc9de5b05dd5" />
+
+
 ## 功能概述
 
 - **墓碑管理**：逝者信息、生平事迹、二维码、留言、打卡
