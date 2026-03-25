@@ -4,22 +4,22 @@
 
 ## 主要子包与功能
 
-| 包路径 | 功能 |
-|--------|------|
-| `api` | 统一响应 `ApiResult`、`ApiCode`、分页参数 `BasePageParam`、`PageInfo` |
-| `exception` | `BusinessException`、`BaseException`、`ConfigException` |
-| `handler` | `RestExceptionHandler` 全局异常处理 |
-| `base` | `BaseController`、`BaseService`、`BaseServiceImpl`、`BaseEntity` |
-| `interceptor` | `LoginInterceptor` 登录拦截、`LogInterceptor` 日志拦截 |
-| `log` | `LogAop`、`OperationLog` 操作日志、`TraceIdPatternConverter` 链路追踪 |
-| `pagination` | 分页、排序、`Paging`、`OrderMapping` |
-| `redis` | `RedisUtil` Redis 工具 |
-| `tool` | `TokenUtil`、`LoginUtil`、`DateUtil`、`CommonUtil`、`AliyunSmsUtils`、`FileTypeTool` 等 |
-| `captcha` | 验证码生成（`Captcha`、`Quant`、`Randoms`、`Encoder`） |
-| `config` | `MyBatisPlusConfig`、`YamlConfigLoader` |
-| `constant` | `CommonConstant`、`RocketMqConstant` |
-| `enums` | `BaseEnum`、`OperationLogType`、`RandomType` |
-| `thread` | `ThreadMdcUtil`、`ThreadPoolExecutorMdcWrapper` |
+| 包路径        | 功能                                                                 |
+| ------------- | -------------------------------------------------------------------- |
+| `api`         | 统一响应 `ApiResult`、`ApiCode`、分页参数 `BasePageParam`、`PageInfo` |
+| `exception`   | `BusinessException`、`BaseException`、`ConfigException`              |
+| `handler`     | `RestExceptionHandler` 全局异常处理                                  |
+| `base`        | `BaseController`、`BaseService`、`BaseServiceImpl`、`BaseEntity`     |
+| `interceptor` | `LoginInterceptor` 登录拦截、`LogInterceptor` 日志拦截               |
+| `log`         | `LogAop`、`OperationLog` 操作日志、`TraceIdPatternConverter` 链路追踪 |
+| `pagination`  | 分页、排序、`Paging`、`OrderMapping`                                 |
+| `redis`       | `RedisUtil` Redis 工具                                               |
+| `tool`        | `TokenUtil`、`LoginUtil`、`DateUtil`、`CommonUtil`、`AliyunSmsUtils`、`FileTypeTool` 等 |
+| `captcha`     | 验证码生成（`Captcha`、`Quant`、`Randoms`、`Encoder`）               |
+| `config`      | `MyBatisPlusConfig`、`YamlConfigLoader`                              |
+| `constant`    | `CommonConstant`、`RocketMqConstant`                                 |
+| `enums`       | `BaseEnum`、`OperationLogType`、`RandomType`                         |
+| `thread`      | `ThreadMdcUtil`、`ThreadPoolExecutorMdcWrapper`                      |
 
 ## 关键类说明
 
@@ -33,7 +33,7 @@
 
 ## 被依赖关系
 
-```
+```text
 memorial-service
     └── memorial-common
 ```
@@ -45,3 +45,5 @@ memorial-service
 - Redis、RocketMQ
 - 阿里云短信
 - Hutool、Guava、Lombok
+
+项目部署与联调说明见 [docs/deployment.md](../docs/deployment.md)。

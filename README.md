@@ -85,7 +85,7 @@
 
 ## 📁 项目结构
 
-```
+```text
 memorial-system/
 ├── memorial-service/
 ├── memorial-common/
@@ -97,17 +97,28 @@ memorial-system/
 
 ---
 
+## 📚 文档索引
+
+- [部署指南](docs/deployment.md)：环境要求、后端/前端生产部署、Nginx 示例
+- [数据库说明](docs/database.md)：`memorial_db.sql` 导入方式与字符集说明
+- [API 说明](docs/api.md)：Knife4j 地址、接口前缀、认证与响应格式
+
+---
+
 ## 🚀 快速开始
 
 ### 初始化数据库
 
-```
-mysql -u root -p < sql/memorial_db.sql
+脚本 `sql/memorial_db.sql` 不含建库语句，需先在 MySQL 中创建数据库，再导入表结构：
+
+```bash
+mysql -u root -p -e "CREATE DATABASE memorial_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+mysql -u root -p memorial_db < sql/memorial_db.sql
 ```
 
 ### 启动后端
 
-```
+```bash
 mvn clean install
 cd memorial-service
 mvn spring-boot:run
@@ -115,7 +126,7 @@ mvn spring-boot:run
 
 ### 启动前端
 
-```
+```bash
 cd memorial-vue
 npm install
 npm run dev
@@ -125,18 +136,7 @@ npm run dev
 
 ## 📦 部署
 
-### 后端
-
-```
-mvn -pl memorial-service package
-java -jar memorial-service.jar
-```
-
-### 前端
-
-```
-npm run build
-```
+生产环境打包、配置修改、Nginx 与前后端联调等步骤见 [docs/deployment.md](docs/deployment.md)。
 
 ---
 

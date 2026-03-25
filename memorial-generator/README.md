@@ -45,15 +45,15 @@ generatorProperties.getDataSourceConfig()
 
 ## 配置说明
 
-| 配置项 | 说明 |
-|--------|------|
-| `maven-module-name` | Maven 模块名（如 memorial-service） |
-| `parent-package` | 父包路径（如 com.memorial） |
-| `module-name` | 业务模块名（如 system） |
-| `table-config` | 表名、主键列名 |
-| `data-source-config` | 数据库连接、用户名、密码、URL |
-| `generator-config` | 生成策略、是否生成 Entity/Controller/Service/Mapper 等 |
-| `file-override` | 是否覆盖已有文件 |
+| 配置项               | 说明                                                         |
+| -------------------- | ------------------------------------------------------------ |
+| `maven-module-name`  | Maven 模块名（如 memorial-service）                          |
+| `parent-package`     | 父包路径（如 com.memorial）                                  |
+| `module-name`        | 业务模块名（如 system）                                      |
+| `table-config`       | 表名、主键列名                                               |
+| `data-source-config` | 数据库连接、用户名、密码、URL                                |
+| `generator-config`   | 生成策略、是否生成 Entity/Controller/Service/Mapper 等       |
+| `file-override`      | 是否覆盖已有文件                                             |
 
 ## 生成策略
 
@@ -76,3 +76,5 @@ generatorProperties.getDataSourceConfig()
 - 生成前请确认数据源配置正确
 - `file-override: true` 会覆盖已有文件，请谨慎使用
 - 生成后可根据业务需要手动调整代码
+
+项目部署与运行环境见 [docs/deployment.md](../docs/deployment.md)。

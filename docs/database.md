@@ -1,47 +1,33 @@
 # 数据库脚本说明
 
-## 执行顺序
+## 仓库中的脚本
 
-### 新库初始化
+当前 `sql/` 目录下提供：
 
-1. **memorial_db.sql**（必选）  
-   主建表脚本，创建数据库 `memorial_db` 及核心表：user、file、tomb、tomb_message、family、family_member 等。
+| 脚本            | 说明 |
+| --------------- | ---- |
+| `memorial_db.sql` | 主建表与初始化数据：用户、文件、墓碑、留言、打卡、家族、菜单与权限相关表等 |
 
-2. **permission_tables.sql**（必选）  
-   权限相关表：role、role_menu、user_role、menu、sys_operation_log 等。
+> 历史上若曾通过独立增量 SQL 升级，请以对应版本发布说明为准；本仓库未附带历史增量脚本文件时，以当前 `memorial_db.sql` 为准做新库初始化。
 
-### 增量升级（已有库按需执行）
+## 新库初始化（执行顺序）
 
-以下脚本用于在已有库上增加字段或表，新库若已使用最新版 `memorial_db.sql` 可能已包含部分内容，请根据实际情况选择执行：
-
-| 脚本 | 说明 |
-|------|------|
-| tomb_qr_code_key.sql | 墓碑表增加 `qr_code_key` 字段（扫码访问标识） |
-| tomb_address.sql | 墓碑表增加地址相关字段 |
-| tomb_field_length.sql | 墓碑表字段长度调整 |
-| tomb_epitaph_story.sql | 墓碑表生平/墓志铭相关字段 |
-| tomb_visitor_action_open.sql | 游客行为开关相关字段 |
-| tomb_checkin_rate_limit_index.sql | 打卡限流索引 |
-| family_pid.sql | 家族表增加 `pid` 字段（父级） |
-| family_member_apply.sql | 家族成员申请表 |
-| family_member_bind_code.sql | 家族成员绑定码相关 |
-| family_restructure.sql | 家族表结构重构（若为空可忽略） |
-
-## 执行方式
+1. 在 MySQL 中创建数据库（若尚未创建）：
 
 ```bash
-# 主脚本
-mysql -u root -p memorial_db < sql/memorial_db.sql
-
-# 权限表
-mysql -u root -p memorial_db < sql/permission_tables.sql
-
-# 增量脚本（按需）
-mysql -u root -p memorial_db < sql/tomb_qr_code_key.sql
-mysql -u root -p memorial_db < sql/family_member_apply.sql
-# ...
+mysql -u root -p -e "CREATE DATABASE memorial_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 ```
 
-## 字符集
+2. 导入主脚本（在**已选中的库** `memorial_db` 上执行，避免表建到默认库）：
 
-数据库及表均使用 `utf8mb4`、`utf8mb4_general_ci`。
+```bash
+mysql -u root -p memorial_db < sql/memorial_db.sql
+```
+
+## 已有库升级
+
+若后续在仓库中增加 `sql/migrations/` 或独立增量脚本，请按各脚本注释或发行说明按需执行。执行前请**备份数据库**。
+
+## 字符集与排序规则
+
+库与表使用 **utf8mb4**。具体列级排序规则（如 `utf8mb4_0900_ai_ci` 等）以 `memorial_db.sql` 导出内容为准。

@@ -2,24 +2,25 @@
 
 ## 环境要求
 
-| 组件 | 版本 |
-|------|------|
-| JDK | 1.8+ |
-| Maven | 3.x |
-| MySQL | 8.0 |
-| Redis | 6.2 |
-| RocketMQ | 4.9.8 |
-| Node.js | ^20.19.0 或 >=22.12.0（仅前端构建需要） |
+| 组件     | 版本                                      |
+| -------- | ----------------------------------------- |
+| JDK      | 1.8+                                      |
+| Maven    | 3.x                                       |
+| MySQL    | 8.0                                       |
+| Redis    | 6.2                                       |
+| RocketMQ | 4.9.8                                     |
+| Node.js  | ^20.19.0 或 >=22.12.0（仅前端构建需要）   |
 
 ## 一、数据库
 
-1. 创建数据库并执行主脚本：
+1. 创建数据库并导入主脚本（`memorial_db.sql` 不含建库语句，须先建库）：
 
 ```bash
-mysql -u root -p < sql/memorial_db.sql
+mysql -u root -p -e "CREATE DATABASE memorial_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+mysql -u root -p memorial_db < sql/memorial_db.sql
 ```
 
-2. 若为已有库升级，按需执行 `sql/` 下增量脚本，详见 [database.md](database.md)。
+2. 已有库升级与脚本说明见 [database.md](database.md)。
 
 ## 二、后端部署
 
