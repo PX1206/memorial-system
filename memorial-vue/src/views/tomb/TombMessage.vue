@@ -57,6 +57,22 @@
           <el-table-column prop="tombName" label="墓碑" width="120" />
           <el-table-column prop="visitorName" label="留言人" width="120" />
           <el-table-column prop="content" label="留言内容" show-overflow-tooltip min-width="200" />
+          <el-table-column label="配图" width="132">
+            <template #default="{ row }">
+              <div v-if="parseRowImages(row).length" class="msg-admin-thumbs">
+                <el-image
+                  v-for="(u, i) in parseRowImages(row)"
+                  :key="i"
+                  :src="u"
+                  :preview-src-list="parseRowImages(row)"
+                  :initial-index="i"
+                  fit="cover"
+                  class="msg-admin-thumb"
+                />
+              </div>
+              <span v-else class="text-muted">—</span>
+            </template>
+          </el-table-column>
           <el-table-column prop="createTime" label="留言时间" width="170" />
           <el-table-column prop="status" label="状态" width="100">
             <template #default="{ row }">
@@ -81,6 +97,17 @@
                 <div class="message-card__tomb">{{ row.tombName || '-' }}</div>
                 <div class="message-card__visitor">{{ row.visitorName || '匿名' }}</div>
                 <div class="message-card__content">{{ (row.content || '').slice(0, 60) }}{{ (row.content || '').length > 60 ? '…' : '' }}</div>
+                <div v-if="parseRowImages(row).length" class="message-card__imgs">
+                  <el-image
+                    v-for="(u, i) in parseRowImages(row)"
+                    :key="i"
+                    :src="u"
+                    :preview-src-list="parseRowImages(row)"
+                    :initial-index="i"
+                    fit="cover"
+                    class="msg-admin-thumb"
+                  />
+                </div>
                 <div class="message-card__meta">
                   <el-tag :type="statusType(row.status)" size="small">{{ statusText(row.status) }}</el-tag>
                   <span class="message-card__time">{{ row.createTime }}</span>
@@ -149,6 +176,16 @@ const statusText = (s) => ({ approved: '已通过', pending: '待审核', reject
 
 function canOperate(row) {
   return row && ['admin', 'chief', 'member'].includes(row.myRole)
+}
+
+function parseRowImages(row) {
+  if (!row?.imageUrls) return []
+  try {
+    const a = JSON.parse(row.imageUrls)
+    return Array.isArray(a) ? a : []
+  } catch {
+    return []
+  }
 }
 
 const currentFamilyTitle = computed(() => {
@@ -261,6 +298,15 @@ function handleDelete(row) {
 .message-card__tomb { font-weight: 600; font-size: 15px; color: #303133; margin-bottom: 4px; }
 .message-card__visitor { font-size: 13px; color: #606266; margin-bottom: 6px; }
 .message-card__content { font-size: 13px; color: #606266; line-height: 1.5; word-break: break-word; margin-bottom: 8px; }
+.message-card__imgs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.text-muted { color: #c0c4cc; }
+.msg-admin-thumbs { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.msg-admin-thumb {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  cursor: pointer;
+}
 .message-card__meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12px; color: #909399; }
 .message-card__time { flex-shrink: 0; }
 .message-card__actions { display: flex; flex-wrap: wrap; gap: 4px; padding-top: 10px; border-top: 1px solid #ebeef5; }

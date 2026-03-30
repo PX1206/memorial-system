@@ -570,6 +570,7 @@ CREATE TABLE `tomb_message`  (
   `user_id` bigint NULL DEFAULT NULL COMMENT '留言用户ID（可为空，匿名留言）',
   `avatar` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '留言人头像',
   `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '留言内容',
+  `image_urls` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '配图URL JSON数组，最多3张',
   `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT 'pending' COMMENT '审核状态：pending待审核 approved已通过 rejected已拒绝',
   `reject_reason` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '拒绝理由',
   `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '留言时间',
@@ -584,12 +585,12 @@ CREATE TABLE `tomb_message`  (
 -- ----------------------------
 -- Records of tomb_message
 -- ----------------------------
-INSERT INTO `tomb_message` VALUES (1, 3, '张书平', 18, NULL, '你好呀！', 'approved', NULL, '2026-03-20 14:21:40', 18, '2026-03-20 14:32:23', NULL, 0);
-INSERT INTO `tomb_message` VALUES (2, 1, '张书平', 18, NULL, '这是一个测试', 'approved', NULL, '2026-03-20 14:23:10', 18, '2026-03-20 14:32:21', NULL, 0);
-INSERT INTO `tomb_message` VALUES (3, 2, '李凡', 23, NULL, '你好', 'approved', NULL, '2026-03-20 14:50:11', 23, '2026-03-20 14:50:44', NULL, 0);
-INSERT INTO `tomb_message` VALUES (4, 1, '李凡', 23, NULL, '你好你好', 'approved', NULL, '2026-03-20 14:50:36', 23, '2026-03-20 14:50:43', NULL, 0);
-INSERT INTO `tomb_message` VALUES (5, 4, '李凡', 23, NULL, '天帝', 'approved', NULL, '2026-03-20 14:51:35', 23, '2026-03-20 15:51:25', NULL, 0);
-INSERT INTO `tomb_message` VALUES (6, 1, '李白', 24, 'https://ny.px-apricot.cn/api/file/6Fh6K3oPeqPLXtA43FBuj9Q2H0WGYzkd', '这是一个长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长测试', 'approved', NULL, '2026-03-20 15:51:15', 24, '2026-03-20 15:51:26', NULL, 0);
+INSERT INTO `tomb_message` VALUES (1, 3, '张书平', 18, NULL, '你好呀！', NULL, 'approved', NULL, '2026-03-20 14:21:40', 18, '2026-03-20 14:32:23', NULL, 0);
+INSERT INTO `tomb_message` VALUES (2, 1, '张书平', 18, NULL, '这是一个测试', NULL, 'approved', NULL, '2026-03-20 14:23:10', 18, '2026-03-20 14:32:21', NULL, 0);
+INSERT INTO `tomb_message` VALUES (3, 2, '李凡', 23, NULL, '你好', NULL, 'approved', NULL, '2026-03-20 14:50:11', 23, '2026-03-20 14:50:44', NULL, 0);
+INSERT INTO `tomb_message` VALUES (4, 1, '李凡', 23, NULL, '你好你好', NULL, 'approved', NULL, '2026-03-20 14:50:36', 23, '2026-03-20 14:50:43', NULL, 0);
+INSERT INTO `tomb_message` VALUES (5, 4, '李凡', 23, NULL, '天帝', NULL, 'approved', NULL, '2026-03-20 14:51:35', 23, '2026-03-20 15:51:25', NULL, 0);
+INSERT INTO `tomb_message` VALUES (6, 1, '李白', 24, 'https://ny.px-apricot.cn/api/file/6Fh6K3oPeqPLXtA43FBuj9Q2H0WGYzkd', '这是一个长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长测试', NULL, 'approved', NULL, '2026-03-20 15:51:15', 24, '2026-03-20 15:51:26', NULL, 0);
 
 -- ----------------------------
 -- Table structure for tomb_story

@@ -81,10 +81,38 @@
 
         <el-tab-pane label="留言" name="messages">
           <div class="compose">
+            <p class="compose-hint">可输入文字；配图选填，最多 3 张（需登录后选择图片上传）。</p>
             <div class="compose-row">
               <el-checkbox v-model="actionAnonymous">匿名</el-checkbox>
             </div>
             <el-input v-model="msgForm.content" placeholder="写下您的思念..." type="textarea" :rows="3" />
+            <div v-if="isLoggedIn" class="compose-upload">
+              <div class="msg-img-picked-list">
+                <div v-for="(u, idx) in msgImageUrls" :key="idx" class="msg-img-picked">
+                  <el-image :src="u" fit="cover" class="msg-img-picked__img" :preview-src-list="msgImageUrls" :initial-index="idx" />
+                  <el-button class="msg-img-picked__rm" type="danger" link circle @click="removeMsgImage(idx)">
+                    <el-icon><Close /></el-icon>
+                  </el-button>
+                </div>
+                <!-- 使用 label 关联 file，避免移动端对 input.click() 的限制 -->
+                <label
+                  v-if="msgImageUrls.length < 3"
+                  class="msg-img-add"
+                  :class="{ 'msg-img-add--disabled': msgImageUploading }"
+                >
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/gif,image/webp"
+                    class="msg-file-input-native"
+                    :disabled="msgImageUploading"
+                    @change="onMsgFilePicked"
+                  />
+                  <el-icon><Plus /></el-icon>
+                  <span>{{ msgImageUploading ? '上传中…' : '添加图片' }}</span>
+                </label>
+              </div>
+            </div>
+            <p v-else class="compose-upload-login-hint muted">登录后可添加配图（最多 3 张），与文字可同时提交。</p>
             <div class="compose-actions">
               <el-button type="primary" :loading="submitting" @click="submitMsg">提交留言</el-button>
               <span class="muted" v-if="isLoggedIn && tomb.visitorActionOpen === false">当前墓碑仅家族成员可留言。</span>
@@ -98,7 +126,25 @@
               <div class="record-card__meta">
                 {{ row.createTime }} · <span :class="'status-' + (row.status || '')">{{ row.status === 'approved' ? '已通过' : row.status === 'pending' ? '待审核' : row.status === 'rejected' ? '已拒绝' : '-' }}</span>
               </div>
-              <div class="record-card__content">{{ row.content }}</div>
+              <div v-if="row.content" class="record-card__content">{{ row.content }}</div>
+              <div v-else-if="row.messageImages?.length" class="record-card__content muted">（无文字）</div>
+              <div v-if="row.messageImages?.length" class="record-card__images">
+                <el-image
+                  v-for="(u, idx) in row.messageImages"
+                  :key="`${row.id}-${idx}`"
+                  :src="u"
+                  lazy
+                  loading="lazy"
+                  :preview-src-list="row.messageImages"
+                  :initial-index="idx"
+                  fit="cover"
+                  class="msg-img-thumb"
+                >
+                  <template #placeholder>
+                    <div class="msg-img-thumb msg-img-thumb--ph" />
+                  </template>
+                </el-image>
+              </div>
             </div>
             <el-empty v-if="!messageLoading && !messageTable?.length" description="暂无留言" :image-size="80" />
           </div>
@@ -434,7 +480,7 @@
 import { ref, reactive, onMounted, onBeforeUnmount, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Close } from '@element-plus/icons-vue'
+import { Close, Plus } from '@element-plus/icons-vue'
 import flowerIcon from '@/assets/icons/flower.svg'
 import candleIcon from '@/assets/icons/candle.svg'
 import { formatTombMemorialDateLine } from '@/utils/tombCalendar'
@@ -452,6 +498,7 @@ import {
 import { passwordLoginAPI, smsLoginAPI, getCaptchaAPI, sendSmsCodeAPI, registerAPI } from '@/api/auth'
 import { applyJoinFamily } from '@/api/family'
 import { encryptPassword } from '@/utils/rsa'
+import { uploadFile } from '@/api/user'
 
 const route = useRoute()
 const router = useRouter()
@@ -467,7 +514,48 @@ const tombDateLine = computed(() => {
   return formatTombMemorialDateLine(t)
 })
 const msgForm = reactive({ content: '' })
+/** 留言配图 URL 列表（最多 3 张） */
+const msgImageUrls = ref([])
+const msgImageUploading = ref(false)
 const actionAnonymous = ref(false)
+
+/** 解析留言配图 JSON（列表加载时写入 row.messageImages，避免模板重复 parse） */
+function parseMessageImageUrls(raw) {
+  if (!raw) return []
+  try {
+    const a = JSON.parse(raw)
+    return Array.isArray(a) ? a : []
+  } catch {
+    return []
+  }
+}
+
+function removeMsgImage(idx) {
+  msgImageUrls.value = msgImageUrls.value.filter((_, i) => i !== idx)
+}
+
+async function onMsgFilePicked(e) {
+  const input = e.target
+  const file = input.files && input.files[0]
+  input.value = ''
+  if (!file) return
+  if (msgImageUrls.value.length >= 3) return
+  if (file.size > 5 * 1024 * 1024) {
+    ElMessage.warning('单张图片不超过 5MB')
+    return
+  }
+  msgImageUploading.value = true
+  try {
+    const url = await uploadFile(file)
+    if (url && msgImageUrls.value.length < 3) {
+      msgImageUrls.value = [...msgImageUrls.value, url]
+    }
+  } catch {
+    /* 拦截器 */
+  } finally {
+    msgImageUploading.value = false
+  }
+}
 const tab = ref('intro')
 const tabsRef = ref()
 
@@ -555,7 +643,11 @@ async function loadMessages() {
   try {
     const res = await getMemorialMessagePageList(messageQuery)
     if (res) {
-      messageTable.value = res.records || []
+      const records = res.records || []
+      messageTable.value = records.map((r) => ({
+        ...r,
+        messageImages: parseMessageImageUrls(r.imageUrls)
+      }))
       messageTotal.value = res.total || 0
     }
   } catch { /* */ }
@@ -599,8 +691,10 @@ async function doCheckin(type) {
 }
 
 async function submitMsg() {
-  if (!msgForm.content.trim()) {
-    ElMessage.warning('请输入留言内容')
+  const urls = [...msgImageUrls.value]
+  const hasText = !!msgForm.content.trim()
+  if (!hasText && urls.length === 0) {
+    ElMessage.warning('请输入留言内容或上传图片')
     return
   }
   if (!isLoggedIn.value) {
@@ -615,10 +709,12 @@ async function submitMsg() {
     await submitMessage({
       tombId: tomb.value.id,
       visitorName: getActionName(),
-      content: msgForm.content
+      content: msgForm.content,
+      imageUrls: urls.length ? urls : undefined
     })
     ElMessage.success('留言已提交，等待审核')
     msgForm.content = ''
+    msgImageUrls.value = []
     messageQuery.pageIndex = 1
     loadMessages()
   } catch { /* 拦截器已处理 */ }
@@ -1328,6 +1424,91 @@ function toPreview(html) {
 .text { color: #606266; line-height: 1.8; white-space: pre-wrap; }
 .empty { color: #c0c4cc; }
 .compose { margin-bottom: 12px; display: flex; flex-direction: column; gap: 10px; }
+.compose-hint { margin: 0; font-size: 12px; color: #909399; line-height: 1.45; }
+.compose-upload-login-hint { margin: 0; font-size: 12px; line-height: 1.45; }
+.msg-img-picked-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 10px;
+}
+.msg-img-picked {
+  position: relative;
+  width: 88px;
+  height: 88px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e4e7ed;
+}
+.msg-img-picked__img { width: 88px; height: 88px; display: block; }
+.msg-img-picked__rm {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  padding: 2px !important;
+  min-height: auto !important;
+  background: rgba(0, 0, 0, 0.45) !important;
+  color: #fff !important;
+}
+.msg-img-add {
+  position: relative;
+  width: 88px;
+  height: 88px;
+  border: 1px dashed #c0c4cc;
+  border-radius: 8px;
+  background: #fafafa;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #606266;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+.msg-img-add--disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.msg-file-input-native {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  font-size: 0;
+}
+.msg-img-add .el-icon {
+  font-size: 22px;
+  pointer-events: none;
+}
+.msg-img-add span {
+  pointer-events: none;
+}
+@media (max-width: 767px) {
+  .compose-upload .msg-img-add {
+    width: 100%;
+    max-width: 100%;
+    min-height: 48px;
+    height: auto;
+    padding: 10px 12px;
+    flex-direction: row;
+    justify-content: center;
+    gap: 8px;
+  }
+  .compose-upload .msg-img-picked {
+    width: 72px;
+    height: 72px;
+  }
+  .compose-upload .msg-img-picked__img {
+    width: 72px;
+    height: 72px;
+  }
+}
 .compose-row { display: flex; gap: 10px; flex-wrap: wrap; }
 .compose-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .muted { color: #909399; font-size: 12px; }
@@ -1362,6 +1543,27 @@ function toPreview(html) {
 .record-card__meta .status-pending { color: #e6a23c; }
 .record-card__meta .status-rejected { color: #f56c6c; }
 .record-card__content { font-size: 14px; color: #606266; line-height: 1.6; white-space: pre-wrap; word-break: break-word; }
+.record-card__images {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+.msg-img-thumb {
+  width: 88px;
+  height: 88px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.msg-img-thumb--ph {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: msg-img-shimmer 1.2s ease-in-out infinite;
+}
+@keyframes msg-img-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
 
 /* 献花/打卡类型图标 */
 .checkin-type-icon { width: 18px; height: 18px; margin-right: 6px; vertical-align: -3px; object-fit: contain; }

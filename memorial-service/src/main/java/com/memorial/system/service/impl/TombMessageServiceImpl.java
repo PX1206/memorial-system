@@ -20,12 +20,17 @@ import com.memorial.system.service.TombAccessChecker;
 import com.memorial.system.service.TombMessageService;
 import com.memorial.system.vo.TombMessageVO;
 import com.memorial.common.redis.RedisUtil;
+import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -51,6 +56,9 @@ public class TombMessageServiceImpl extends BaseServiceImpl<TombMessageMapper, T
 
     @Autowired
     private RedisUtil redisUtil;
+
+    @Value("${local.host}")
+    private String localHost;
 
     @Override
     public Paging<TombMessageVO> getMessagePageList(TombMessagePageParam param) throws Exception {
@@ -127,9 +135,34 @@ public class TombMessageServiceImpl extends BaseServiceImpl<TombMessageMapper, T
         return true;
     }
 
+    /**
+     * 校验并序列化配图 URL（须为本地上传接口返回的地址）
+     */
+    private String normalizeImageUrlsJson(List<String> imageUrls) {
+        if (imageUrls == null || imageUrls.isEmpty()) {
+            return null;
+        }
+        if (imageUrls.size() > 3) {
+            throw new BusinessException(400, "每则留言最多 3 张图片");
+        }
+        List<String> cleaned = new ArrayList<>();
+        for (String u : imageUrls) {
+            if (StringUtils.isBlank(u)) {
+                continue;
+            }
+            String t = u.trim();
+            String base = localHost == null ? "" : localHost.trim().replaceAll("/+$", "");
+            if (!t.startsWith(base + "/file/")) {
+                throw new BusinessException(400, "无效的图片地址");
+            }
+            cleaned.add(t);
+        }
+        return cleaned.isEmpty() ? null : JSON.toJSONString(cleaned);
+    }
+
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean addMessageAuth(Long tombId, Long userId, String visitorName, String content) throws Exception {
+    public boolean addMessageAuth(Long tombId, Long userId, String visitorName, String content, List<String> imageUrls) throws Exception {
         Tomb tomb = tombMapper.selectById(tombId);
         if (tomb == null) {
             throw new BusinessException(500, "墓碑不存在");
@@ -155,6 +188,12 @@ public class TombMessageServiceImpl extends BaseServiceImpl<TombMessageMapper, T
 
         User user = userMapper.selectById(userId);
 
+        String text = content == null ? "" : content.trim();
+        String imagesJson = normalizeImageUrlsJson(imageUrls);
+        if (text.isEmpty() && StringUtils.isBlank(imagesJson)) {
+            throw new BusinessException(400, "请输入留言内容或上传图片");
+        }
+
         TombMessage message = new TombMessage();
         message.setTombId(tombId);
         message.setUserId(userId);
@@ -162,7 +201,8 @@ public class TombMessageServiceImpl extends BaseServiceImpl<TombMessageMapper, T
         if (user != null) {
             message.setAvatar(user.getHeadImg());
         }
-        message.setContent(content);
+        message.setContent(text);
+        message.setImageUrls(imagesJson);
         message.setStatus("pending");
         message.setCreateTime(new Date());
         message.setCreateBy(userId);

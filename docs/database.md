@@ -12,6 +12,7 @@
 | `alter_tomb_lunar_flag_merge.sql` | 农历标记合并（按需） |
 | `alter_tomb_reminder_lunar_event_types.sql` | 墓碑提醒事件类型扩展（按需） |
 | `alter_tomb_reminder_custom_remarks.sql` | 自定义日期备注列等（按需） |
+| `alter_tomb_message_image_urls.sql` | 墓碑留言配图（JSON URL 数组，最多 3 张）（按需） |
 
 > **新库**：直接执行最新的 `memorial_db.sql` 即可得到当前表结构。  
 > **已有库**：按上线顺序执行缺失的 `alter_*.sql`，执行前请备份。历史上若曾通过其他渠道升级，以实际库结构为准。

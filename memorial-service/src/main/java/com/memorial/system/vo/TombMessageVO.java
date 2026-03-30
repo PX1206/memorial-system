@@ -22,6 +22,10 @@ public class TombMessageVO implements Serializable {
     private String visitorName;
     private String avatar;
     private String content;
+
+    @ApiModelProperty("配图 URL 列表 JSON 字符串，前端解析为数组展示")
+    private String imageUrls;
+
     private String status;
     private String rejectReason;
 

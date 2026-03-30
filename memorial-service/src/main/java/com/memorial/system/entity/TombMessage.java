@@ -38,6 +38,9 @@ public class TombMessage extends BaseEntity {
     @ApiModelProperty("留言内容")
     private String content;
 
+    @ApiModelProperty("配图 URL 列表 JSON 数组，最多 3 张")
+    private String imageUrls;
+
     @ApiModelProperty("审核状态：pending/approved/rejected")
     private String status;
 

@@ -6,6 +6,8 @@ import com.memorial.system.entity.TombMessage;
 import com.memorial.system.param.TombMessagePageParam;
 import com.memorial.system.vo.TombMessageVO;
 
+import java.util.List;
+
 public interface TombMessageService extends BaseService<TombMessage> {
 
     Paging<TombMessageVO> getMessagePageList(TombMessagePageParam param) throws Exception;
@@ -21,5 +23,5 @@ public interface TombMessageService extends BaseService<TombMessage> {
     /**
      * 提交留言（需要登录，支持匿名姓名展示）
      */
-    boolean addMessageAuth(Long tombId, Long userId, String visitorName, String content) throws Exception;
+    boolean addMessageAuth(Long tombId, Long userId, String visitorName, String content, List<String> imageUrls) throws Exception;
 }

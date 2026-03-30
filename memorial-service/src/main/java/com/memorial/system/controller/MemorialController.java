@@ -22,6 +22,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -68,10 +70,11 @@ public class MemorialController {
         }
         Long tombId = Long.valueOf(body.get("tombId").toString());
         String visitorName = resolveVisitorName(body.get("visitorName"));
-        String content = body.get("content").toString();
+        String content = body.get("content") == null ? "" : body.get("content").toString();
+        List<String> imageUrls = parseImageUrlList(body.get("imageUrls"));
         Long userId = LoginUtil.getUserId();
         LoginUtil.refreshToken();
-        boolean flag = tombMessageService.addMessageAuth(tombId, userId, visitorName, content);
+        boolean flag = tombMessageService.addMessageAuth(tombId, userId, visitorName, content, imageUrls);
         return ApiResult.result(flag);
     }
 
@@ -141,6 +144,23 @@ public class MemorialController {
         param.setForPublicMemorial(true);
         Paging<TombCheckinVO> paging = tombCheckinService.getCheckinPageList(param);
         return ApiResult.ok(paging);
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<String> parseImageUrlList(Object raw) {
+        if (raw == null) {
+            return new ArrayList<>();
+        }
+        if (raw instanceof List) {
+            List<String> out = new ArrayList<>();
+            for (Object o : (List<?>) raw) {
+                if (o != null && !o.toString().trim().isEmpty()) {
+                    out.add(o.toString().trim());
+                }
+            }
+            return out;
+        }
+        return new ArrayList<>();
     }
 
     /** 留言/献花显示名：明确传「匿名」用匿名，否则用当前用户昵称 */

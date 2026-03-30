@@ -465,12 +465,10 @@
               </el-table-column>
               <el-table-column label="状态" width="120">
                 <template #default="{ row }">
-                  <el-tag
-                    :type="row.status === '通过' ? 'success' : row.status === '拒绝' ? 'danger' : 'warning'"
-                  >
-                    {{ row.status || '待审核' }}
+                  <el-tag :type="messageStatusTagType(row.status)">
+                    {{ messageStatusText(row.status) }}
                   </el-tag>
-                  <el-tooltip v-if="row.status === '拒绝' && row.rejectReason" :content="row.rejectReason" placement="top">
+                  <el-tooltip v-if="row.status === 'rejected' && row.rejectReason" :content="row.rejectReason" placement="top">
                     <el-button size="small" type="danger" link>原因</el-button>
                   </el-tooltip>
                 </template>
@@ -517,11 +515,11 @@
             <el-descriptions-item label="访客">{{ currentMessage.visitorName || '匿名' }}</el-descriptions-item>
             <el-descriptions-item label="时间">{{ currentMessage.createTime }}</el-descriptions-item>
             <el-descriptions-item label="状态" :span="2">
-              <el-tag :type="currentMessage.status === '通过' ? 'success' : currentMessage.status === '拒绝' ? 'danger' : 'warning'">
-                {{ currentMessage.status || '待审核' }}
+              <el-tag :type="messageStatusTagType(currentMessage.status)">
+                {{ messageStatusText(currentMessage.status) }}
               </el-tag>
             </el-descriptions-item>
-            <el-descriptions-item v-if="currentMessage.status === '拒绝' && currentMessage.rejectReason" label="拒绝原因" :span="2">
+            <el-descriptions-item v-if="currentMessage.status === 'rejected' && currentMessage.rejectReason" label="拒绝原因" :span="2">
               {{ currentMessage.rejectReason }}
             </el-descriptions-item>
             <el-descriptions-item label="内容" :span="2">
@@ -859,6 +857,16 @@ const messageQuery = reactive({ tombId: null, keyword: '', status: '', pageIndex
 
 const messageDialogVisible = ref(false)
 const currentMessage = reactive({ id: null, visitorName: '', content: '', status: '', rejectReason: '', createTime: '' })
+
+/** 留言审核状态（与后端 approved/pending/rejected 一致） */
+function messageStatusText(s) {
+  const map = { approved: '已通过', pending: '待审核', rejected: '已拒绝' }
+  return map[s] || (s ? String(s) : '—')
+}
+
+function messageStatusTagType(s) {
+  return ({ approved: 'success', pending: 'warning', rejected: 'danger' })[s] || 'info'
+}
 
 function openMessageDialog(row) {
   Object.assign(currentMessage, {
