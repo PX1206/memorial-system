@@ -83,3 +83,16 @@ export function submitMessage(data) {
 export function submitCheckin(data) {
   return request.post('/open/memorial/checkin', data)
 }
+
+/** 当前用户对某墓碑的个人提醒（需登录） */
+export function getTombReminder(tombId) {
+  return request.get('/tomb/reminder/get', { params: { tombId } })
+}
+
+export function saveTombReminder(data) {
+  return request.post('/tomb/reminder/save', data)
+}
+
+export function toggleTombReminder(data) {
+  return request.post('/tomb/reminder/toggle', data)
+}

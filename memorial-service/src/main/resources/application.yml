@@ -104,6 +104,11 @@ aliyun:
       sign-name: sakura
       template-code: SMS_18525113
       template-param: code # 阿里云短信模板参数名
+    # 墓碑提醒（需在阿里云申请模板，单参数长文本，如 ${content}）
+    reminder:
+      sign-name: sakura
+      template-code: ''
+      template-param: content
 
 rsa:
   data:

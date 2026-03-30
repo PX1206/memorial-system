@@ -80,7 +80,13 @@ npm run build
 3. 将 `docs/nginx-ny.px-apricot.cn.conf` 复制到 Nginx，修改 `root`、`ssl_certificate`、`ssl_certificate_key` 路径
 4. `nginx -t && nginx -s reload`
 
-## 四、注意事项
+## 四、墓碑提醒（短信）可选配置
+
+若使用「墓碑个人提醒」短信能力，需在阿里云短信控制台申请模板，并在 `application.yml` 中配置 `aliyun.sms.reminder`（`sign-name`、`template-code`、`template-param` 等，与模板变量一致）。未配置模板时，提醒逻辑仍可落库/记录，但短信可能无法发出。
+
+定时任务类 `TombReminderScheduleJob` 负责按日扫描到期提醒；生产环境请将调度表达式改为合适的 **cron**（如每日固定时刻），并按需关闭仅用于联调的 `fixedRate` 写法。
+
+## 五、注意事项
 
 - 生产环境建议将敏感配置（数据库、Redis、短信等）移至环境变量或配置中心
 - Knife4j 文档建议生产环境关闭或加访问控制

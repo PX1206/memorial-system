@@ -16,6 +16,7 @@
 - 👨‍👩‍👧‍👦 家族体系
 - 🔐 权限管理
 - 🗂 文件管理
+- 🔔 墓碑个人提醒：忌日/生辰/节日/自定义日期，支持提前提醒与短信通知（农历墓碑与自定义日期语义一致）
 
 ---
 
@@ -99,8 +100,9 @@ memorial-system/
 
 ## 📚 文档索引
 
+- [模块说明](docs/modules.md)：各子工程职责、墓碑提醒等业务边界
 - [部署指南](docs/deployment.md)：环境要求、后端/前端生产部署、Nginx 示例
-- [数据库说明](docs/database.md)：`memorial_db.sql` 导入方式与字符集说明
+- [数据库说明](docs/database.md)：`memorial_db.sql` 与增量脚本、字符集说明
 - [API 说明](docs/api.md)：Knife4j 地址、接口前缀、认证与响应格式
 
 ---

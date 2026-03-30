@@ -20,6 +20,7 @@ Knife4j 提供完整的接口列表、参数说明、在线调试功能。
 | /family         | 家族           |
 | /family/member  | 家族成员       |
 | /tomb           | 墓碑           |
+| /tomb/reminder  | 墓碑个人提醒（配置、开关、忌日/节日/自定义日期等） |
 | /tomb/message   | 墓碑留言       |
 | /tomb/story     | 墓碑生平       |
 | /tomb/checkin   | 墓碑打卡       |

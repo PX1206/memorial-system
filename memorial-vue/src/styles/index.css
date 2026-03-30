@@ -32,3 +32,49 @@ body {
   color: #303133;
   font-weight: 600;
 }
+
+/* 墓碑日期：YYYY-MM-DD + 农/公 标记（与 v-html 配合，类名全局可用） */
+.tomb-cal-ymd {
+  font-variant-numeric: tabular-nums;
+}
+.tomb-cal-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 5px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+  border-radius: 3px;
+  vertical-align: 1px;
+}
+/* 纪念页：日期与「公历/农历」同一行垂直居中 */
+.tomb-memorial-dates-line {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0 6px;
+  line-height: 1.5;
+}
+.tomb-memorial-dates-line .tomb-cal-badge {
+  margin-left: 0;
+  vertical-align: unset;
+}
+.tomb-memorial-sep {
+  margin: 0 2px;
+  opacity: 0.75;
+}
+/* 纪念页「公历」「农历」两字 */
+.tomb-cal-badge--memorial {
+  padding: 1px 6px;
+  letter-spacing: 0.02em;
+  line-height: 1.35;
+  font-size: 12px;
+}
+.tomb-cal-badge--lunar {
+  color: #b88230;
+  background: rgba(230, 162, 60, 0.15);
+}
+.tomb-cal-badge--solar {
+  color: #2b7bd6;
+  background: rgba(64, 158, 255, 0.15);
+}

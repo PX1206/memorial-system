@@ -33,7 +33,7 @@
                     INNER JOIN family_ids fi ON f.pid = fi.id
                     WHERE f.del_flag = 0
                 )
-                SELECT t.id, t.name, t.photo, t.birthday, t.deathday, t.biography, t.story, t.epitaph, t.visitor_action_open,
+                SELECT t.id, t.name, t.photo, DATE_FORMAT(t.birthday, '%Y-%m-%d') AS birthday, DATE_FORMAT(t.deathday, '%Y-%m-%d') AS deathday, t.lunar_flag, t.biography, t.story, t.epitaph, t.visitor_action_open,
                        t.family_id, fam.name AS family_name, t.address, t.qr_code_key, t.visit_count, t.message_count,
                        t.create_time,
                        <include refid="myRoleCase" />
@@ -55,7 +55,7 @@
 
             <!-- familyId 为空：查询全部墓碑。用 fam 的 root_id 替代每行 correlated 子查询 -->
             <otherwise>
-                SELECT t.id, t.name, t.photo, t.birthday, t.deathday, t.biography, t.story, t.epitaph, t.visitor_action_open,
+                SELECT t.id, t.name, t.photo, DATE_FORMAT(t.birthday, '%Y-%m-%d') AS birthday, DATE_FORMAT(t.deathday, '%Y-%m-%d') AS deathday, t.lunar_flag, t.biography, t.story, t.epitaph, t.visitor_action_open,
                        t.family_id, fam.name AS family_name, t.address, t.qr_code_key, t.visit_count, t.message_count,
                        t.create_time,
                        <include refid="myRoleCase" />
@@ -78,7 +78,7 @@
     </select>
 
     <select id="getTombVO" resultType="com.memorial.system.vo.TombVO">
-        SELECT t.id, t.name, t.photo, t.birthday, t.deathday, t.biography, t.story, t.epitaph, t.visitor_action_open,
+        SELECT t.id, t.name, t.photo, DATE_FORMAT(t.birthday, '%Y-%m-%d') AS birthday, DATE_FORMAT(t.deathday, '%Y-%m-%d') AS deathday, t.lunar_flag, t.biography, t.story, t.epitaph, t.visitor_action_open,
                t.family_id, f.name AS family_name, t.address, t.qr_code_key, t.visit_count, t.message_count,
                t.create_time
         FROM tomb t
@@ -87,7 +87,7 @@
     </select>
 
     <select id="getTombVOByCode" resultType="com.memorial.system.vo.TombVO">
-        SELECT t.id, t.name, t.photo, t.birthday, t.deathday, t.biography, t.story, t.epitaph, t.visitor_action_open,
+        SELECT t.id, t.name, t.photo, DATE_FORMAT(t.birthday, '%Y-%m-%d') AS birthday, DATE_FORMAT(t.deathday, '%Y-%m-%d') AS deathday, t.lunar_flag, t.biography, t.story, t.epitaph, t.visitor_action_open,
                t.family_id, f.name AS family_name, t.address, t.qr_code_key, t.visit_count, t.message_count,
                t.create_time
         FROM tomb t

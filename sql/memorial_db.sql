@@ -487,8 +487,9 @@ CREATE TABLE `tomb`  (
   `name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '逝者姓名',
   `photo` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '照片URL',
   `photos` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT '生前照片（多张，逗号分隔）',
-  `birthday` date NULL DEFAULT NULL COMMENT '出生日期',
+  `birthday` date NULL DEFAULT NULL COMMENT '出生日期（历法语义由 lunar_flag 决定；农历时为农历年月日字面量）',
   `deathday` date NULL DEFAULT NULL COMMENT '逝世日期',
+  `lunar_flag` tinyint(1) NOT NULL DEFAULT 0 COMMENT '日期历制：0公历 1农历（出生、逝世一致）',
   `biography` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT '个人简介',
   `story` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT '生平事迹',
   `epitaph` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '墓志铭（不超过64字）',
@@ -514,10 +515,10 @@ CREATE TABLE `tomb`  (
 -- ----------------------------
 -- Records of tomb
 -- ----------------------------
-INSERT INTO `tomb` VALUES (1, '张三丰', 'https://ny.px-apricot.cn/api/file/kagppUpROoQoK661TYPd3kjNzD7Xrpjz', NULL, '2020-01-01', '2026-03-01', '<p>	张三丰（生卒年不详）<span style=\"color: rgb(51, 102, 204);\">&nbsp;[1]&nbsp;[17]&nbsp;[19-21]</span>，是辽东<a href=\"https://baike.baidu.com/item/%E6%87%BF%E5%B7%9E/10344882?fromModule=lemma_inlink\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"color: rgb(19, 110, 194);\">懿州</a>人<span style=\"color: rgb(51, 102, 204);\">&nbsp;[30]</span>。名全一，一名君宝，三丰其号也。以其不修边幅，又号张邋遢<span style=\"color: rgb(51, 102, 204);\">&nbsp;[30]</span>。自称<a href=\"https://baike.baidu.com/item/%E5%BC%A0%E9%81%93%E9%99%B5/1707760?fromModule=lemma_inlink\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"color: rgb(19, 110, 194);\">张道陵</a>后裔，又名彭俊、全一、思廉、玄素、玄化、三仹、三峰、君实<span style=\"color: rgb(51, 102, 204);\">&nbsp;[29]</span>，字铉一、蹋仙、居宝、昆阳、剌闼、元元、玄玄、符元，号三侔、三丰子、玄玄子<span style=\"color: rgb(51, 102, 204);\">&nbsp;[2-8]&nbsp;[11]&nbsp;[13-15]&nbsp;[18]</span>。</p><p>	元世祖<a href=\"https://baike.baidu.com/item/%E4%B8%AD%E7%BB%9F/19140493?fromModule=lemma_inlink\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"color: rgb(19, 110, 194);\">中统</a>元年，官至中山博陵令。大耳圆目、须髯如戟，居宝鸡<a href=\"https://baike.baidu.com/item/%E9%87%91%E5%8F%B0%E8%A7%82/7970580?fromModule=lemma_inlink\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"color: rgb(19, 110, 194);\">金台观</a>时曾“阳神出游”、时隐时现。皇帝封其“犹龙六祖隐仙寓化虚微普度天尊”、“通微显化真人”、“韬光尚志真仙”、“清虚元妙真君”、“飞龙显化宏仁济世真君”等<span style=\"color: rgb(51, 102, 204);\">&nbsp;[15]&nbsp;[19]</span>。</p><p>	张三丰影响后世最深的是在前代理论及技艺的基础上，开创了中国武术中的内家功夫——武当派。张三丰深受阴阳平衡、动静相生理念的影响，于是根据道家“道法自然”“处柔守雌”理论，创造了以养生为首、防身为要，以柔克刚、以静制动、借力打力、后发制人的独特功理与拳法，为中华武术的发展作出了突出的贡献。</p>', '', '明可明，非常明。道可道，非常道', 1, 3, '武当山', 'Hdk2aTAt59G9', 25, 3, 16, 1, '2026-03-20 11:25:22', 16, '2026-03-20 11:43:42', 16, 0);
-INSERT INTO `tomb` VALUES (2, '张翼德', 'https://ny.px-apricot.cn/api/file/0Tf8kHwi3DR8HI4MY7QHLVerV0JzBEKC', NULL, '2020-01-31', '2026-03-20', '<p><br></p>', '', '', 1, 6, '', 'JPMXTL5vJnnm', 12, 1, 16, 1, '2026-03-20 14:08:48', 16, NULL, NULL, 0);
-INSERT INTO `tomb` VALUES (3, '张子凡', 'https://ny.px-apricot.cn/api/file/Ke5MBSc9rHpSq3ER04AdKWYaMWPmFQdb', NULL, '2022-01-06', '2026-02-03', '', '', '', 0, 5, '', 'bHLxf34PS5qn', 8, 1, 16, 1, '2026-03-20 14:14:36', 16, '2026-03-20 14:15:53', 16, 0);
-INSERT INTO `tomb` VALUES (4, '李天帝', 'https://ny.px-apricot.cn/api/file/taLrxkmlIIUyrugr91S7GRkRme8aHwgP', NULL, '2026-03-01', '2026-03-31', '<p>	李槐是中国网络动画《剑来》及其衍生作品中的男性角色，骊珠洞天人士，十境武夫李二之子，母亲善撒泼骂街。作为气运天命之子，被列为四大内定十五境人选之一，是齐静春最小的弟子，自幼受杨老头偏爱。其姐李柳为远古水神转世，家族成员对其极为疼爱<span style=\"color: rgb(51, 102, 204);\">&nbsp;[1]&nbsp;[3-4]</span>。</p><p>	李槐在山崖书院求学期间，与李宝瓶、林守一等人同窗时目睹崔东山施法，因顽劣举动被李宝瓶揪耳塞苹果<span style=\"color: rgb(51, 102, 204);\">&nbsp;[2]&nbsp;[5]</span>，期间意外获得剑修圣地蝉蜕洞天并收服七彩神鹿。及冠后与裴钱游历北俱芦洲，拜蛮荒天下十四境老瞎子为师习得武夫聚音成线之法<span style=\"color: rgb(51, 102, 204);\">&nbsp;[1]&nbsp;[3]</span>。</p><p>	李槐福缘深厚，与裴钱共同游历时展现出超越贺小凉和黄庭的福运表现，两人关系日益密切<span style=\"color: rgb(51, 102, 204);\">&nbsp;[1]&nbsp;[3]</span>。其父李二曾在大隋皇宫与守门人吴鉞大战并晋入十境<span style=\"color: rgb(51, 102, 204);\">&nbsp;[5]</span>。</p>', '', '世间气运10斗，李天帝独得12斗', 1, 7, '', 'aXWHEepPhedv', 3, 1, 17, 1, '2026-03-20 14:38:11', 17, '2026-03-20 14:38:21', 17, 0);
+INSERT INTO `tomb` VALUES (1, '张三丰', 'https://ny.px-apricot.cn/api/file/kagppUpROoQoK661TYPd3kjNzD7Xrpjz', NULL, '2020-01-01', '2026-03-01', 0, '<p>	张三丰（生卒年不详）<span style=\"color: rgb(51, 102, 204);\">&nbsp;[1]&nbsp;[17]&nbsp;[19-21]</span>，是辽东<a href=\"https://baike.baidu.com/item/%E6%87%BF%E5%B7%9E/10344882?fromModule=lemma_inlink\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"color: rgb(19, 110, 194);\">懿州</a>人<span style=\"color: rgb(51, 102, 204);\">&nbsp;[30]</span>。名全一，一名君宝，三丰其号也。以其不修边幅，又号张邋遢<span style=\"color: rgb(51, 102, 204);\">&nbsp;[30]</span>。自称<a href=\"https://baike.baidu.com/item/%E5%BC%A0%E9%81%93%E9%99%B5/1707760?fromModule=lemma_inlink\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"color: rgb(19, 110, 194);\">张道陵</a>后裔，又名彭俊、全一、思廉、玄素、玄化、三仹、三峰、君实<span style=\"color: rgb(51, 102, 204);\">&nbsp;[29]</span>，字铉一、蹋仙、居宝、昆阳、剌闼、元元、玄玄、符元，号三侔、三丰子、玄玄子<span style=\"color: rgb(51, 102, 204);\">&nbsp;[2-8]&nbsp;[11]&nbsp;[13-15]&nbsp;[18]</span>。</p><p>	元世祖<a href=\"https://baike.baidu.com/item/%E4%B8%AD%E7%BB%9F/19140493?fromModule=lemma_inlink\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"color: rgb(19, 110, 194);\">中统</a>元年，官至中山博陵令。大耳圆目、须髯如戟，居宝鸡<a href=\"https://baike.baidu.com/item/%E9%87%91%E5%8F%B0%E8%A7%82/7970580?fromModule=lemma_inlink\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"color: rgb(19, 110, 194);\">金台观</a>时曾“阳神出游”、时隐时现。皇帝封其“犹龙六祖隐仙寓化虚微普度天尊”、“通微显化真人”、“韬光尚志真仙”、“清虚元妙真君”、“飞龙显化宏仁济世真君”等<span style=\"color: rgb(51, 102, 204);\">&nbsp;[15]&nbsp;[19]</span>。</p><p>	张三丰影响后世最深的是在前代理论及技艺的基础上，开创了中国武术中的内家功夫——武当派。张三丰深受阴阳平衡、动静相生理念的影响，于是根据道家“道法自然”“处柔守雌”理论，创造了以养生为首、防身为要，以柔克刚、以静制动、借力打力、后发制人的独特功理与拳法，为中华武术的发展作出了突出的贡献。</p>', '', '明可明，非常明。道可道，非常道', 1, 3, '武当山', 'Hdk2aTAt59G9', 25, 3, 16, 1, '2026-03-20 11:25:22', 16, '2026-03-20 11:43:42', 16, 0);
+INSERT INTO `tomb` VALUES (2, '张翼德', 'https://ny.px-apricot.cn/api/file/0Tf8kHwi3DR8HI4MY7QHLVerV0JzBEKC', NULL, '2020-01-31', '2026-03-20', 0, '<p><br></p>', '', '', 1, 6, '', 'JPMXTL5vJnnm', 12, 1, 16, 1, '2026-03-20 14:08:48', 16, NULL, NULL, 0);
+INSERT INTO `tomb` VALUES (3, '张子凡', 'https://ny.px-apricot.cn/api/file/Ke5MBSc9rHpSq3ER04AdKWYaMWPmFQdb', NULL, '2022-01-06', '2026-02-03', 0, '', '', '', 0, 5, '', 'bHLxf34PS5qn', 8, 1, 16, 1, '2026-03-20 14:14:36', 16, '2026-03-20 14:15:53', 16, 0);
+INSERT INTO `tomb` VALUES (4, '李天帝', 'https://ny.px-apricot.cn/api/file/taLrxkmlIIUyrugr91S7GRkRme8aHwgP', NULL, '2026-03-01', '2026-03-31', 0, '<p>	李槐是中国网络动画《剑来》及其衍生作品中的男性角色，骊珠洞天人士，十境武夫李二之子，母亲善撒泼骂街。作为气运天命之子，被列为四大内定十五境人选之一，是齐静春最小的弟子，自幼受杨老头偏爱。其姐李柳为远古水神转世，家族成员对其极为疼爱<span style=\"color: rgb(51, 102, 204);\">&nbsp;[1]&nbsp;[3-4]</span>。</p><p>	李槐在山崖书院求学期间，与李宝瓶、林守一等人同窗时目睹崔东山施法，因顽劣举动被李宝瓶揪耳塞苹果<span style=\"color: rgb(51, 102, 204);\">&nbsp;[2]&nbsp;[5]</span>，期间意外获得剑修圣地蝉蜕洞天并收服七彩神鹿。及冠后与裴钱游历北俱芦洲，拜蛮荒天下十四境老瞎子为师习得武夫聚音成线之法<span style=\"color: rgb(51, 102, 204);\">&nbsp;[1]&nbsp;[3]</span>。</p><p>	李槐福缘深厚，与裴钱共同游历时展现出超越贺小凉和黄庭的福运表现，两人关系日益密切<span style=\"color: rgb(51, 102, 204);\">&nbsp;[1]&nbsp;[3]</span>。其父李二曾在大隋皇宫与守门人吴鉞大战并晋入十境<span style=\"color: rgb(51, 102, 204);\">&nbsp;[5]</span>。</p>', '', '世间气运10斗，李天帝独得12斗', 1, 7, '', 'aXWHEepPhedv', 3, 1, 17, 1, '2026-03-20 14:38:11', 17, '2026-03-20 14:38:21', 17, 0);
 
 -- ----------------------------
 -- Table structure for tomb_checkin
@@ -690,5 +691,48 @@ INSERT INTO `user_role` VALUES (18, 22, 2);
 INSERT INTO `user_role` VALUES (19, 23, 2);
 INSERT INTO `user_role` VALUES (20, 24, 2);
 INSERT INTO `user_role` VALUES (21, 25, 2);
+
+-- ----------------------------
+-- Table structure for tomb_reminder（用户个人墓碑提醒）
+-- ----------------------------
+DROP TABLE IF EXISTS `tomb_reminder`;
+CREATE TABLE `tomb_reminder`  (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '自增ID',
+  `user_id` bigint NOT NULL COMMENT '提醒所属用户',
+  `tomb_id` bigint NOT NULL COMMENT '墓碑ID',
+  `relationship` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '与墓主关系',
+  `enabled` tinyint NOT NULL DEFAULT 1 COMMENT '是否开启：1开启 0关闭',
+  `channel_sms` tinyint NOT NULL DEFAULT 1 COMMENT '短信渠道',
+  `channel_wechat` tinyint NOT NULL DEFAULT 0 COMMENT '微信渠道（预留，公众号推送）',
+  `event_types` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT 'JSON：DEATH_ANNIVERSARY,QINGMING,CHONGYANG,BIRTHDAY,CUSTOM',
+  `custom_dates` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT 'JSON：自定义日期，最多3条，MM-dd 或 yyyy-MM-dd',
+  `custom_date_remarks` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT 'JSON：与 custom_dates 一一对应的备注（如纪念日名称），最多3条',
+  `advance_offsets` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT 'JSON：提前天数列表，含0当天、1、3及自定义',
+  `lunar_event_types` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT 'JSON：忌日/生辰按农历推算，取值 DEATH_ANNIVERSARY、BIRTHDAY',
+  `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP,
+  `create_by` bigint NULL DEFAULT NULL,
+  `update_time` datetime NULL DEFAULT NULL,
+  `update_by` bigint NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uk_tomb_reminder_user_tomb`(`user_id`, `tomb_id`) USING BTREE,
+  INDEX `idx_tomb_reminder_tomb`(`tomb_id`) USING BTREE,
+  INDEX `idx_tomb_reminder_enabled`(`enabled`, `channel_sms`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '墓碑个人提醒配置' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Table structure for tomb_reminder_send_log（防重复发送）
+-- ----------------------------
+DROP TABLE IF EXISTS `tomb_reminder_send_log`;
+CREATE TABLE `tomb_reminder_send_log`  (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `reminder_id` bigint NOT NULL,
+  `biz_key` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '幂等键：事件+年+提前天数等',
+  `send_date` date NOT NULL COMMENT '实际发送日（自然日）',
+  `channel` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'sms',
+  `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uk_reminder_biz`(`reminder_id`, `biz_key`) USING BTREE,
+  INDEX `idx_send_date`(`send_date`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '墓碑提醒发送记录' ROW_FORMAT = DYNAMIC;
 
 SET FOREIGN_KEY_CHECKS = 1;

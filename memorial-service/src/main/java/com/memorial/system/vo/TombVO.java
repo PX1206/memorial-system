@@ -21,13 +21,14 @@ public class TombVO implements Serializable {
     private String name;
     private String photo;
 
-    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date birthday;
+    @ApiModelProperty("出生日期 yyyy-MM-dd")
+    private String birthday;
 
-    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date deathday;
+    @ApiModelProperty("逝世日期 yyyy-MM-dd")
+    private String deathday;
+
+    @ApiModelProperty("日期是否按农历语义（出生、逝世一致）")
+    private Boolean lunarFlag;
 
     private String biography;
     private String story;
@@ -57,4 +58,10 @@ public class TombVO implements Serializable {
 
     @ApiModelProperty("当前登录用户是否已是该墓碑所属家族的成员（同根家族树内），用于纪念页隐藏「申请成为家族成员」提示")
     private Boolean isFamilyMember;
+
+    @ApiModelProperty("当前登录用户是否可为该墓碑设置个人提醒（已登录且墓碑未禁用时为 true）")
+    private Boolean canSetReminder;
+
+    @ApiModelProperty("当前用户对该墓碑的个人提醒是否已开启（有配置且开启为 true；未配置或已关闭为 false，列表用）")
+    private Boolean myReminderOn;
 }

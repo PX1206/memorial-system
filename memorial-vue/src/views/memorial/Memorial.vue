@@ -8,7 +8,7 @@
         </div>
         <div class="hero-info">
           <h2 class="name">{{ tomb.name || '加载中...' }}</h2>
-          <div class="dates" v-if="tomb.birthday">{{ tomb.birthday }} — {{ tomb.deathday }}</div>
+          <div class="dates" v-if="tomb.birthday" v-html="tombDateLine"></div>
           <div class="address" v-if="tomb.address">所处位置：{{ tomb.address }}</div>
           <div class="meta">
             <el-tag size="small" type="info">访问量 {{ tomb.visitCount ?? 0 }}</el-tag>
@@ -21,6 +21,17 @@
           <div class="actions">
             <el-button type="danger" @click="doCheckin('献花')">献花</el-button>
             <el-button type="warning" @click="doCheckin('点蜡烛')">点蜡烛</el-button>
+            <template v-if="isLoggedIn">
+              <el-button type="primary" plain @click="openReminderDialog">添加提醒</el-button>
+              <template v-if="reminderSaved?.id">
+                <span class="muted reminder-switch-label">提醒开关</span>
+                <el-switch
+                  v-model="reminderSaved.enabled"
+                  :loading="reminderToggleLoading"
+                  @change="toggleReminderEnabled"
+                />
+              </template>
+            </template>
           </div>
 
           <div class="name-setting" v-if="isLoggedIn">
@@ -42,6 +53,7 @@
             </template>
             <el-button type="primary" link @click="openApplyDialog">申请成为家族成员</el-button>
           </div>
+
         </div>
       </div>
 
@@ -315,7 +327,88 @@
         </template>
       </el-dialog>
 
-      <!-- 申请成为家族成员 -->
+      <!-- 墓碑提醒 -->
+      <el-dialog
+        v-model="reminderDialogVisible"
+        title="墓碑提醒"
+        :width="isMobile ? '92%' : '560px'"
+        destroy-on-close
+        class="reminder-dialog"
+        align-center
+      >
+        <el-form ref="reminderFormRef" :model="reminderForm" :rules="reminderRules" v-bind="reminderFormLabelAttrs">
+          <el-form-item label="与墓主关系" prop="relationship">
+            <el-select v-model="reminderForm.relationship" placeholder="请选择" style="width: 100%">
+              <el-option v-for="r in relations" :key="r" :label="r" :value="r" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="提醒日期" prop="eventTypes">
+            <div class="reminder-event-checkboxes">
+              <el-checkbox-group v-model="reminderForm.eventTypes">
+                <el-checkbox v-for="o in reminderEventOptions" :key="o.value" :label="o.value">
+                  {{ o.label }}
+                </el-checkbox>
+              </el-checkbox-group>
+            </div>
+          </el-form-item>
+          <el-form-item v-if="reminderForm.eventTypes.includes('CUSTOM')" label="自定义日期">
+            <div class="custom-dates">
+              <p v-if="tomb?.lunarFlag" class="reminder-custom-hint">
+                本墓碑为农历日期；下方日期按农历月日理解，每年对应公历日会变动。
+              </p>
+              <p class="reminder-custom-dates-tip">
+                日期会自动根据墓主信息公历/农历提示；备注为选填，可填写纪念日等。
+              </p>
+              <div v-for="i in [0, 1, 2]" :key="i" class="custom-date-row">
+                <div class="custom-date-picker-wrap">
+                  <el-date-picker
+                    v-model="reminderCustomPickers[i]"
+                    type="date"
+                    value-format="YYYY-MM-DD"
+                    class="custom-date-input"
+                    clearable
+                  />
+                </div>
+                <el-input
+                  v-model="reminderCustomRemarks[i]"
+                  maxlength="32"
+                  show-word-limit
+                  clearable
+                  class="reminder-custom-remark-input"
+                />
+              </div>
+            </div>
+          </el-form-item>
+          <el-form-item label="提前提醒">
+            <el-checkbox v-model="reminderForm.advance0">当天</el-checkbox>
+            <el-checkbox v-model="reminderForm.advance1">提前 1 天</el-checkbox>
+            <el-checkbox v-model="reminderForm.advance3">提前 3 天</el-checkbox>
+            <div class="custom-advance-list">
+              <div v-for="(n, i) in reminderForm.customAdvanceDays" :key="i" class="custom-advance-row">
+                <span>提前</span>
+                <el-input-number v-model="reminderForm.customAdvanceDays[i]" :min="1" :max="365" controls-position="right" />
+                <span>天</span>
+                <el-button type="danger" link @click="removeCustomAdvance(i)">删除</el-button>
+              </div>
+              <el-button v-if="reminderForm.customAdvanceDays.length < 8" type="primary" link @click="addCustomAdvance">+ 自定义提前天数</el-button>
+            </div>
+          </el-form-item>
+          <el-form-item label="提醒方式">
+            <el-checkbox v-model="reminderForm.channelSms" disabled>短信</el-checkbox>
+            <el-checkbox v-model="reminderForm.channelWechat" disabled>微信（即将支持公众号推送）</el-checkbox>
+          </el-form-item>
+          <el-form-item label="总开关">
+            <el-switch v-model="reminderForm.enabled" />
+          </el-form-item>
+        </el-form>
+        <template #footer>
+          <div class="reminder-dialog-footer">
+            <el-button @click="reminderDialogVisible = false">取消</el-button>
+            <el-button type="primary" :loading="reminderSaving" @click="submitReminder">保存</el-button>
+          </div>
+        </template>
+      </el-dialog>
+
       <el-dialog v-model="applyDialogVisible" title="申请成为家族成员" width="420px" destroy-on-close>
         <el-form ref="applyFormRef" :model="applyForm" :rules="applyRules" label-width="90px">
           <el-form-item label="家族名称">{{ tomb.familyName || '—' }}</el-form-item>
@@ -344,7 +437,18 @@ import { ElMessage } from 'element-plus'
 import { Close } from '@element-plus/icons-vue'
 import flowerIcon from '@/assets/icons/flower.svg'
 import candleIcon from '@/assets/icons/candle.svg'
-import { getMemorialDetail, getMemorialDetailByCode, getMemorialMessagePageList, getMemorialCheckinPageList, submitMessage, submitCheckin } from '@/api/tomb'
+import { formatTombMemorialDateLine } from '@/utils/tombCalendar'
+import {
+  getMemorialDetail,
+  getMemorialDetailByCode,
+  getMemorialMessagePageList,
+  getMemorialCheckinPageList,
+  submitMessage,
+  submitCheckin,
+  getTombReminder,
+  saveTombReminder,
+  toggleTombReminder
+} from '@/api/tomb'
 import { passwordLoginAPI, smsLoginAPI, getCaptchaAPI, sendSmsCodeAPI, registerAPI } from '@/api/auth'
 import { applyJoinFamily } from '@/api/family'
 import { encryptPassword } from '@/utils/rsa'
@@ -357,6 +461,11 @@ const submitting = ref(false)
 const defaultPhoto = 'https://dummyimage.com/200x200/cccccc/000000&text=Photo'
 
 const tomb = ref({})
+const tombDateLine = computed(() => {
+  const t = tomb.value
+  if (!t?.birthday) return ''
+  return formatTombMemorialDateLine(t)
+})
 const msgForm = reactive({ content: '' })
 const actionAnonymous = ref(false)
 const tab = ref('intro')
@@ -389,6 +498,11 @@ async function loadTomb(idOrCode) {
       checkinQuery.tombId = res.id
       loadMessages()
       loadCheckins()
+      if (isLoggedIn.value) {
+        await loadReminderSaved()
+      } else {
+        reminderSaved.value = null
+      }
     }
   } catch {
     ElMessage.error('获取墓碑信息失败')
@@ -600,6 +714,7 @@ async function handleDialogLogin() {
     if (action?.type === 'checkin') doCheckin(action.payload)
     else if (action?.type === 'message') submitMsg()
     else if (action?.type === 'applyFamily' && !tomb.value?.isFamilyMember) openApplyDialog()
+    else if (action?.type === 'reminder') openReminderDialog()
   } catch {
     // 验证失败或登录失败，保持弹窗打开
   } finally {
@@ -706,6 +821,208 @@ async function handleDialogRegister() {
 // =========================
 
 const relations = ['父亲', '母亲', '儿子', '女儿', '兄弟', '姐妹', '爷爷', '奶奶', '外公', '外婆', '叔伯', '姑姨', '其他']
+
+// =========================
+// 墓碑个人提醒
+// =========================
+
+const reminderEventOptions = [
+  { value: 'DEATH_ANNIVERSARY', label: '忌日（按逝世日期）' },
+  { value: 'QINGMING', label: '清明节（公历约4月5日）' },
+  { value: 'CHONGYANG', label: '重阳节（农历九月初九）' },
+  { value: 'BIRTHDAY', label: '生辰（按出生日期）' },
+  { value: 'CUSTOM', label: '自定义（最多3个日期）' }
+]
+
+/** 窄屏表单项标签置顶，避免挤压 */
+const reminderFormLabelAttrs = computed(() =>
+  isMobile.value
+    ? { labelPosition: 'top' }
+    : { labelPosition: 'right', labelWidth: '110px' }
+)
+
+const reminderDialogVisible = ref(false)
+const reminderSaving = ref(false)
+const reminderToggleLoading = ref(false)
+const reminderSaved = ref(null)
+const reminderFormRef = ref()
+/** 自定义日期：三个日期选择器，提交时转为字符串数组 */
+const reminderCustomPickers = ref([null, null, null])
+/** 与上面对应的备注（与 customDates 顺序一致） */
+const reminderCustomRemarks = ref(['', '', ''])
+
+const reminderForm = reactive({
+  relationship: '',
+  eventTypes: [],
+  advance0: true,
+  advance1: false,
+  advance3: false,
+  customAdvanceDays: [],
+  channelSms: true,
+  channelWechat: false,
+  enabled: true
+})
+const reminderRules = {
+  relationship: [{ required: true, message: '请选择与墓主关系', trigger: 'change' }],
+  eventTypes: [{ type: 'array', required: true, min: 1, message: '请至少选择一种日期类型', trigger: 'change' }]
+}
+
+async function loadReminderSaved() {
+  if (!tomb.value?.id) return
+  try {
+    const r = await getTombReminder(tomb.value.id)
+    reminderSaved.value = r || null
+  } catch {
+    reminderSaved.value = null
+  }
+}
+
+function apiStrToPicker(str) {
+  if (!str || !String(str).trim()) return null
+  const t = String(str).trim()
+  if (/^\d{4}-\d{2}-\d{2}$/.test(t)) return t
+  if (/^\d{2}-\d{2}$/.test(t)) {
+    const y = new Date().getFullYear()
+    const [m, d] = t.split('-')
+    return `${y}-${m}-${d}`
+  }
+  return null
+}
+
+function fillReminderFormFromSaved() {
+  const r = reminderSaved.value
+  if (!r) {
+    reminderForm.relationship = ''
+    reminderForm.eventTypes = []
+    reminderCustomPickers.value = [null, null, null]
+    reminderCustomRemarks.value = ['', '', '']
+    reminderForm.advance0 = true
+    reminderForm.advance1 = false
+    reminderForm.advance3 = false
+    reminderForm.customAdvanceDays = []
+    reminderForm.enabled = true
+    reminderForm.channelSms = true
+    reminderForm.channelWechat = false
+    return
+  }
+  reminderForm.relationship = r.relationship || ''
+  reminderForm.eventTypes = [...(r.eventTypes || [])]
+  const cds = r.customDates || []
+  reminderCustomPickers.value = [apiStrToPicker(cds[0]), apiStrToPicker(cds[1]), apiStrToPicker(cds[2])]
+  const rem = r.customDateRemarks || []
+  reminderCustomRemarks.value = [rem[0] || '', rem[1] || '', rem[2] || '']
+  const offs = r.advanceOffsets || []
+  reminderForm.advance0 = offs.includes(0)
+  reminderForm.advance1 = offs.includes(1)
+  reminderForm.advance3 = offs.includes(3)
+  reminderForm.customAdvanceDays = offs.filter((x) => x !== 0 && x !== 1 && x !== 3)
+  reminderForm.enabled = r.enabled !== false
+  reminderForm.channelSms = r.channelSms !== false
+  reminderForm.channelWechat = !!r.channelWechat
+}
+
+async function openReminderDialog() {
+  if (!isLoggedIn.value) {
+    pendingAction.value = { type: 'reminder' }
+    loginDialogVisible.value = true
+    if (loginState.mode === 'sms') getLoginCaptcha()
+    return
+  }
+  await loadReminderSaved()
+  fillReminderFormFromSaved()
+  reminderDialogVisible.value = true
+}
+
+function addCustomAdvance() {
+  reminderForm.customAdvanceDays.push(7)
+}
+
+function removeCustomAdvance(i) {
+  reminderForm.customAdvanceDays.splice(i, 1)
+}
+
+/** 按槽位顺序收集有日期的项，保证 customDates 与 customDateRemarks 一一对应 */
+function buildReminderCustomDatesAndRemarks() {
+  const dates = []
+  const remarks = []
+  for (let i = 0; i < 3; i++) {
+    const d = reminderCustomPickers.value[i]
+    if (d && String(d).trim()) {
+      dates.push(String(d).trim())
+      remarks.push((reminderCustomRemarks.value[i] || '').trim())
+    }
+  }
+  return { dates, remarks }
+}
+
+async function toggleReminderEnabled(val) {
+  if (!reminderSaved.value?.id) return
+  reminderToggleLoading.value = true
+  try {
+    await toggleTombReminder({ id: reminderSaved.value.id, enabled: val })
+    ElMessage.success(val ? '已开启提醒' : '已关闭提醒')
+  } catch {
+    reminderSaved.value.enabled = !val
+  } finally {
+    reminderToggleLoading.value = false
+  }
+}
+
+async function submitReminder() {
+  if (!tomb.value?.id) return
+  try {
+    await reminderFormRef.value?.validate()
+  } catch {
+    return
+  }
+  if (reminderForm.eventTypes.includes('CUSTOM')) {
+    const { dates } = buildReminderCustomDatesAndRemarks()
+    if (dates.length === 0) {
+      ElMessage.warning('请选择自定义日期或取消勾选「自定义」')
+      return
+    }
+  }
+  const base = []
+  if (reminderForm.advance0) base.push(0)
+  if (reminderForm.advance1) base.push(1)
+  if (reminderForm.advance3) base.push(3)
+  const customAdv = reminderForm.customAdvanceDays.filter((n) => n != null && n >= 1 && n <= 365)
+  if (base.length === 0 && customAdv.length === 0) {
+    ElMessage.warning('请至少选择一种提前提醒方式')
+    return
+  }
+  let customDates
+  let customDateRemarksPayload
+  if (reminderForm.eventTypes.includes('CUSTOM')) {
+    const { dates, remarks } = buildReminderCustomDatesAndRemarks()
+    customDates = dates
+    customDateRemarksPayload = remarks
+  }
+  reminderSaving.value = true
+  try {
+    await saveTombReminder({
+      id: reminderSaved.value?.id,
+      tombId: tomb.value.id,
+      relationship: reminderForm.relationship,
+      enabled: reminderForm.enabled,
+      channelSms: reminderForm.channelSms,
+      channelWechat: reminderForm.channelWechat,
+      eventTypes: reminderForm.eventTypes,
+      customDates,
+      customDateRemarks: customDateRemarksPayload,
+      advanceOffsets: base,
+      customAdvanceDays: customAdv
+    })
+    ElMessage.success('提醒已保存')
+    await loadReminderSaved()
+    reminderDialogVisible.value = false
+  } catch {
+    /* 拦截器 */
+  } finally {
+    reminderSaving.value = false
+  }
+}
+
 const applyDialogVisible = ref(false)
 const applyFormRef = ref()
 const applySubmitting = ref(false)
@@ -800,11 +1117,133 @@ function toPreview(html) {
 .dates { color: #909399; font-size: 13px; margin-bottom: 10px; }
 .address { color: #909399; font-size: 13px; margin-bottom: 10px; }
 .meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-.actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.actions .reminder-switch-label { font-size: 13px; }
 .name-setting { margin-top: 10px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .name-hint { font-size: 12px; color: #909399; }
 .action-tip { margin-top: 10px; font-size: 13px; color: #909399; }
 .apply-family-tip { margin-top: 8px; font-size: 13px; color: #909399; }
+
+/* el-date-picker 根节点带 width:100%，会撑满 flex 行，必须用固定宽外壳约束 */
+.custom-dates { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 340px; }
+.reminder-custom-hint { margin: 0 0 6px; font-size: 12px; color: #909399; line-height: 1.45; }
+.reminder-custom-dates-tip {
+  margin: 0 0 8px;
+  font-size: 12px;
+  color: #909399;
+  line-height: 1.5;
+}
+.custom-date-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.custom-date-picker-wrap {
+  flex: 0 0 112px;
+  width: 112px;
+  max-width: 112px;
+  min-width: 0;
+}
+.custom-date-picker-wrap :deep(.el-date-editor) {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
+}
+.custom-date-picker-wrap :deep(.el-input__wrapper) {
+  padding-left: 6px;
+  padding-right: 4px;
+}
+.custom-date-picker-wrap :deep(.el-input__inner) {
+  font-size: 12px;
+}
+.reminder-custom-remark-input {
+  flex: 1;
+  min-width: 0;
+  max-width: 213px;
+}
+.reminder-custom-remark-input :deep(.el-input__wrapper) {
+  box-sizing: border-box;
+}
+.small { font-size: 12px; }
+.custom-advance-list { margin-top: 8px; width: 100%; }
+.custom-advance-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
+.reminder-dialog :deep(.el-checkbox) { margin-right: 12px; margin-bottom: 6px; }
+.reminder-dialog-footer { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 10px; }
+
+/* 墓碑提醒弹窗：手机适配 */
+@media (max-width: 767px) {
+  .reminder-dialog.el-dialog {
+    max-width: 100%;
+    margin: 12px auto !important;
+    max-height: calc(100vh - 24px);
+    display: flex;
+    flex-direction: column;
+  }
+  .reminder-dialog :deep(.el-dialog__header) {
+    padding: 14px 16px 8px;
+    flex-shrink: 0;
+  }
+  .reminder-dialog :deep(.el-dialog__body) {
+    padding: 0 16px;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+    -webkit-overflow-scrolling: touch;
+  }
+  .reminder-dialog :deep(.el-dialog__footer) {
+    padding: 10px 16px 16px;
+    flex-shrink: 0;
+  }
+  .reminder-dialog :deep(.el-form-item) {
+    margin-bottom: 16px;
+  }
+  .reminder-dialog :deep(.el-form-item__label) {
+    line-height: 1.4;
+  }
+  .reminder-event-checkboxes :deep(.el-checkbox-group) {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    width: 100%;
+  }
+  .reminder-event-checkboxes :deep(.el-checkbox) {
+    margin-right: 0;
+    margin-bottom: 4px;
+    white-space: normal;
+    align-items: flex-start;
+    height: auto;
+    line-height: 1.45;
+  }
+  .reminder-dialog .custom-dates {
+    max-width: none;
+  }
+  .reminder-dialog .custom-date-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .reminder-dialog .custom-date-picker-wrap {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 1 1 auto;
+  }
+  .reminder-dialog .reminder-custom-remark-input {
+    max-width: 100% !important;
+    width: 100%;
+  }
+  .reminder-dialog-footer {
+    flex-direction: column-reverse;
+    width: 100%;
+    gap: 8px;
+  }
+  .reminder-dialog-footer .el-button {
+    width: 100%;
+    margin: 0;
+  }
+}
 
 /* 登录弹窗内部卡片样式（固定尺寸与首页一致） */
 .memorial-login-dialog .el-dialog__header { display: none; }

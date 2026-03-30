@@ -77,4 +77,4 @@ generatorProperties.getDataSourceConfig()
 - `file-override: true` 会覆盖已有文件，请谨慎使用
 - 生成后可根据业务需要手动调整代码
 
-项目部署与运行环境见 [docs/deployment.md](../docs/deployment.md)。
+仓库模块说明见 [docs/modules.md](../docs/modules.md)，部署与运行环境见 [docs/deployment.md](../docs/deployment.md)。

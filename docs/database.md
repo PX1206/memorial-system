@@ -6,9 +6,15 @@
 
 | 脚本            | 说明 |
 | --------------- | ---- |
-| `memorial_db.sql` | 主建表与初始化数据：用户、文件、墓碑、留言、打卡、家族、菜单与权限相关表等 |
+| `memorial_db.sql` | 主建表与初始化数据：用户、文件、墓碑、留言、打卡、家族、菜单与权限、`tomb_reminder` 等相关表 |
+| `alter_tomb_birthday_deathday_lunar.sql` | 墓碑出生/逝世农历相关字段（按需） |
+| `alter_tomb_date_components.sql` | 日期分量（按需） |
+| `alter_tomb_lunar_flag_merge.sql` | 农历标记合并（按需） |
+| `alter_tomb_reminder_lunar_event_types.sql` | 墓碑提醒事件类型扩展（按需） |
+| `alter_tomb_reminder_custom_remarks.sql` | 自定义日期备注列等（按需） |
 
-> 历史上若曾通过独立增量 SQL 升级，请以对应版本发布说明为准；本仓库未附带历史增量脚本文件时，以当前 `memorial_db.sql` 为准做新库初始化。
+> **新库**：直接执行最新的 `memorial_db.sql` 即可得到当前表结构。  
+> **已有库**：按上线顺序执行缺失的 `alter_*.sql`，执行前请备份。历史上若曾通过其他渠道升级，以实际库结构为准。
 
 ## 新库初始化（执行顺序）
 

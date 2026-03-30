@@ -27,11 +27,14 @@ public class TombParam implements Serializable {
     @ApiModelProperty("照片URL")
     private String photo;
 
-    @ApiModelProperty("出生日期")
+    @ApiModelProperty("出生日期 yyyy-MM-dd（历法语义由 lunarFlag 决定，农历时即为农历年月日字面量）")
     private String birthday;
 
-    @ApiModelProperty("逝世日期")
+    @ApiModelProperty("逝世日期 yyyy-MM-dd")
     private String deathday;
+
+    @ApiModelProperty("日期是否按农历语义（出生、逝世一致）")
+    private Boolean lunarFlag;
 
     @Size(max = 2000, message = "个人简介HTML内容不能超过1000字符")
     @ApiModelProperty("个人简介")

@@ -11,6 +11,11 @@ import lombok.experimental.Accessors;
 
 import java.util.Date;
 
+/**
+ * 出生/逝世为 {@code birthday}/{@code deathday} 两个 DATE；
+ * 当 {@code lunarFlag} 为 true 时，两日期中的年、月、日均按<strong>农历</strong>语义存储（不做农历→公历换算）；
+ * 为 false 时按公历语义存储。
+ */
 @Data
 @Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)
@@ -27,11 +32,14 @@ public class Tomb extends BaseEntity {
     @ApiModelProperty("照片URL")
     private String photo;
 
-    @ApiModelProperty("出生日期")
+    @ApiModelProperty("出生日期（历法语义由 lunarFlag 决定）")
     private Date birthday;
 
-    @ApiModelProperty("逝世日期")
+    @ApiModelProperty("逝世日期（历法语义由 lunarFlag 决定）")
     private Date deathday;
+
+    @ApiModelProperty("日期是否按农历语义：true 农历，false 公历（出生、逝世纪律一致）")
+    private Boolean lunarFlag;
 
     @ApiModelProperty("个人简介")
     private String biography;

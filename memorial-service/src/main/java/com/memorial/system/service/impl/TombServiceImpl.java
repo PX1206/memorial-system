@@ -10,12 +10,15 @@ import com.memorial.common.pagination.Paging;
 import com.memorial.common.tool.LoginUtil;
 import com.memorial.system.entity.Family;
 import com.memorial.system.entity.Tomb;
+import com.memorial.system.entity.TombReminder;
 import com.memorial.system.service.TombStoryService;
 import com.memorial.system.mapper.FamilyMapper;
 import com.memorial.system.mapper.TombMapper;
+import com.memorial.system.mapper.TombReminderMapper;
 import com.memorial.system.param.TombPageParam;
 import com.memorial.system.param.TombParam;
 import com.memorial.system.service.TombAccessChecker;
+import com.memorial.system.service.TombReminderAccess;
 import com.memorial.system.service.TombService;
 import com.memorial.system.vo.TombVO;
 import lombok.extern.slf4j.Slf4j;
@@ -23,15 +26,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-import java.text.SimpleDateFormat;
+import java.util.stream.Collectors;
 import java.util.Date;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 @Slf4j
 @Service
 public class TombServiceImpl extends BaseServiceImpl<TombMapper, Tomb> implements TombService {
+
+    private static final DateTimeFormatter ISO_DATE = DateTimeFormatter.ISO_LOCAL_DATE;
 
     @Autowired
     private TombMapper tombMapper;
@@ -45,6 +55,12 @@ public class TombServiceImpl extends BaseServiceImpl<TombMapper, Tomb> implement
     @Autowired
     private TombAccessChecker tombAccessChecker;
 
+    @Autowired
+    private TombReminderAccess tombReminderAccess;
+
+    @Autowired
+    private TombReminderMapper tombReminderMapper;
+
     @Override
     public Paging<TombVO> getTombPageList(TombPageParam param) throws Exception {
         param.setCurrentUserId(LoginUtil.getUserId());
@@ -55,7 +71,36 @@ public class TombServiceImpl extends BaseServiceImpl<TombMapper, Tomb> implement
         if (LoginUtil.isAdmin() && paging.getRecords() != null) {
             paging.getRecords().forEach(vo -> vo.setMyRole("admin"));
         }
+        fillMyReminderOn(paging.getRecords());
         return paging;
+    }
+
+    /** 列表：当前用户对每条墓碑的个人提醒是否处于开启状态 */
+    private void fillMyReminderOn(List<TombVO> records) {
+        if (records == null || records.isEmpty()) {
+            return;
+        }
+        Long userId;
+        try {
+            userId = LoginUtil.getUserId();
+        } catch (Exception e) {
+            return;
+        }
+        List<Long> tombIds = records.stream().map(TombVO::getId).filter(Objects::nonNull).collect(Collectors.toList());
+        if (tombIds.isEmpty()) {
+            return;
+        }
+        List<TombReminder> list = tombReminderMapper.selectList(Wrappers.<TombReminder>lambdaQuery()
+                .eq(TombReminder::getUserId, userId)
+                .in(TombReminder::getTombId, tombIds));
+        Map<Long, TombReminder> map = new HashMap<>();
+        for (TombReminder tr : list) {
+            map.putIfAbsent(tr.getTombId(), tr);
+        }
+        for (TombVO vo : records) {
+            TombReminder tr = map.get(vo.getId());
+            vo.setMyReminderOn(tr != null && Boolean.TRUE.equals(tr.getEnabled()));
+        }
     }
 
     @Override
@@ -79,6 +124,23 @@ public class TombServiceImpl extends BaseServiceImpl<TombMapper, Tomb> implement
                 throw new BusinessException(500, "个人简介纯文字不能超过1000字");
             }
         }
+        if (param.getBirthday() == null || param.getBirthday().trim().isEmpty()) {
+            throw new BusinessException(500, "请填写出生日期");
+        }
+        if (param.getDeathday() == null || param.getDeathday().trim().isEmpty()) {
+            throw new BusinessException(500, "请填写逝世日期");
+        }
+    }
+
+    private Date parseSqlDate(String s) {
+        LocalDate ld = LocalDate.parse(s.trim(), ISO_DATE);
+        return java.sql.Date.valueOf(ld);
+    }
+
+    private void applyTombDateFields(Tomb tomb, TombParam param) {
+        tomb.setBirthday(parseSqlDate(param.getBirthday()));
+        tomb.setDeathday(parseSqlDate(param.getDeathday()));
+        tomb.setLunarFlag(Boolean.TRUE.equals(param.getLunarFlag()));
     }
 
     @Override
@@ -103,13 +165,7 @@ public class TombServiceImpl extends BaseServiceImpl<TombMapper, Tomb> implement
         tomb.setCreateTime(new Date());
         tomb.setQrCodeKey(generateUniqueQrCodeKey());
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        if (param.getBirthday() != null && !param.getBirthday().isEmpty()) {
-            tomb.setBirthday(sdf.parse(param.getBirthday()));
-        }
-        if (param.getDeathday() != null && !param.getDeathday().isEmpty()) {
-            tomb.setDeathday(sdf.parse(param.getDeathday()));
-        }
+        applyTombDateFields(tomb, param);
 
         tombMapper.insert(tomb);
         return true;
@@ -141,13 +197,7 @@ public class TombServiceImpl extends BaseServiceImpl<TombMapper, Tomb> implement
         tomb.setUpdateBy(LoginUtil.getUserId());
         tomb.setUpdateTime(new Date());
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        if (param.getBirthday() != null && !param.getBirthday().isEmpty()) {
-            tomb.setBirthday(sdf.parse(param.getBirthday()));
-        }
-        if (param.getDeathday() != null && !param.getDeathday().isEmpty()) {
-            tomb.setDeathday(sdf.parse(param.getDeathday()));
-        }
+        applyTombDateFields(tomb, param);
 
         tombMapper.updateById(tomb);
         return true;
@@ -188,6 +238,7 @@ public class TombServiceImpl extends BaseServiceImpl<TombMapper, Tomb> implement
         TombVO tombVO = tombMapper.getTombVO(id);
         tombVO.setStories(tombStoryService.listByTombId(id));
         setFamilyMemberFlag(tombVO);
+        setReminderFlag(tombVO, tomb);
         tomb.setVisitCount(tomb.getVisitCount() + 1);
         tombMapper.updateById(tomb);
         return tombVO;
@@ -206,6 +257,7 @@ public class TombServiceImpl extends BaseServiceImpl<TombMapper, Tomb> implement
         setFamilyMemberFlag(tombVO);
         Tomb tomb = tombMapper.selectById(tombVO.getId());
         if (tomb != null) {
+            setReminderFlag(tombVO, tomb);
             tomb.setVisitCount(tomb.getVisitCount() + 1);
             tombMapper.updateById(tomb);
         }
@@ -224,6 +276,20 @@ public class TombServiceImpl extends BaseServiceImpl<TombMapper, Tomb> implement
             }
         } catch (Exception e) {
             tombVO.setIsFamilyMember(false);
+        }
+    }
+
+    /** 是否可设置个人提醒（需登录；墓碑未禁用即可） */
+    private void setReminderFlag(TombVO tombVO, Tomb tomb) {
+        if (tomb == null) {
+            tombVO.setCanSetReminder(false);
+            return;
+        }
+        try {
+            Long userId = LoginUtil.getUserId();
+            tombVO.setCanSetReminder(tombReminderAccess.canManage(userId, tomb));
+        } catch (Exception e) {
+            tombVO.setCanSetReminder(false);
         }
     }
 

@@ -46,4 +46,4 @@ memorial-service
 - 阿里云短信
 - Hutool、Guava、Lombok
 
-项目部署与联调说明见 [docs/deployment.md](../docs/deployment.md)。
+项目模块总览见 [docs/modules.md](../docs/modules.md)，部署与联调见 [docs/deployment.md](../docs/deployment.md)。

@@ -10,6 +10,7 @@
 - **权限管理**：角色、菜单、操作日志
 - **文件管理**：文件上传、下载、预览
 - **公开纪念页**：扫码访问的公开纪念页面（`/open/memorial`）
+- **墓碑个人提醒**：用户绑定关系后可配置忌日、清明、重阳、生辰、自定义日期（最多 3 个，可备注）；支持当天/提前 1 天/提前 3 天及自定义提前天数；**农历墓碑**（`lunar_flag`）下忌日、生辰与自定义日期按农历月日计算周年；短信走阿里云模板（`aliyun.sms.reminder`）；`TombReminderScheduleJob` 定时扫描发送
 - **其他**：验证码、地区、仪表盘、短信
 
 ## 技术栈
@@ -42,6 +43,7 @@ mvn spring-boot:run
 | `knife4j.enable`       | 是否开启 API 文档                      | true               |
 | `aliyun.sms`           | 阿里云短信配置                         | 见 application.yml |
 | `local.host`           | 当前服务 IP 端口（用于生成二维码等）   | 见 application.yml |
+| `aliyun.sms.reminder`  | 墓碑提醒短信模板（签名、模板编码、参数名） | 见 application.yml |
 
 ## API 文档
 
@@ -64,7 +66,7 @@ mvn spring-boot:run
 | `/captcha`                                               | 验证码               |
 | `/area`                                                  | 地区                 |
 | `/family`、`/family/member`                             | 家族、家族成员       |
-| `/tomb`、`/tomb/message`、`/tomb/story`、`/tomb/checkin` | 墓碑、留言、生平、打卡 |
+| `/tomb`、`/tomb/reminder`、`/tomb/message`、`/tomb/story`、`/tomb/checkin` | 墓碑、个人提醒、留言、生平、打卡 |
 | `/open/memorial`                                         | 公开纪念页（扫码访问） |
 | `/user`                                                  | 用户                 |
 | `/role`、`/menu`                                        | 角色、菜单           |
