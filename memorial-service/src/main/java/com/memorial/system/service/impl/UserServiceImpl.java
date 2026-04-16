@@ -183,7 +183,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapper, User> implement
         // 3 时间戳校验（5秒）
         // ==============================
 
-        if (Math.abs(now - timestamp) > 5000) {
+        if (Math.abs(now - timestamp) > 30000) {
             throw new BusinessException(500, "请求已过期");
         }
 
@@ -197,7 +197,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapper, User> implement
             throw new BusinessException(500, "请求重复");
         }
 
-        redisUtil.set(redisKey, "1", 5); // 5秒过期
+        redisUtil.set(redisKey, "1", 30); // 5秒过期
 
         // ==============================
         // 5 多次登录错误拦截
